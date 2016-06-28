@@ -1,4 +1,4 @@
-## ![](http://www.refractored.com/images/plugin_icon_media.png) Media Plugin for Xamarin and Windows
+## Media Plugin for Xamarin and Windows
 
 Simple cross platform plugin to take photos and video or pick them from a gallery from shared code.
 
@@ -7,6 +7,8 @@ Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a 
 ### Setup
 * Available on NuGet: http://www.nuget.org/packages/Xam.Plugin.Media [![NuGet](https://img.shields.io/nuget/v/Xam.Plugin.Media.svg?label=NuGet)](https://www.nuget.org/packages/Xam.Plugin.Media/)
 * Install into your PCL project and Client projects.
+
+Build Status: [![Build status](https://ci.appveyor.com/api/projects/status/872kljawr91vphty?svg=true)](https://ci.appveyor.com/project/JamesMontemagno/mediaplugin)
 
 **Platform Support**
 
