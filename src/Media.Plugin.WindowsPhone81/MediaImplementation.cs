@@ -112,7 +112,7 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsTakeVideoSupported
         {
-            get { return false; }
+            get { return true; }
         }
         /// <inheritdoc/>
         public bool IsPickVideoSupported
@@ -196,9 +196,49 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="options">Video Media Options</param>
         /// <returns>Media file of new video or null if canceled</returns>
-        public Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
         {
-            throw new NotSupportedException();
+            if (!initialized)
+                await Initialize();
+
+            if (!IsCameraAvailable)
+                throw new NotSupportedException();
+
+            options.VerifyOptions();
+
+            var capture = new CameraCaptureUI();
+            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Video, options);
+            if (result == null)
+                return null;
+
+            StorageFolder folder = ApplicationData.Current.LocalFolder;
+
+            string path = options.GetFilePath(folder.Path);
+            var directoryFull = Path.GetDirectoryName(path);
+            var newFolder = directoryFull.Replace(folder.Path, string.Empty);
+            if (!string.IsNullOrWhiteSpace(newFolder))
+                await folder.CreateFolderAsync(newFolder, CreationCollisionOption.OpenIfExists);
+
+            folder = await StorageFolder.GetFolderFromPathAsync(directoryFull);
+
+            string filename = Path.GetFileName(path);
+            string aPath = null;
+            if (options?.SaveToAlbum ?? false)
+            {
+                try
+                {
+                    string fileNameNoEx = Path.GetFileNameWithoutExtension(path);
+                    var copy = await result.CopyAsync(KnownFolders.VideosLibrary, fileNameNoEx + result.FileType, NameCollisionOption.GenerateUniqueName);
+                    aPath = copy.Path;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("unable to save to album:" + ex);
+                }
+            }
+
+            var file = await result.CopyAsync(folder, filename, NameCollisionOption.GenerateUniqueName).AsTask();
+            return new MediaFile(file.Path, () => file.OpenStreamForReadAsync().Result, albumPath: aPath);
         }
 
 

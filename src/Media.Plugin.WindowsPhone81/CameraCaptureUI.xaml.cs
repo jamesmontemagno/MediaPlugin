@@ -38,6 +38,10 @@ namespace DMX.Helper
     {
         // store the pic here
         StorageFile file;
+        
+        //ihuete
+        CameraCaptureUIMode Mode;
+        bool IsRecording = false;
 
         // stop flag - needed to find when to get back to former page
         bool stopFlag = false;
@@ -126,7 +130,7 @@ namespace DMX.Helper
                 var ccu = ccuipage.MyCCUCtrl;
 
                 // start captureing again
-                await ccu.CaptureFileAsync(CameraCaptureUIMode.Photo, options);
+                await ccu.CaptureFileAsync(CameraCaptureUIMode.Photo, Options);
             }
             else
             {
@@ -196,7 +200,7 @@ namespace DMX.Helper
 
 
 
-        StoreCameraMediaOptions options;
+        StoreCameraMediaOptions Options;
         /// <summary>
         /// This method takes a picture. 
         /// Right now the parameter is not evaluated.
@@ -207,7 +211,16 @@ namespace DMX.Helper
         public async Task<StorageFile> CaptureFileAsync(CameraCaptureUIMode mode, StoreCameraMediaOptions options)
         {
             var t = IsStopped();
-            options = options;
+            Mode = mode;
+            if (Mode == CameraCaptureUIMode.Photo)
+            {
+                camerButton.Icon = new SymbolIcon(Symbol.Camera);
+            }
+            else if (Mode == CameraCaptureUIMode.Video)
+            {
+                camerButton.Icon = new SymbolIcon(Symbol.Video);
+            }
+            Options = options;
             // Create new MediaCapture 
             MyMediaCapture = new MediaCapture();
             var videoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
@@ -266,18 +279,43 @@ namespace DMX.Helper
 
         async private void Button_Click(object sender, RoutedEventArgs e)
         {
-            // Create new file in the pictures library     
+            if (!IsRecording)
+            {
+                // Create new file in the pictures library     
+                if (Mode == CameraCaptureUIMode.Photo)
+                {
+                    file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
 
-            file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
 
+                    // create a jpeg image
+                    var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
 
-            // create a jpeg image
-            var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
+                    await MyMediaCapture.CapturePhotoToStorageFileAsync(imgEncodingProperties, file);
 
-            await MyMediaCapture.CapturePhotoToStorageFileAsync(imgEncodingProperties, file);
+                    // when pic has been taken, set stopFlag
+                    StopFlag = true;
+                }
+                else if (Mode == CameraCaptureUIMode.Video)
+                {
+                    IsRecording = true;
+                    camerButton.Icon = new SymbolIcon(Symbol.Stop);
 
-            // when pic has been taken, set stopFlag
-            StopFlag = true;
+                    file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuivideo.mp4", CreationCollisionOption.ReplaceExisting);
+                    
+                    // create a jpeg image
+                    var videoEncodingProperties = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Vga);
+
+                    await MyMediaCapture.StartRecordToStorageFileAsync(videoEncodingProperties, file);
+
+                    // when pic has been taken, set stopFlag
+                    StopFlag = false;
+                }
+            }
+            else
+            {
+                await MyMediaCapture.StopRecordAsync();
+                StopFlag = true;
+            }
         }
 
 

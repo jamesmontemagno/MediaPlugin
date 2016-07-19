@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
         <CaptureElement Grid.Row="0" Name="myCaptureElement" Stretch="UniformToFill"  ></CaptureElement>
         <StackPanel Grid.Row="1" Background="Transparent">
-            <AppBarButton VerticalAlignment="Center" HorizontalAlignment="Center"
+            <AppBarButton x:Name="camerButton" VerticalAlignment="Center" HorizontalAlignment="Center"
                        Click="Button_Click"  Icon="Camera" ></AppBarButton>
         </StackPanel >
     </Grid>
