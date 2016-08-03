@@ -249,14 +249,14 @@ namespace Plugin.Media
             {
                 picker.CameraDevice = GetUICameraDevice(options.DefaultCamera);
 
-				if (options.OverlayViewProvider != null)
-				{
-					var overlay = options.OverlayViewProvider();
-					if (overlay is UIView)
-					{
-						picker.CameraOverlayView = overlay as UIView;
-					}
-				}
+		if (options.OverlayViewProvider != null)
+		{
+			var overlay = options.OverlayViewProvider();
+			if (overlay is UIView)
+			{
+				picker.CameraOverlayView = overlay as UIView;
+			}
+		}
                 if (mediaType == TypeImage)
                     picker.CameraCaptureMode = UIImagePickerControllerCameraCaptureMode.Photo;
                 else if (mediaType == TypeMovie)
