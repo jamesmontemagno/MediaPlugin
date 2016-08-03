@@ -11,43 +11,73 @@ using UIKit;
 
 namespace MediaTest.iOS
 {
-	[Register ("ViewController")]
-	partial class ViewController
-	{
-		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		UIButton PickPhoto { get; set; }
+    [Register ("ViewController")]
+    partial class ViewController
+    {
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISwitch AlbumSwitch { get; set; }
 
-		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		UIButton PickVideo { get; set; }
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIImageView MainImage { get; set; }
 
-		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		UIButton TakePhoto { get; set; }
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIButton PickPhoto { get; set; }
 
-		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		UIButton TakeVideo { get; set; }
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIButton PickVideo { get; set; }
 
-		void ReleaseDesignerOutlets ()
-		{
-			if (PickPhoto != null) {
-				PickPhoto.Dispose ();
-				PickPhoto = null;
-			}
-			if (PickVideo != null) {
-				PickVideo.Dispose ();
-				PickVideo = null;
-			}
-			if (TakePhoto != null) {
-				TakePhoto.Dispose ();
-				TakePhoto = null;
-			}
-			if (TakeVideo != null) {
-				TakeVideo.Dispose ();
-				TakeVideo = null;
-			}
-		}
-	}
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISwitch SizeSwitch { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIButton TakePhoto { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UIButton TakeVideo { get; set; }
+
+        void ReleaseDesignerOutlets ()
+        {
+            if (AlbumSwitch != null) {
+                AlbumSwitch.Dispose ();
+                AlbumSwitch = null;
+            }
+
+            if (MainImage != null) {
+                MainImage.Dispose ();
+                MainImage = null;
+            }
+
+            if (PickPhoto != null) {
+                PickPhoto.Dispose ();
+                PickPhoto = null;
+            }
+
+            if (PickVideo != null) {
+                PickVideo.Dispose ();
+                PickVideo = null;
+            }
+
+            if (SizeSwitch != null) {
+                SizeSwitch.Dispose ();
+                SizeSwitch = null;
+            }
+
+            if (TakePhoto != null) {
+                TakePhoto.Dispose ();
+                TakePhoto = null;
+            }
+
+            if (TakeVideo != null) {
+                TakeVideo.Dispose ();
+                TakeVideo = null;
+            }
+        }
+    }
 }

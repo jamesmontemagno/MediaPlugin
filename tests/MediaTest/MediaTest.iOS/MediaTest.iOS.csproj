@@ -108,13 +108,13 @@
     <Content Include="Entitlements.plist" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Media\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
+    <ProjectReference Include="..\..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
       <Project>{6edb0588-ffc5-4ef5-8a99-9e241d0f878d}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Media\Media.Plugin.iOSUnified\Media.Plugin.iOSUnified.csproj">
+    <ProjectReference Include="..\..\..\src\Media.Plugin.iOS\Media.Plugin.iOS.csproj">
       <Project>{2882aeeb-d4cd-4eb9-8a6c-6653b33681f0}</Project>
-      <Name>Media.Plugin.iOSUnified</Name>
+      <Name>Media.Plugin.iOS</Name>
       <IsAppExtension>false</IsAppExtension>
       <IsWatchApp>false</IsWatchApp>
     </ProjectReference>

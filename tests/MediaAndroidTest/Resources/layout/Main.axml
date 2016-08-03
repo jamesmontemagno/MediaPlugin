@@ -3,6 +3,16 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
+    <Switch
+        android:id="@+id/switch_size"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:text="Make Smaller"/>
+    <Switch
+      android:id="@+id/switch_save_album"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:text="Save to Album"/>
     <Button
         android:id="@+id/MyButton"
         android:layout_width="fill_parent"

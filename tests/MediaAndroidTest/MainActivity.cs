@@ -31,6 +31,10 @@ namespace MediaAndroidTest
             // and attach an event to it
             Button button = FindViewById<Button>(Resource.Id.MyButton);
             var image = FindViewById<ImageView>(Resource.Id.imageView1);
+
+            var switchSize = FindViewById<Switch>(Resource.Id.switch_size);
+            var switchSaveToAlbum = FindViewById<Switch>(Resource.Id.switch_save_album);
+
             button.Click += async delegate
             {
                 var media = new Plugin.Media.MediaImplementation();
@@ -38,7 +42,8 @@ namespace MediaAndroidTest
                 {
                     Directory = "Sample",
                     Name = "test.jpg",
-                    SaveToAlbum = true,
+                    SaveToAlbum = switchSaveToAlbum.Checked,
+                    PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
                     DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Front
                 });
                 if (file == null)

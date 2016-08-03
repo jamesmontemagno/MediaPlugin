@@ -72,25 +72,16 @@ namespace Plugin.Media
             }
         }
         /// <inheritdoc/>
-        public bool IsTakePhotoSupported
-        {
-            get { return true; }
-        }
+        public bool IsTakePhotoSupported => true;
+
         /// <inheritdoc/>
-        public bool IsPickPhotoSupported
-        {
-            get { return true; }
-        }
+        public bool IsPickPhotoSupported => true;
+
         /// <inheritdoc/>
-        public bool IsTakeVideoSupported
-        {
-            get { return true; }
-        }
+        public bool IsTakeVideoSupported => true;
+
         /// <inheritdoc/>
-        public bool IsPickVideoSupported
-        {
-            get { return true; }
-        }
+        public bool IsPickVideoSupported => true;
 
         /// <summary>
         /// Take a photo async with specified options

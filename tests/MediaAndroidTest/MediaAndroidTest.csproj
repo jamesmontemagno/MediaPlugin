@@ -99,11 +99,11 @@
     <Content Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Media\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
+    <ProjectReference Include="..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
       <Project>{6EDB0588-FFC5-4EF5-8A99-9E241D0F878D}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Media\Media.Plugin.Android\Media.Plugin.Android.csproj">
+    <ProjectReference Include="..\..\src\Media.Plugin.Android\Media.Plugin.Android.csproj">
       <Project>{56A56F17-7DE1-4CA1-9617-BF32E971AC84}</Project>
       <Name>Media.Plugin.Android</Name>
     </ProjectReference>

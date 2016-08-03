@@ -22,8 +22,8 @@
                                 <state key="normal" title="Pick P">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
-                                    <rect key="frame" x="69" y="66" width="46" height="30"/>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <rect key="frame" x="54" y="46" width="46" height="30"/>
                                 </variation>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="8" translatesAutoresizingMaskIntoConstraints="NO">
@@ -31,8 +31,8 @@
                                 <state key="normal" title="Take P">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
-                                    <rect key="frame" x="69" y="104" width="46" height="30"/>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <rect key="frame" x="54" y="84" width="46" height="30"/>
                                 </variation>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="9" translatesAutoresizingMaskIntoConstraints="NO">
@@ -40,8 +40,8 @@
                                 <state key="normal" title="Pick V">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
-                                    <rect key="frame" x="69" y="148" width="46" height="30"/>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <rect key="frame" x="54" y="128" width="46" height="30"/>
                                 </variation>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="10" translatesAutoresizingMaskIntoConstraints="NO">
@@ -49,10 +49,48 @@
                                 <state key="normal" title="Take V">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact" fixedFrame="YES">
-                                    <rect key="frame" x="69" y="192" width="46" height="30"/>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <rect key="frame" x="54" y="172" width="46" height="30"/>
                                 </variation>
                             </button>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" id="26" translatesAutoresizingMaskIntoConstraints="NO" image="MainImage">
+                                <rect key="frame" x="20" y="308" width="160" height="240"/>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <rect key="frame" x="20" y="304" width="280" height="244"/>
+                                </variation>
+                            </imageView>
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="27">
+                                <rect key="frame" x="52" y="210" width="51" height="31"/>
+                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="123" y="210" width="51" height="31"/>
+                                </variation>
+                            </switch>
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="28">
+                                <rect key="frame" x="52" y="249" width="51" height="31"/>
+                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="123" y="249" width="51" height="31"/>
+                                </variation>
+                            </switch>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="size" lineBreakMode="tailTruncation" minimumFontSize="10" id="29" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="56" y="215" width="42" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="20" y="215" width="78" height="21"/>
+                                </variation>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="album" lineBreakMode="tailTruncation" minimumFontSize="10" id="30" translatesAutoresizingMaskIntoConstraints="NO">
+                                <rect key="frame" x="56" y="254" width="42" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="20" y="254" width="78" height="21"/>
+                                </variation>
+                            </label>
                         </subviews>
                         <variation key="default">
                             <mask key="subviews">
@@ -60,6 +98,38 @@
                                 <exclude reference="8"/>
                                 <exclude reference="9"/>
                                 <exclude reference="10"/>
+                                <exclude reference="26"/>
+                                <exclude reference="27"/>
+                                <exclude reference="28"/>
+                                <exclude reference="29"/>
+                                <exclude reference="30"/>
+                            </mask>
+                            <mask key="constraints">
+                                <exclude reference="14"/>
+                                <exclude reference="15"/>
+                                <exclude reference="16"/>
+                                <exclude reference="17"/>
+                                <exclude reference="18"/>
+                                <exclude reference="19"/>
+                                <exclude reference="20"/>
+                                <exclude reference="21"/>
+                                <exclude reference="22"/>
+                                <exclude reference="23"/>
+                                <exclude reference="24"/>
+                                <exclude reference="25"/>
+                                <exclude reference="31"/>
+                                <exclude reference="32"/>
+                                <exclude reference="34"/>
+                                <exclude reference="35"/>
+                                <exclude reference="38"/>
+                                <exclude reference="39"/>
+                                <exclude reference="40"/>
+                                <exclude reference="41"/>
+                                <exclude reference="42"/>
+                                <exclude reference="43"/>
+                                <exclude reference="44"/>
+                                <exclude reference="45"/>
+                                <exclude reference="46"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
@@ -68,14 +138,76 @@
                                 <include reference="8"/>
                                 <include reference="9"/>
                                 <include reference="10"/>
+                                <include reference="26"/>
+                                <include reference="27"/>
+                                <include reference="28"/>
+                                <include reference="29"/>
+                                <include reference="30"/>
+                            </mask>
+                            <mask key="constraints">
+                                <include reference="14"/>
+                                <include reference="15"/>
+                                <include reference="16"/>
+                                <include reference="17"/>
+                                <include reference="18"/>
+                                <include reference="19"/>
+                                <include reference="20"/>
+                                <include reference="21"/>
+                                <include reference="22"/>
+                                <include reference="23"/>
+                                <include reference="24"/>
+                                <include reference="25"/>
+                                <include reference="31"/>
+                                <include reference="32"/>
+                                <include reference="34"/>
+                                <include reference="35"/>
+                                <include reference="38"/>
+                                <include reference="39"/>
+                                <include reference="40"/>
+                                <include reference="41"/>
+                                <include reference="42"/>
+                                <include reference="43"/>
+                                <include reference="44"/>
+                                <include reference="45"/>
+                                <include reference="46"/>
                             </mask>
                         </variation>
+                        <constraints>
+                            <constraint id="14" firstItem="5" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
+                            <constraint id="15" firstItem="8" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
+                            <constraint id="16" firstItem="9" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
+                            <constraint id="17" firstItem="10" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
+                            <constraint id="18" firstItem="5" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="26"/>
+                            <constraint id="19" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="5" secondAttribute="trailing" constant="220"/>
+                            <constraint id="20" firstItem="8" firstAttribute="top" secondItem="5" secondAttribute="bottom" constant="8"/>
+                            <constraint id="21" firstItem="9" firstAttribute="top" secondItem="8" secondAttribute="bottom" constant="14"/>
+                            <constraint id="22" firstItem="10" firstAttribute="top" secondItem="9" secondAttribute="bottom" constant="14"/>
+                            <constraint id="23" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="9" secondAttribute="trailing" constant="220"/>
+                            <constraint id="24" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="8" secondAttribute="trailing" constant="220"/>
+                            <constraint id="25" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="10" secondAttribute="trailing" constant="220"/>
+                            <constraint id="31" firstItem="29" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="13"/>
+                            <constraint id="32" firstItem="29" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
+                            <constraint id="34" firstItem="27" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="8"/>
+                            <constraint id="35" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="27" secondAttribute="trailing" constant="146"/>
+                            <constraint id="38" firstItem="30" firstAttribute="top" secondItem="29" secondAttribute="bottom" constant="18"/>
+                            <constraint id="39" firstItem="30" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
+                            <constraint id="40" firstItem="28" firstAttribute="leading" secondItem="30" secondAttribute="trailing" constant="25"/>
+                            <constraint id="41" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="28" secondAttribute="trailing" constant="146"/>
+                            <constraint id="42" firstItem="28" firstAttribute="top" secondItem="27" secondAttribute="bottom" constant="8"/>
+                            <constraint id="43" firstItem="26" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
+                            <constraint id="44" firstItem="8bC-Xf-vdC" firstAttribute="bottom" secondItem="26" secondAttribute="bottom" constant="20"/>
+                            <constraint id="45" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="26" secondAttribute="trailing" constant="20"/>
+                            <constraint id="46" firstItem="26" firstAttribute="top" secondItem="28" secondAttribute="bottom" constant="24"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="PickPhoto" destination="5" id="name-outlet-5"/>
                         <outlet property="TakePhoto" destination="8" id="name-outlet-8"/>
                         <outlet property="PickVideo" destination="9" id="name-outlet-9"/>
                         <outlet property="TakeVideo" destination="10" id="name-outlet-10"/>
+                        <outlet property="SizeSwitch" destination="27" id="name-outlet-27"/>
+                        <outlet property="AlbumSwitch" destination="28" id="name-outlet-28"/>
+                        <outlet property="MainImage" destination="26" id="name-outlet-26"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
