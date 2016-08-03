@@ -314,7 +314,7 @@ namespace Plugin.Media
                     var height = (image.CGImage.Height * percent);
 
                     //begin resizing image
-                    image = image.ResizeImage(width, height);
+                    image = image.ResizeImageWithAspectRatio(width, height);
 
                 }
                 catch (Exception ex)
