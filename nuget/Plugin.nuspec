@@ -14,20 +14,7 @@
          Take or pick photos and videos from a cross platform API.
        </description>
      <releaseNotes>
-       [2.2.0]
-       -Android: No longer require camera permission
-       -Android: Use latest permission plugin for External Storage Permissions
-       -Android: Try to show front facing camera when parameter is set
-       [2.1.2]
-       -Added new "SaveToAlbum" bool to save the photo to the public galleries
-       -Added new "AlbumPath", which is set when you Save to the Album.
-       -Features work on iOS, Android, WinRT, UWP
-       [2.0.1]
-       -Breaking changes: New namespace - Plugin.Media
-       -Automatically Add Android Permissions
-       -Request Android Permissions on Marshmallow
-       --Uses new Permissions Plugin
-       -UWP Support
+      For changelog go to: https://github.com/jamesmontemagno/MediaPlugin/blob/master/README.md
      </releaseNotes>
        <summary>Take or pick photos and videos from a cross platform API.</summary>
        <tags>xamarin, pcl, xam.pcl, media, photo, video, plugin, plugin for xamarin, windows phone, winphone, wp8, winrt, android, xamarin.forms, ios</tags>
