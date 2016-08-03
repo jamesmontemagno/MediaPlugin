@@ -49,37 +49,20 @@ namespace Plugin.Media
         }
 
         ///<inheritdoc/>
-        public Task<bool> Initialize()
-        {
-            return Task.FromResult(true);
-        }
+        public Task<bool> Initialize() => Task.FromResult(true);
 
         /// <inheritdoc/>
-        public bool IsCameraAvailable
-        {
-            get;
-            private set;
-        }
+        public bool IsCameraAvailable { get; }
         /// <inheritdoc/>
-        public bool IsTakePhotoSupported
-        {
-            get { return true; }
-        }
+        public bool IsTakePhotoSupported => true;
+
         /// <inheritdoc/>
-        public bool IsPickPhotoSupported
-        {
-            get { return true; }
-        }
+        public bool IsPickPhotoSupported => true;
+
         /// <inheritdoc/>
-        public bool IsTakeVideoSupported
-        {
-            get { return true; }
-        }
+        public bool IsTakeVideoSupported => true;
         /// <inheritdoc/>
-        public bool IsPickVideoSupported
-        {
-            get { return true; }
-        }
+        public bool IsPickVideoSupported => true;
 
         /// <summary>
         /// 
@@ -135,7 +118,7 @@ namespace Plugin.Media
         /// <returns>Media file or null if canceled</returns>
         public async Task<MediaFile> PickPhotoAsync()
         {
-            if (!(await RequestStoragePermission().ConfigureAwait(false)))
+            if (!(await RequestStoragePermission()))
             {
                 return null;
             }
@@ -173,7 +156,7 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission().ConfigureAwait(false)))
+            if (!(await RequestStoragePermission()))
             {
                 return null;
             }
@@ -207,7 +190,7 @@ namespace Plugin.Media
                     }
                     catch(Exception ex)
                     {
-                        Console.WriteLine("Unable to shrink image: {ex}");
+                        Console.WriteLine($"Unable to shrink image: {ex}");
                     }
                 }
             }
@@ -242,7 +225,7 @@ namespace Plugin.Media
         public async Task<MediaFile> PickVideoAsync()
         {
 
-            if (!(await RequestStoragePermission().ConfigureAwait(false)))
+            if (!(await RequestStoragePermission()))
             {
                 return null;
             }
@@ -260,7 +243,7 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission().ConfigureAwait(false)))
+            if (!(await RequestStoragePermission()))
             {
                 return null;
             }
@@ -334,11 +317,11 @@ namespace Plugin.Media
             return id;
         }
 
-        private Task<Plugin.Media.Abstractions.MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options)
+        private Task<MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options)
         {
             int id = GetRequestId();
 
-            var ntcs = new TaskCompletionSource<Plugin.Media.Abstractions.MediaFile>(id);
+            var ntcs = new TaskCompletionSource<MediaFile>(id);
             if (Interlocked.CompareExchange(ref this.completionSource, ntcs, null) != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
 
@@ -383,14 +366,16 @@ namespace Plugin.Media
                 if (!orientation.HasValue)
                     return false;
 
-                var bmp = RotateImage(filePath, orientation.Value);
+                using (var bmp = RotateImage(filePath, orientation.Value))
+                {
 
-                using (var stream = File.Open(filePath, FileMode.OpenOrCreate))
-                    await bmp.CompressAsync(Bitmap.CompressFormat.Png, 92, stream);
+                    using (var stream = File.Open(filePath, FileMode.OpenOrCreate))
+                        await bmp.CompressAsync(Bitmap.CompressFormat.Png, 92, stream);
 
-                bmp.Recycle();
+                    bmp.Recycle();
 
-                return true;
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -406,40 +391,44 @@ namespace Plugin.Media
         {
             try
             {
-                var ei = new ExifInterface(filePath);
-                var orientation = (Orientation)ei.GetAttributeInt(ExifInterface.TagOrientation, (int)Orientation.Normal);
-                switch (orientation)
+                using (var ei = new ExifInterface(filePath))
                 {
-                    case Orientation.Rotate90:
-                        return 90;
-                    case Orientation.Rotate180:
-                        return 180;
-                    case Orientation.Rotate270:
-                        return 270;
-                    default:
-                        return null;
-                }
+                    var orientation = (Orientation)ei.GetAttributeInt(ExifInterface.TagOrientation, (int)Orientation.Normal);
 
+                    switch (orientation)
+                    {
+                        case Orientation.Rotate90:
+                            return 90;
+                        case Orientation.Rotate180:
+                            return 180;
+                        case Orientation.Rotate270:
+                            return 270;
+                        default:
+                            return null;
+                    }
+                }
             }
             catch (Exception ex)
             {
 #if DEBUG
                 throw ex;
 #else
-            return null;
+                return null;
 #endif
             }
         }
 
         private static Bitmap RotateImage(string filePath, int rotation)
         {
-            var originalImage = BitmapFactory.DecodeFile(filePath);
+            using (var originalImage = BitmapFactory.DecodeFile(filePath))
+            {
 
-            var matrix = new Matrix();
-            matrix.PostRotate(rotation);
-            var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true);
-            originalImage.Recycle();
-            return rotatedImage;
+                var matrix = new Matrix();
+                matrix.PostRotate(rotation);
+                var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true);
+                originalImage.Recycle();
+                return rotatedImage;
+            }
         }
     }
 
