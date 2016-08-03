@@ -78,6 +78,15 @@ namespace Plugin.Media.Abstractions
             set;
         }
 
+	/// <summary>
+	/// Get or set for an OverlayViewProvider
+	/// </summary>
+	public Func<Object> OverlayViewProvider
+	{
+		get;
+		set;
+	}
+
         /// <summary>
         // Get or set if the image should be stored public
         /// </summary>
