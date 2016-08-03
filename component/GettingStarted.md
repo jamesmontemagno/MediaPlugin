@@ -64,13 +64,13 @@ Via a Xamarin.Forms project with a Button and Image to take a photo:
       takePhoto.Clicked += async (sender, args) =>
         {
 
-          if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.PhotosSupported)
+          if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotosSupported)
           {
-            DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
+            DisplayAlert("No Camera", ":( No camera available.", "OK");
             return;
           }
 
-          var file = await CrossMedia.Current.TakePhotoAsync(new Media.Plugin.Abstractions.StoreCameraMediaOptions
+          var file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
             {
 
               Directory = "Sample",
