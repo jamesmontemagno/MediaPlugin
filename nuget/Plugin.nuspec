@@ -39,13 +39,13 @@
    </metadata>
    <files>
      <file src="nuget\readme.txt" target="readme.txt" /> 
-     <!--Core-->
-     <file src="src\Media.Plugin\bin\Release\Plugin.Media.dll" target="lib\portable-net45+wp8+wpa81+win8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Plugin.Media.dll" />
-     <file src="src\Media.Plugin\bin\Release\Plugin.Media.xml" target="lib\portable-net45+wp8+wpa81+win8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Plugin.Media.xml" />
-     <file src="src\Media.Plugin\bin\Release\Plugin.Media.pdb" target="lib\portable-net45+wp8+wpa81+win8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Plugin.Media.pdb" />
-     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.dll" target="lib\portable-net45+wp8+wpa81+win8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Plugin.Media.Abstractions.dll" />
-     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.xml" target="lib\portable-net45+wp8+wpa81+win8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Plugin.Media.Abstractions.xml" />
-     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.pdb" target="lib\portable-net45+wp8+wpa81+win8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Plugin.Media.Abstractions.pdb" />
+     <!--PCL-->
+     <file src="src\Media.Plugin\bin\Release\Plugin.Media.dll" target="lib\portable-net45+wp80+win8+wpa81\Plugin.Media.dll" />
+     <file src="src\Media.Plugin\bin\Release\Plugin.Media.xml" target="lib\portable-net45+wp80+win8+wpa81\Plugin.Media.xml" />
+     <file src="src\Media.Plugin\bin\Release\Plugin.Media.pdb" target="lib\portable-net45+wp80+win8+wpa81\Plugin.Media.pdb" />
+     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.dll" target="lib\portable-net45+wp80+win8+wpa81\Plugin.Media.Abstractions.dll" />
+     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.xml" target="lib\portable-net45+wp80+win8+wpa81\Plugin.Media.Abstractions.xml" />
+     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.pdb" target="lib\portable-net45+wp80+win8+wpa81\Plugin.Media.Abstractions.pdb" />
 
      <!--Win Phone Silverlight-->
      <file src="src\Media.Plugin.WindowsPhone8\bin\Release\Plugin.Media.dll" target="lib\wp8\Plugin.Media.dll" />
@@ -85,15 +85,10 @@
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.xml" target="lib\MonoAndroid10\Plugin.Media.Abstractions.xml" />
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.pdb" target="lib\MonoAndroid10\Plugin.Media.Abstractions.pdb" />
 
+  
      <!--Xamarin.iOS-->
-     <file src="src\Media.Plugin.iOS\bin\iPhone\Release\Plugin.Media.dll" target="lib\MonoTouch10\Plugin.Media.dll" />
-     <file src="src\Media.Plugin.iOS\bin\iPhone\Release\Plugin.Media.xml" target="lib\MonoTouch10\Plugin.Media.xml" />
-     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.dll" target="lib\MonoTouch10\Plugin.Media.Abstractions.dll" />
-     <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.xml" target="lib\MonoTouch10\Plugin.Media.Abstractions.xml" />
-     
-     <!--Xamarin.iOS Unified-->
-     <file src="src\Media.Plugin.iOSUnified\bin\iPhone\Release\Plugin.Media.dll" target="lib\Xamarin.iOS10\Plugin.Media.dll" />
-     <file src="src\Media.Plugin.iOSUnified\bin\iPhone\Release\Plugin.Media.xml" target="lib\Xamarin.iOS10\Plugin.Media.xml" />
+     <file src="src\Media.Plugin.iOS\bin\iPhone\Release\Plugin.Media.dll" target="lib\Xamarin.iOS10\Plugin.Media.dll" />
+     <file src="src\Media.Plugin.iOS\bin\iPhone\Release\Plugin.Media.xml" target="lib\Xamarin.iOS10\Plugin.Media.xml" />
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.dll" target="lib\Xamarin.iOS10\Plugin.Media.Abstractions.dll" />
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.xml" target="lib\Xamarin.iOS10\Plugin.Media.Abstractions.xml" />
 
