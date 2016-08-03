@@ -21,13 +21,7 @@ using System.Threading;
 using System.IO;
 using System.Linq;
 
-#if __UNIFIED__
 using UIKit;
-using CoreGraphics;
-#else
-using MonoTouch.UIKit;
-using CGRect = global::System.Drawing.RectangleF;
-#endif
 
 namespace Plugin.Media
 {
@@ -42,10 +36,7 @@ namespace Plugin.Media
         public static UIStatusBarStyle StatusBarStyle { get; set; }
 
         ///<inheritdoc/>
-        public Task<bool> Initialize()
-        {
-            return Task.FromResult(true);
-        }
+        public Task<bool> Initialize() => Task.FromResult(true);
 
         /// <summary>
         /// Implementation
@@ -67,35 +58,20 @@ namespace Plugin.Media
             }
         }
         /// <inheritdoc/>
-        public bool IsCameraAvailable
-        {
-            get;
-            private set;
-        }
+        public bool IsCameraAvailable { get; }
+
         /// <inheritdoc/>
-        public bool IsTakePhotoSupported
-        {
-            get;
-            private set;
-        }
+        public bool IsTakePhotoSupported { get; }
+
         /// <inheritdoc/>
-        public bool IsPickPhotoSupported
-        {
-            get;
-            private set;
-        }
+        public bool IsPickPhotoSupported { get; }
+
         /// <inheritdoc/>
-        public bool IsTakeVideoSupported
-        {
-            get;
-            private set;
-        }
+        public bool IsTakeVideoSupported { get; }
+
         /// <inheritdoc/>
-        public bool IsPickVideoSupported
-        {
-            get;
-            private set;
-        }
+        public bool IsPickVideoSupported { get; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -249,16 +225,18 @@ namespace Plugin.Media
             {
                 picker.CameraDevice = GetUICameraDevice(options.DefaultCamera);
 
-		if (options.OverlayViewProvider != null)
-		{
-			var overlay = options.OverlayViewProvider();
-			if (overlay is UIView)
-			{
-				picker.CameraOverlayView = overlay as UIView;
-			}
-		}
+                if (options.OverlayViewProvider != null)
+                {
+                    var overlay = options.OverlayViewProvider();
+                    if (overlay is UIView)
+                    {
+                        picker.CameraOverlayView = overlay as UIView;
+                    }
+                }
                 if (mediaType == TypeImage)
+                {
                     picker.CameraCaptureMode = UIImagePickerControllerCameraCaptureMode.Photo;
+                }
                 else if (mediaType == TypeMovie)
                 {
                     StoreVideoOptions voptions = (StoreVideoOptions)options;

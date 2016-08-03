@@ -15,13 +15,7 @@
 
 using System;
 using System.IO;
-#if ! __UNIFIED__
-using MonoTouch.UIKit;
-using MonoTouch.Foundation;
-#else
-using UIKit;
 using Foundation;
-#endif
 using System.Runtime.InteropServices;
 
 namespace Plugin.Media
@@ -57,12 +51,7 @@ namespace Plugin.Media
             }
             else
             {
-#if ! __UNIFIED__
-                var len = (int)Math.Min(count, theData.Length - pos);
-#else
 				var len = (int)Math.Min (count, (double)(theData.Length - pos));
-#endif
-
                 Marshal.Copy(new IntPtr(theData.Bytes.ToInt64() + pos), buffer, offset, len);
                 pos += (uint)len;
                 return len;
@@ -84,42 +73,13 @@ namespace Plugin.Media
             throw new NotSupportedException();
         }
 
-        public override bool CanRead
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override bool CanRead => true;
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanSeek => false;
 
-        public override bool CanWrite
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanWrite => false;
 
-        public override long Length
-        {
-            get
-            {
-                // override does not allow nint
-#if ! __UNIFIED__
-                return theData.Length;
-#else
-				return (long) theData.Length;
-#endif
-            }
-        }
+        public override long Length => (long) theData.Length;
 
         public override long Position
         {

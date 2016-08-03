@@ -19,25 +19,12 @@ using System.IO;
 using System.Threading.Tasks;
 
 using Plugin.Media.Abstractions;
-using System.Collections.Generic;
-using System.Drawing;
 
-#if __UNIFIED__
 using CoreGraphics;
 using AssetsLibrary;
 using Foundation;
 using UIKit;
-using CoreGraphics;
 using NSAction = global::System.Action;
-#else
-using MonoTouch.AssetsLibrary;
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
-
-using MonoTouch.CoreGraphics;
-using CGRect = global::System.Drawing.RectangleF;
-using nfloat = global::System.Single;
-#endif
 
 namespace Plugin.Media
 {
@@ -76,7 +63,7 @@ namespace Plugin.Media
         public override async void FinishedPickingMedia(UIImagePickerController picker, NSDictionary info)
         {
             RemoveOrientationChangeObserverAndNotifications();
-            
+
             MediaFile mediaFile;
             switch ((NSString)info[UIImagePickerController.MediaType])
             {
@@ -108,7 +95,7 @@ namespace Plugin.Media
         public override void Canceled(UIImagePickerController picker)
         {
             RemoveOrientationChangeObserverAndNotifications();
-            
+
             if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
             {
                 UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
@@ -196,7 +183,7 @@ namespace Plugin.Media
                 }
             }
         }
-        
+
         private void RemoveOrientationChangeObserverAndNotifications()
         {
             if (viewController != null)
@@ -322,12 +309,15 @@ namespace Plugin.Media
                             break;
                     }
 
+                    //calculate new size
                     var width = (image.CGImage.Width * percent);
                     var height = (image.CGImage.Height * percent);
-                    image = image.Scale(new SizeF(width, height));
-                   
+
+                    //begin resizing image
+                    image = image.ResizeImage(width, height);
+
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Unable to compress image: {ex}");
                 }
@@ -335,14 +325,12 @@ namespace Plugin.Media
 
             image.AsJPEG().Save(path, true);
 
-           
-
-
-
             Action<bool> dispose = null;
             string aPath = null;
             if (source != UIImagePickerControllerSourceType.Camera)
+            {
                 dispose = d => File.Delete(path);
+            }
             else
             {
                 if (this.options.SaveToAlbum)
@@ -364,7 +352,7 @@ namespace Plugin.Media
             return new MediaFile(path, () => File.OpenRead(path), dispose: dispose, albumPath: aPath);
         }
 
-        
+
 
         private async Task<MediaFile> GetMovieMediaFile(NSDictionary info)
         {

@@ -14,13 +14,7 @@
 //    limitations under the License.
 //
 
-using System;
-
-#if __UNIFIED__
 using UIKit;
-#else
-using MonoTouch.UIKit;
-#endif
 
 namespace Plugin.Media
 {
@@ -33,15 +27,10 @@ namespace Plugin.Media
             this.picker = picker;
         }
 
-        public override bool ShouldDismiss(UIPopoverController popoverController)
-        {
-            return true;
-        }
+        public override bool ShouldDismiss(UIPopoverController popoverController) => true;
 
-        public override void DidDismiss(UIPopoverController popoverController)
-        {
+        public override void DidDismiss(UIPopoverController popoverController) =>
             pickerDelegate.Canceled(picker);
-        }
 
         private readonly MediaPickerDelegate pickerDelegate;
         private readonly UIImagePickerController picker;

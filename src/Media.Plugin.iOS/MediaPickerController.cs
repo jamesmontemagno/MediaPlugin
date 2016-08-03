@@ -19,13 +19,8 @@ using System.Threading.Tasks;
 
 using Plugin.Media.Abstractions;
 
-#if __UNIFIED__
 using UIKit;
 using Foundation;
-#else
-using MonoTouch.UIKit;
-using MonoTouch.Foundation;
-#endif
 
 namespace Plugin.Media
 {
@@ -60,9 +55,7 @@ namespace Plugin.Media
         /// Gets result of picker
         /// </summary>
         /// <returns></returns>
-        public Task<MediaFile> GetResultAsync()
-        {
-            return ((MediaPickerDelegate)Delegate).Task;
-        }
+        public Task<MediaFile> GetResultAsync() =>
+            ((MediaPickerDelegate)Delegate).Task;
     }
 }
