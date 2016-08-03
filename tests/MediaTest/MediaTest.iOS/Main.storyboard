@@ -13,7 +13,7 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <subviews>
@@ -53,21 +53,21 @@
                                     <rect key="frame" x="54" y="172" width="46" height="30"/>
                                 </variation>
                             </button>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" id="26" translatesAutoresizingMaskIntoConstraints="NO" image="MainImage">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" id="26" translatesAutoresizingMaskIntoConstraints="NO">
                                 <rect key="frame" x="20" y="308" width="160" height="240"/>
                                 <variation key="heightClass=regular-widthClass=compact">
                                     <rect key="frame" x="20" y="304" width="280" height="244"/>
                                 </variation>
                             </imageView>
-                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="27">
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="27" fixedFrame="YES">
                                 <rect key="frame" x="52" y="210" width="51" height="31"/>
-                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                <variation key="heightClass=regular-widthClass=compact">
                                     <rect key="frame" x="123" y="210" width="51" height="31"/>
                                 </variation>
                             </switch>
                             <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="28">
                                 <rect key="frame" x="52" y="249" width="51" height="31"/>
-                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                <variation key="heightClass=regular-widthClass=compact">
                                     <rect key="frame" x="123" y="249" width="51" height="31"/>
                                 </variation>
                             </switch>
@@ -77,8 +77,8 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
-                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="20" y="215" width="78" height="21"/>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <rect key="frame" x="20" y="215" width="78" height="20.5"/>
                                 </variation>
                             </label>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="album" lineBreakMode="tailTruncation" minimumFontSize="10" id="30" translatesAutoresizingMaskIntoConstraints="NO">
@@ -87,8 +87,8 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
-                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="20" y="254" width="78" height="21"/>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <rect key="frame" x="20" y="253.5" width="78" height="20.5"/>
                                 </variation>
                             </label>
                         </subviews>
@@ -119,17 +119,18 @@
                                 <exclude reference="25"/>
                                 <exclude reference="31"/>
                                 <exclude reference="32"/>
-                                <exclude reference="34"/>
-                                <exclude reference="35"/>
                                 <exclude reference="38"/>
                                 <exclude reference="39"/>
-                                <exclude reference="40"/>
-                                <exclude reference="41"/>
-                                <exclude reference="42"/>
-                                <exclude reference="43"/>
-                                <exclude reference="44"/>
-                                <exclude reference="45"/>
-                                <exclude reference="46"/>
+                                <exclude reference="52"/>
+                                <exclude reference="53"/>
+                                <exclude reference="59"/>
+                                <exclude reference="60"/>
+                                <exclude reference="61"/>
+                                <exclude reference="62"/>
+                                <exclude reference="63"/>
+                                <exclude reference="64"/>
+                                <exclude reference="65"/>
+                                <exclude reference="66"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=regular-widthClass=compact">
@@ -159,17 +160,18 @@
                                 <include reference="25"/>
                                 <include reference="31"/>
                                 <include reference="32"/>
-                                <include reference="34"/>
-                                <include reference="35"/>
                                 <include reference="38"/>
                                 <include reference="39"/>
-                                <include reference="40"/>
-                                <include reference="41"/>
-                                <include reference="42"/>
-                                <include reference="43"/>
-                                <include reference="44"/>
-                                <include reference="45"/>
-                                <include reference="46"/>
+                                <include reference="52"/>
+                                <include reference="53"/>
+                                <include reference="59"/>
+                                <include reference="60"/>
+                                <include reference="61"/>
+                                <include reference="62"/>
+                                <include reference="63"/>
+                                <include reference="64"/>
+                                <include reference="65"/>
+                                <include reference="66"/>
                             </mask>
                         </variation>
                         <constraints>
@@ -187,17 +189,18 @@
                             <constraint id="25" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="10" secondAttribute="trailing" constant="220"/>
                             <constraint id="31" firstItem="29" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="13"/>
                             <constraint id="32" firstItem="29" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
-                            <constraint id="34" firstItem="27" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="8"/>
-                            <constraint id="35" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="27" secondAttribute="trailing" constant="146"/>
                             <constraint id="38" firstItem="30" firstAttribute="top" secondItem="29" secondAttribute="bottom" constant="18"/>
                             <constraint id="39" firstItem="30" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
-                            <constraint id="40" firstItem="28" firstAttribute="leading" secondItem="30" secondAttribute="trailing" constant="25"/>
-                            <constraint id="41" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="28" secondAttribute="trailing" constant="146"/>
-                            <constraint id="42" firstItem="28" firstAttribute="top" secondItem="27" secondAttribute="bottom" constant="8"/>
-                            <constraint id="43" firstItem="26" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
-                            <constraint id="44" firstItem="8bC-Xf-vdC" firstAttribute="bottom" secondItem="26" secondAttribute="bottom" constant="20"/>
-                            <constraint id="45" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="26" secondAttribute="trailing" constant="20"/>
-                            <constraint id="46" firstItem="26" firstAttribute="top" secondItem="28" secondAttribute="bottom" constant="24"/>
+                            <constraint id="52" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="29" secondAttribute="trailing" constant="222"/>
+                            <constraint id="53" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="30" secondAttribute="trailing" constant="222"/>
+                            <constraint id="59" firstItem="27" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="8"/>
+                            <constraint id="60" firstItem="27" firstAttribute="leading" secondItem="29" secondAttribute="trailing" constant="25"/>
+                            <constraint id="61" firstItem="28" firstAttribute="top" secondItem="27" secondAttribute="bottom" constant="8"/>
+                            <constraint id="62" firstItem="28" firstAttribute="leading" secondItem="30" secondAttribute="trailing" constant="25"/>
+                            <constraint id="63" firstItem="26" firstAttribute="top" secondItem="28" secondAttribute="bottom" constant="24"/>
+                            <constraint id="64" firstItem="26" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
+                            <constraint id="65" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="26" secondAttribute="trailing" constant="20"/>
+                            <constraint id="66" firstItem="8bC-Xf-vdC" firstAttribute="bottom" secondItem="26" secondAttribute="bottom" constant="20"/>
                         </constraints>
                     </view>
                     <connections>
