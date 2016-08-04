@@ -164,12 +164,17 @@ WP 8/8.1 Silverlight only supports photo, not video.
 
 Set `Webcam` permission.
 
-In your App.xaml.cs you MUST place the following code:
+In your App.xaml.cs you MUST place the following code inside of the `OnLaunched` method:
 
 ```csharp
-Plugin.Media.MediaImplementation.OnFilesPicked(args);
-```
+protected override void OnActivated(IActivatedEventArgs args)
+{
 
+    Plugin.Media.MediaImplementation.OnFilesPicked(args);
+
+    base.OnActivated(args);
+}
+```
 **Windows Store:**
 
 Set `Webcam` permission.

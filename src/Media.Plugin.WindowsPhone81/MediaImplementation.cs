@@ -139,7 +139,7 @@ namespace Plugin.Media
             var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo, options);
             if (result == null)
                 return null;
-            
+
             StorageFolder folder = ApplicationData.Current.LocalFolder;
 
             string path = options.GetFilePath(folder.Path);
