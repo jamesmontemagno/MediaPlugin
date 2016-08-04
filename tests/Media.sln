@@ -19,8 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Media.Plugin.WindowsStore",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8A040C2B-8359-4AFD-BE26-E125EC08FADA}"
 	ProjectSection(SolutionItems) = preProject
-		Media.Plugin.nuspec = Media.Plugin.nuspec
-		readme.txt = readme.txt
+		..\nuget\Plugin.nuspec = ..\nuget\Plugin.nuspec
+		..\nuget\readme.txt = ..\nuget\readme.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestsApps", "TestsApps", "{EAB7ED86-6B88-4D76-9CCC-83BFDF137EA8}"

@@ -49,6 +49,7 @@ namespace MediaAndroidTest
                 if (file == null)
                     return;
                 var path = file.Path;
+                Toast.MakeText(this, path, ToastLength.Long).Show();
                 System.Diagnostics.Debug.WriteLine(path);
 
                 image.SetImageBitmap(BitmapFactory.DecodeFile(file.Path));
@@ -62,6 +63,7 @@ namespace MediaAndroidTest
                   if (file == null)
                       return;
                   var path = file.Path;
+                  Toast.MakeText(this, path, ToastLength.Long).Show();
                   System.Diagnostics.Debug.WriteLine(path);
                   image.SetImageBitmap(BitmapFactory.DecodeFile(file.Path));
                   file.Dispose();
@@ -80,7 +82,7 @@ namespace MediaAndroidTest
                       return;
                   var path = file.Path;
                   System.Diagnostics.Debug.WriteLine(path);
-
+                  Toast.MakeText(this, path, ToastLength.Long).Show();
 
 
                   file.Dispose();
@@ -96,6 +98,7 @@ namespace MediaAndroidTest
                     return;
 
                 var path = file.Path;
+                Toast.MakeText(this, path, ToastLength.Long).Show();
                 System.Diagnostics.Debug.WriteLine(path);
 
                 file.Dispose();
