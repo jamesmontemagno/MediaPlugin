@@ -50,9 +50,16 @@
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.dll" target="lib\wpa81\Plugin.Media.Abstractions.dll" />
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.xml" target="lib\wpa81\Plugin.Media.Abstractions.xml" />
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.pdb" target="lib\wpa81\Plugin.Media.Abstractions.pdb" />
-
-     <file src="src\Media.Plugin.WindowsPhone81\bin\Release\Plugin.Media\*.*" target="lib\wpa81\Plugin.Media" />
+     <file src="src\Media.Plugin.WindowsPhone81\bin\Release\CameraCaptureUIPage.xbf" target="lib\wpa81\Plugin.Media\CameraCaptureUIPage.xbf" />
+     <file src="src\Media.Plugin.WindowsPhone81\bin\Release\CameraCaptureUI.xbf" target="lib\wpa81\Plugin.Media\CameraCaptureUI.xbf" />
      
+     
+     <file src="src\Media.Plugin.WindowsPhone81\CameraCaptureUIPage.xaml" target="lib\wpa81\Plugin.Media\CameraCaptureUIPage.xaml" />
+     <file src="src\Media.Plugin.WindowsPhone81\CameraCaptureUI.xaml" target="lib\wpa81\Plugin.Media\CameraCaptureUI.xaml" />
+     
+     <file src="src\Media.Plugin.WindowsPhone81\bin\Release\Plugin.Media.xr.xml" target="lib\wpa81\Plugin.Media\Plugin.Media.xr.xml" />
+     
+
      <!--WinStore-->
      <file src="src\Media.Plugin.WindowsStore\bin\Release\Plugin.Media.dll" target="lib\win8\Plugin.Media.dll" />
      <file src="src\Media.Plugin.WindowsStore\bin\Release\Plugin.Media.xml" target="lib\win8\Plugin.Media.xml" />
