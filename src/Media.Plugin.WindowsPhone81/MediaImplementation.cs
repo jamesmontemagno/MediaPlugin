@@ -30,7 +30,7 @@ using Windows.UI.Xaml;
 using System.Threading;
 using System.Linq;
 using Windows.ApplicationModel.Activation;
-using DMX.Helper;
+using Plugin.Media;
 using System.Diagnostics;
 
 namespace Plugin.Media

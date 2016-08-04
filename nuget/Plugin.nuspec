@@ -49,7 +49,7 @@
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.dll" target="lib\wpa81\Plugin.Media.Abstractions.dll" />
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.xml" target="lib\wpa81\Plugin.Media.Abstractions.xml" />
      <file src="src\Media.Plugin.Abstractions\bin\Release\Plugin.Media.Abstractions.pdb" target="lib\wpa81\Plugin.Media.Abstractions.pdb" />
-     <file src="src\Media.Plugin.WindowsPhone81\bin\Release\CameraCaptureUiPage.xbf" target="lib\wpa81\Plugin.Media\CameraCaptureUiPage.xbf" />
+     <file src="src\Media.Plugin.WindowsPhone81\bin\Release\CameraCaptureUIPage.xbf" target="lib\wpa81\Plugin.Media\CameraCaptureUIPage.xbf" />
      <file src="src\Media.Plugin.WindowsPhone81\bin\Release\CameraCaptureUI.xbf" target="lib\wpa81\Plugin.Media\CameraCaptureUI.xbf" />
      <file src="src\Media.Plugin.WindowsPhone81\bin\Release\Plugin.Media.xr.xml" target="lib\wpa81\Plugin.Media\Plugin.Media.xr.xml" />
      

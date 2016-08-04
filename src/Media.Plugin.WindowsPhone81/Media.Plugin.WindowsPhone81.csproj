@@ -94,8 +94,8 @@
       <DependentUpon>CameraCaptureUI.xaml</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="CameraCaptureUiPage.xaml.cs">
-      <DependentUpon>CameraCaptureUiPage.xaml</DependentUpon>
+    <Compile Include="CameraCaptureUIPage.xaml.cs">
+      <DependentUpon>CameraCaptureUIPage.xaml</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="MediaImplementation.cs" />
@@ -107,7 +107,7 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Page>
-    <Page Include="CameraCaptureUiPage.xaml">
+    <Page Include="CameraCaptureUIPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
