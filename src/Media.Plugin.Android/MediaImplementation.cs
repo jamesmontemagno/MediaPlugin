@@ -127,24 +127,6 @@ namespace Plugin.Media
             return media;
         }
 
-        async Task<bool> RequestStoragePermission()
-        {
-            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
-            if (status != Permissions.Abstractions.PermissionStatus.Granted)
-            {
-                Console.WriteLine("Does not have storage permission granted, requesting.");
-                var results = await CrossPermissions.Current.RequestPermissionsAsync(Permissions.Abstractions.Permission.Storage);
-                if (results.ContainsKey(Permissions.Abstractions.Permission.Storage) &&
-                    results[Permissions.Abstractions.Permission.Storage] != Permissions.Abstractions.PermissionStatus.Granted)
-                {
-                    Console.WriteLine("Storage permission Denied.");
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
 
         /// <summary>
         /// Take a photo async with specified options
@@ -171,53 +153,17 @@ namespace Plugin.Media
             {
                 try
                 {
-                    await FixOrientationAsync(media.Path);
+                    await FixOrientationAndResizeAsync(media.Path, options.PhotoSize);
                 }
                 catch(Exception ex)
                 {
                     Console.WriteLine("Unable to check orientation: " + ex);
                 }
-
-                if (options.PhotoSize != PhotoSize.Full)
-                {
-                    try
-                    {
-                        var bmp = ResizeImage(media.Path, options.PhotoSize);
-                        using (var stream = File.Open(media.Path, FileMode.OpenOrCreate))
-                            await bmp.CompressAsync(Bitmap.CompressFormat.Png, 92, stream);
-
-                        bmp.Recycle();
-                    }
-                    catch(Exception ex)
-                    {
-                        Console.WriteLine($"Unable to shrink image: {ex}");
-                    }
-                }
             }
 
             return media;
         }
-        public static Bitmap ResizeImage (string filePath, PhotoSize photoSize)
-        {
-            var percent = 1.0f;
-            switch (photoSize)
-            {
-                case PhotoSize.Large:
-                    percent = .75f;
-                    break;
-                case PhotoSize.Medium:
-                    percent = .5f;
-                    break;
-                case PhotoSize.Small:
-                    percent = .25f;
-                    break;
-            }
-            var originalImage = BitmapFactory.DecodeFile(filePath);
-            var rotatedImage = Bitmap.CreateScaledBitmap(originalImage, (int)(originalImage.Width * percent), (int)(originalImage.Height * percent), false);
-            originalImage.Recycle();
-            return rotatedImage;
 
-        }
         /// <summary>
         /// Picks a video from the default gallery
         /// </summary>
@@ -257,6 +203,25 @@ namespace Plugin.Media
         private int requestId;
         private TaskCompletionSource<Plugin.Media.Abstractions.MediaFile> completionSource;
 
+
+        async Task<bool> RequestStoragePermission()
+        {
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
+            if (status != Permissions.Abstractions.PermissionStatus.Granted)
+            {
+                Console.WriteLine("Does not have storage permission granted, requesting.");
+                var results = await CrossPermissions.Current.RequestPermissionsAsync(Permissions.Abstractions.Permission.Storage);
+                if (results.ContainsKey(Permissions.Abstractions.Permission.Storage) &&
+                    results[Permissions.Abstractions.Permission.Storage] != Permissions.Abstractions.PermissionStatus.Granted)
+                {
+                    Console.WriteLine("Storage permission Denied.");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private void VerifyOptions(StoreMediaOptions options)
         {
             if (options == null)
@@ -277,9 +242,6 @@ namespace Plugin.Media
             {
                 pickerIntent.PutExtra(MediaPickerActivity.ExtraPath, options.Directory);
                 pickerIntent.PutExtra(MediaStore.Images.ImageColumns.Title, options.Name);
-
-
-
 
                 var cameraOptions = (options as StoreCameraMediaOptions);
                 if (cameraOptions != null)
@@ -353,41 +315,196 @@ namespace Plugin.Media
         /// <summary>
         ///  Rotate an image if required and saves it back to disk.
         /// </summary>
-        /// <param name="file">The file image</param>
-        /// <returns>True if rotation occured, else fal</returns>
-        public async Task<bool> FixOrientationAsync(string filePath)
+        /// <param name="filePath">The file image path</param>
+        /// <param name="photoSize">Photo size to go to.</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, PhotoSize photoSize)
         {
             if (string.IsNullOrWhiteSpace(filePath))
-                return false;
+                return Task.FromResult(false);
+
             try
             {
-                var orientation = GetRotation(filePath);
-
-                if (!orientation.HasValue)
-                    return false;
-
-                using (var bmp = RotateImage(filePath, orientation.Value))
+                return Task.Run(() =>
                 {
+                    try
+                    {
+                        var rotation = GetRotation(filePath);
 
-                    using (var stream = File.Open(filePath, FileMode.OpenOrCreate))
-                        await bmp.CompressAsync(Bitmap.CompressFormat.Png, 92, stream);
+                        if (rotation == 0 && photoSize == PhotoSize.Full)
+                            return false;
 
-                    bmp.Recycle();
+                        var percent = 1.0f;
+                        switch (photoSize)
+                        {
+                            case PhotoSize.Large:
+                                percent = .75f;
+                                break;
+                            case PhotoSize.Medium:
+                                percent = .5f;
+                                break;
+                            case PhotoSize.Small:
+                                percent = .25f;
+                                break;
+                        }
 
-                    return true;
-                }
+                        using (var originalImage = BitmapFactory.DecodeFile(filePath))
+                        {
+                           
+
+                            //if we need to rotate then go for it.
+                            //then compresse it if needed
+                            if (rotation != 0)
+                            {
+                                var matrix = new Matrix();
+                                matrix.PostRotate(rotation);
+                                using (var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true))
+                                {
+                                    if (photoSize != PhotoSize.Full)
+                                    {
+                                        using (var compressedImage = Bitmap.CreateScaledBitmap(rotatedImage, (int)(rotatedImage.Width * percent), (int)(rotatedImage.Height * percent), false))
+                                        {
+                                            using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                                            {
+                                                compressedImage.Compress(Bitmap.CompressFormat.Jpeg, 92, stream);
+                                                stream.Close();
+                                            }
+                                            compressedImage.Recycle();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                                        {
+                                            rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, 100, stream);
+                                            stream.Close();
+                                        }
+                                    }
+                                    rotatedImage.Recycle();
+                                }
+                                originalImage.Recycle();
+                                // Dispose of the Java side bitmap.
+                                GC.Collect();
+                                return true;
+                            }
+
+
+                            using (var compressedImage = Bitmap.CreateScaledBitmap(originalImage, (int)(originalImage.Width * percent), (int)(originalImage.Height * percent), false))
+                            {
+                                using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                                {
+                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, 92, stream);
+                                    stream.Close();
+                                }
+
+                                compressedImage.Recycle();
+                            }
+
+                            originalImage.Recycle();
+                            // Dispose of the Java side bitmap.
+                            GC.Collect();
+                            return true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+#if DEBUG
+                        throw ex;
+#else
+                        return false;
+#endif
+                    }
+                });
             }
             catch (Exception ex)
             {
 #if DEBUG
                 throw ex;
 #else
-                return false;
+                return Task.FromResult(false);
 #endif
             }
         }
 
-        static int? GetRotation(string filePath)
+        /// <summary>
+        /// Resize Image Async
+        /// </summary>
+        /// <param name="filePath">The file image path</param>
+        /// <param name="photoSize">Photo size to go to.</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return Task.FromResult(false);
+
+            try
+            {
+                return Task.Run(() =>
+                {
+                    try
+                    {
+                        
+
+                        if (photoSize == PhotoSize.Full)
+                            return false;
+
+                        var percent = 1.0f;
+                        switch (photoSize)
+                        {
+                            case PhotoSize.Large:
+                                percent = .75f;
+                                break;
+                            case PhotoSize.Medium:
+                                percent = .5f;
+                                break;
+                            case PhotoSize.Small:
+                                percent = .25f;
+                                break;
+                        }
+
+                        using (var originalImage = BitmapFactory.DecodeFile(filePath))
+                        {
+                            
+                            using (var compressedImage = Bitmap.CreateScaledBitmap(originalImage, (int)(originalImage.Width * percent), (int)(originalImage.Height * percent), false))
+                            {
+                                using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                                {
+                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, 92, stream);
+                                    stream.Close();
+                                }
+
+                                compressedImage.Recycle();
+
+                            }
+                            originalImage.Recycle();
+
+                            // Dispose of the Java side bitmap.
+                            GC.Collect();
+                            return true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+#if DEBUG
+                        throw ex;
+#else
+                        return false;
+#endif
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                throw ex;
+#else
+                return Task.FromResult(false);
+#endif
+            }
+        }
+
+
+        static int GetRotation(string filePath)
         {
             try
             {
@@ -404,7 +521,7 @@ namespace Plugin.Media
                         case Orientation.Rotate270:
                             return 270;
                         default:
-                            return null;
+                            return 0;
                     }
                 }
             }
@@ -413,23 +530,11 @@ namespace Plugin.Media
 #if DEBUG
                 throw ex;
 #else
-                return null;
+                return 0;
 #endif
             }
         }
 
-        private static Bitmap RotateImage(string filePath, int rotation)
-        {
-            using (var originalImage = BitmapFactory.DecodeFile(filePath))
-            {
-
-                var matrix = new Matrix();
-                matrix.PostRotate(rotation);
-                var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true);
-                originalImage.Recycle();
-                return rotatedImage;
-            }
-        }
     }
 
 
