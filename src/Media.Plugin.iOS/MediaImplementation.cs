@@ -89,12 +89,17 @@ namespace Plugin.Media
         /// Picks a photo from the default gallery
         /// </summary>
         /// <returns>Media file or null if canceled</returns>
-        public Task<MediaFile> PickPhotoAsync()
+        public Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
         {
             if (!IsPickPhotoSupported)
                 throw new NotSupportedException();
 
-            return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage);
+            var cameraOptions = new StoreCameraMediaOptions
+            {
+                PhotoSize = options?.PhotoSize ?? PhotoSize.Full
+            };
+
+            return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
         }
         /// <summary>
         /// 

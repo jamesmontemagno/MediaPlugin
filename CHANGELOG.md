@@ -1,8 +1,9 @@
 ## Changelog
 
-### [2.5.0-betaX]
-* iOS & Android: Resize taking a photo
+### [2.5.1-betaX]
 * All: Ensure you call await CrossMedia.Current.Initialize(); before accessing any APIs
+* iOS & Android: Ability to resize taking a photo
+* iOS & Android: Ability to resize when pickign photo
 * Android: Fix images that get rotated in the wrong direction
 * iOS: Fix for rotating device.
 * iOS: Added custom overlay method

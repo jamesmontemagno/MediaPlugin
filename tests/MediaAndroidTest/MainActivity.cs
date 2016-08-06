@@ -3,6 +3,7 @@ using Android.Widget;
 using Android.OS;
 using Android.Graphics;
 using Android.Content.PM;
+using System;
 
 namespace MediaAndroidTest
 {
@@ -37,11 +38,12 @@ namespace MediaAndroidTest
 
             button.Click += async delegate
             {
+                var size = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full;
                 var media = new Plugin.Media.MediaImplementation();
                 var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
                 {
                     Directory = "Sample",
-                    Name = "test.jpg",
+                    Name = $"{DateTime.Now}_{size}.jpg",
                     SaveToAlbum = switchSaveToAlbum.Checked,
                     PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
                     DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Front
@@ -59,7 +61,10 @@ namespace MediaAndroidTest
             var pick = FindViewById<Button>(Resource.Id.button1);
             pick.Click += async (sender, args) =>
               {
-                  var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync();
+                  var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
+                  {
+                      PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full
+                  });
                   if (file == null)
                       return;
                   var path = file.Path;

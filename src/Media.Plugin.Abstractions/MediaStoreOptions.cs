@@ -63,11 +63,25 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         Front
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class PickMediaOptions
+    {
+
+        /// <summary>
+        /// Gets or sets the size of the photo.
+        /// </summary>
+        /// <value>The size of the photo.</value>
+        public PhotoSize PhotoSize { get; set; } = PhotoSize.Full;
+    }
+
     /// <summary>
     /// 
     /// </summary>
     public class StoreCameraMediaOptions
-      : StoreMediaOptions
+        : StoreMediaOptions
     {
         /// <summary>
         /// Default camera
@@ -78,14 +92,14 @@ namespace Plugin.Media.Abstractions
             set;
         }
 
-	/// <summary>
-	/// Get or set for an OverlayViewProvider
-	/// </summary>
-	public Func<Object> OverlayViewProvider
-	{
-		get;
-		set;
-	}
+        /// <summary>
+        /// Get or set for an OverlayViewProvider
+        /// </summary>
+        public Func<Object> OverlayViewProvider
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         // Get or set if the image should be stored public
@@ -100,6 +114,7 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         /// <value>The size of the photo.</value>
         public PhotoSize PhotoSize { get; set; } = PhotoSize.Full;
+
     }
 
     /// <summary>

@@ -116,13 +116,29 @@ namespace Plugin.Media
         /// Picks a photo from the default gallery
         /// </summary>
         /// <returns>Media file or null if canceled</returns>
-        public async Task<MediaFile> PickPhotoAsync()
+        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
         {
             if (!(await RequestStoragePermission()))
             {
                 return null;
             }
             var media = await TakeMediaAsync("image/*", Intent.ActionPick, null);
+
+            if (options == null)
+                return media;
+
+            //check to see if we need to rotate if success
+            if (!string.IsNullOrWhiteSpace(media?.Path) && options.PhotoSize != PhotoSize.Full)
+            {
+                try
+                {
+                    await ResizeAsync(media.Path, options.PhotoSize);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unable to check orientation: " + ex);
+                }
+            }
 
             return media;
         }

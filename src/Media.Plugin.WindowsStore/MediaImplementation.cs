@@ -141,7 +141,7 @@ namespace Plugin.Media
         /// Picks a photo from the default gallery
         /// </summary>
         /// <returns>Media file or null if canceled</returns>
-        public async Task<MediaFile> PickPhotoAsync()
+        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
         {
             var picker = new FileOpenPicker();
             picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;

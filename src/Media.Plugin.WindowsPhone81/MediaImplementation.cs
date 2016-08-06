@@ -174,7 +174,7 @@ namespace Plugin.Media
         /// Picks a photo from the default gallery
         /// </summary>
         /// <returns>Media file or null if canceled</returns>
-        public Task<MediaFile> PickPhotoAsync()
+        public Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
         {
             var ntcs = new TaskCompletionSource<MediaFile>();
             if (Interlocked.CompareExchange(ref completionSource, ntcs, null) != null)
