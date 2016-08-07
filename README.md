@@ -179,11 +179,6 @@ protected override void OnActivated(IActivatedEventArgs args)
 
 Set `Webcam` permission.
 
-## Future Enhancements
-* Auto Rotate on Android
-* Image Metadata
-* Update Andorid Implentation with new Activity
-* Return original album path of picked media
 
 Thanks!
 
