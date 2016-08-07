@@ -132,8 +132,12 @@ takePhoto.Clicked += async (sender, args) =>
 };
 ```
 
+### Compressing Photos
+When calling `TakePhotoAsync` or `PickPhotoAsync` you can specify multiple options. First is `PhotoSize` which sill shrink the photo down to 75%, 50%, or 25% it's original size. Additionally, it is recommended to set the `CompressionQuality`, which is a value from 0 the most compressed all the way to 100, which is no compression. A good setting from testing is around 92.
+
+
 ### Saving Photo/Video to Camera Roll/Gallery
-As of Version 2.1.0 ([currently in beta](https://www.nuget.org/packages/Xam.Plugin.Media/2.1.0-beta1)) you can now save a photo or video to the camera roll/gallery. When creating the ```StoreCameraMediaOptions``` or ```StoreVideoMediaOptions``` simply set ```SaveToAlbum``` to true. When your user takes a photo it will still store temporary data, but also if needed make a copy to the public gallery (based on platform). In the MediaFile you will now see a AlbumPath that you can query as well.
+You can now save a photo or video to the camera roll/gallery. When creating the ```StoreCameraMediaOptions``` or ```StoreVideoMediaOptions``` simply set ```SaveToAlbum``` to true. When your user takes a photo it will still store temporary data, but also if needed make a copy to the public gallery (based on platform). In the MediaFile you will now see a AlbumPath that you can query as well.
 
 Android: When you set SaveToAlbum this will make it so your photos are public in the Pictures/YourDirectory or Movies/YourDirectory. This is the only way Android can detect the photos.
 
