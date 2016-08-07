@@ -132,7 +132,7 @@ namespace Plugin.Media
             {
                 try
                 {
-                    await ResizeAsync(media.Path, options.PhotoSize);
+                    await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality);
                 }
                 catch (Exception ex)
                 {
@@ -164,18 +164,67 @@ namespace Plugin.Media
 
             var media = await TakeMediaAsync("image/*", MediaStore.ActionImageCapture, options);
 
-            //check to see if we need to rotate if success
-            if (!string.IsNullOrWhiteSpace(media?.Path))
+            if (string.IsNullOrWhiteSpace(media?.Path))
+                return media;
+
+            if (options.SaveToAlbum)
             {
                 try
                 {
-                    await FixOrientationAndResizeAsync(media.Path, options.PhotoSize);
+                    var fileName = System.IO.Path.GetFileName(media.Path);
+                    var publicUri = MediaPickerActivity.GetOutputMediaFile(context, options.Directory ?? "temp", fileName, true, true);
+                    using (System.IO.Stream input = File.OpenRead(media.Path))
+                        using (System.IO.Stream output = File.Create(publicUri.Path))
+                            input.CopyTo(output);
+
+                    media.AlbumPath = publicUri.Path;
+
+                    var f = new Java.IO.File(publicUri.Path);
+
+                    //MediaStore.Images.Media.InsertImage(context.ContentResolver,
+                    //    f.AbsolutePath, f.Name, null);
+
+                    try
+                    {
+                        Android.Media.MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
+
+                        ContentValues values = new ContentValues();
+                        values.Put(MediaStore.Images.Media.InterfaceConsts.Title, System.IO.Path.GetFileNameWithoutExtension(f.AbsolutePath));
+                        values.Put(MediaStore.Images.Media.InterfaceConsts.Description, string.Empty);
+                        values.Put(MediaStore.Images.Media.InterfaceConsts.DateTaken, Java.Lang.JavaSystem.CurrentTimeMillis());
+                        values.Put(MediaStore.Images.ImageColumns.BucketId, f.ToString().ToLowerInvariant().GetHashCode());
+                        values.Put(MediaStore.Images.ImageColumns.BucketDisplayName, f.Name.ToLowerInvariant());
+                        values.Put("_data", f.AbsolutePath);
+
+                        var cr = context.ContentResolver;
+                        cr.Insert(MediaStore.Images.Media.ExternalContentUri, values);
+                    }
+                    catch (Exception ex1)
+                    {
+                        Console.WriteLine("Unable to save to scan file: " + ex1);
+                    }
+
+                    var contentUri = Android.Net.Uri.FromFile(f);
+                    var mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile, contentUri);
+                    context.SendBroadcast(mediaScanIntent);
                 }
-                catch(Exception ex)
+                catch (Exception ex2)
                 {
-                    Console.WriteLine("Unable to check orientation: " + ex);
+                    Console.WriteLine("Unable to save to gallery: " + ex2);
                 }
             }
+
+            //check to see if we need to rotate if success
+
+            try
+            {
+                await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Unable to check orientation: " + ex);
+            }
+            
 
             return media;
         }
@@ -217,7 +266,7 @@ namespace Plugin.Media
 
         private readonly Context context;
         private int requestId;
-        private TaskCompletionSource<Plugin.Media.Abstractions.MediaFile> completionSource;
+        private TaskCompletionSource<MediaFile> completionSource;
 
 
         async Task<bool> RequestStoragePermission()
@@ -334,7 +383,7 @@ namespace Plugin.Media
         /// <param name="filePath">The file image path</param>
         /// <param name="photoSize">Photo size to go to.</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> FixOrientationAndResizeAsync(string filePath, PhotoSize photoSize)
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, PhotoSize photoSize, int quality)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -382,7 +431,7 @@ namespace Plugin.Media
                                         {
                                             using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                             {
-                                                compressedImage.Compress(Bitmap.CompressFormat.Jpeg, 92, stream);
+                                                compressedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
                                                 stream.Close();
                                             }
                                             compressedImage.Recycle();
@@ -392,7 +441,7 @@ namespace Plugin.Media
                                     {
                                         using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                         {
-                                            rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, 100, stream);
+                                            rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
                                             stream.Close();
                                         }
                                     }
@@ -409,7 +458,7 @@ namespace Plugin.Media
                             {
                                 using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                 {
-                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, 92, stream);
+                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
                                     stream.Close();
                                 }
 
@@ -448,7 +497,7 @@ namespace Plugin.Media
         /// <param name="filePath">The file image path</param>
         /// <param name="photoSize">Photo size to go to.</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize)
+        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -485,7 +534,8 @@ namespace Plugin.Media
                             {
                                 using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                 {
-                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, 92, stream);
+                                   
+                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
                                     stream.Close();
                                 }
 

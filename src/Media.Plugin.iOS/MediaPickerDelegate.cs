@@ -323,13 +323,19 @@ namespace Plugin.Media
                 }
             }
 
-            image.AsJPEG().Save(path, true);
+            //iOS quality is 0.0-1.0
+            var quality = (options.CompressionQuality / 100f);
+            image.AsJPEG(quality).Save(path, true);
 
             Action<bool> dispose = null;
             string aPath = null;
             if (source != UIImagePickerControllerSourceType.Camera)
             {
                 dispose = d => File.Delete(path);
+
+                //try to get the album path's url
+                var url = (NSUrl)info[UIImagePickerController.ReferenceUrl];
+                aPath = url?.AbsoluteString;
             }
             else
             {

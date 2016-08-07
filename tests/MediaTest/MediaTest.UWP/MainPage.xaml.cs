@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -30,7 +31,7 @@ namespace MediaTest.UWP
 
         private async void ButtonTakePhoto_Click(object sender, RoutedEventArgs e)
         {
-            var media = new Plugin.Media.MediaImplementation();
+            
             var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
             {
                 Directory = "Sample",
@@ -41,6 +42,25 @@ namespace MediaTest.UWP
                 return;
             var path = file.Path;
             System.Diagnostics.Debug.WriteLine(path);
+
+            var dialog = new MessageDialog(path);
+            await dialog.ShowAsync();
+
+            file.Dispose();
+        }
+
+        private async void ButtonPickPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            
+            var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync();
+            if (file == null)
+                return;
+            var path = file.Path;
+            System.Diagnostics.Debug.WriteLine(path);
+            var dialog = new MessageDialog(path);
+            await dialog.ShowAsync();
+
+            file.Dispose();
         }
     }
 }

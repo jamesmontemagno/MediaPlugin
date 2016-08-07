@@ -143,7 +143,7 @@ namespace Plugin.Media
 
                     if (!ran)
                     {
-                        this.path = GetOutputMediaFile(this, b.GetString(ExtraPath), this.title, this.isPhoto, this.saveToAlbum);
+                        this.path = GetOutputMediaFile(this, b.GetString(ExtraPath), this.title, this.isPhoto, false);
 
                         Touch();
                         pickIntent.PutExtra(MediaStore.ExtraOutput, this.path);
@@ -192,7 +192,7 @@ namespace Plugin.Media
                 {
                     originalPath = data.ToString();
                     string currentPath = path.Path;
-                    pathFuture = TryMoveFileAsync(context, data, path, isPhoto, saveToAlbum).ContinueWith(t =>
+                    pathFuture = TryMoveFileAsync(context, data, path, isPhoto, false).ContinueWith(t =>
                         new Tuple<string, bool>(t.Result ? currentPath : null, false));
                 }
                 else
@@ -205,7 +205,7 @@ namespace Plugin.Media
             {
                 originalPath = data.ToString();
                 path = data;
-                pathFuture = GetFileForUriAsync(context, path, isPhoto, saveToAlbum);
+                pathFuture = GetFileForUriAsync(context, path, isPhoto, false);
             }
             else
                 pathFuture = TaskFromResult<Tuple<string, bool>>(null);
@@ -214,51 +214,9 @@ namespace Plugin.Media
             {
                 
                 string resultPath = t.Result.Item1;
+                var aPath = originalPath;
                 if (resultPath != null && File.Exists(t.Result.Item1))
                 {
-                    string aPath = null;
-                    if (saveToAlbum)
-                    {
-                        aPath = resultPath;
-                        try
-                        {
-                            
-                            var f = new Java.IO.File(resultPath);
-
-                            
-                            //MediaStore.Images.Media.InsertImage(context.ContentResolver,
-                            //    f.AbsolutePath, f.Name, null);
-
-                            try
-                            {
-                                Android.Media.MediaScannerConnection.ScanFile(context, new [] { f.AbsolutePath }, null, context as MediaPickerActivity);
-
-                                ContentValues values = new ContentValues();
-                                values.Put(MediaStore.Images.Media.InterfaceConsts.Title, Path.GetFileNameWithoutExtension(f.AbsolutePath));
-                                values.Put(MediaStore.Images.Media.InterfaceConsts.Description, string.Empty);
-                                values.Put(MediaStore.Images.Media.InterfaceConsts.DateTaken, Java.Lang.JavaSystem.CurrentTimeMillis());
-                                values.Put(MediaStore.Images.ImageColumns.BucketId, f.ToString().ToLowerInvariant().GetHashCode());
-                                values.Put(MediaStore.Images.ImageColumns.BucketDisplayName, f.Name.ToLowerInvariant());
-                                values.Put("_data", f.AbsolutePath);
-
-                                var cr = context.ContentResolver;
-                                cr.Insert(MediaStore.Images.Media.ExternalContentUri, values);
-                            }
-                            catch (Exception ex1)
-                            {
-                                    Console.WriteLine("Unable to save to scan file: " + ex1);
-                            }
-                        
-                            var contentUri = Uri.FromFile(f);
-                            var mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile, contentUri);
-                            context.SendBroadcast(mediaScanIntent);
-                        }
-                        catch (Exception ex2)
-                        {
-                            Console.WriteLine("Unable to save to gallery: " + ex2);
-                        }
-                    }
-
                     var mf = new MediaFile(resultPath, () =>
                       {
                           return File.OpenRead(resultPath);
@@ -319,13 +277,13 @@ namespace Plugin.Media
                 {
                     if ((int)Build.VERSION.SdkInt >= 22)
                     {
-                        var e = await GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, saveToAlbum);
+                        var e = await GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
                         OnMediaPicked(e);
                         Finish();
                     }
                     else
                     {
-                        future = GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, saveToAlbum);
+                        future = GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
 
                         Finish();
 
@@ -352,10 +310,10 @@ namespace Plugin.Media
             }
         }
 
-        private static Task<bool> TryMoveFileAsync(Context context, Uri url, Uri path, bool isPhoto, bool saveToAlbum)
+        public static Task<bool> TryMoveFileAsync(Context context, Uri url, Uri path, bool isPhoto, bool saveToAlbum)
         {
             string moveTo = GetLocalPath(path);
-            return GetFileForUriAsync(context, url, isPhoto, saveToAlbum).ContinueWith(t =>
+            return GetFileForUriAsync(context, url, isPhoto, false).ContinueWith(t =>
             {
                 if (t.Result.Item1 == null)
                     return false;
@@ -399,7 +357,7 @@ namespace Plugin.Media
             return Path.Combine(folder, nname);
         }
 
-        private static Uri GetOutputMediaFile(Context context, string subdir, string name, bool isPhoto, bool saveToAlbum)
+        public static Uri GetOutputMediaFile(Context context, string subdir, string name, bool isPhoto, bool saveToAlbum)
         {
             subdir = subdir ?? String.Empty;
 
@@ -421,9 +379,12 @@ namespace Plugin.Media
                     if (!mediaStorageDir.Mkdirs())
                         throw new IOException("Couldn't create directory, have you added the WRITE_EXTERNAL_STORAGE permission?");
 
-                    // Ensure this media doesn't show up in gallery apps
-                    using (Java.IO.File nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
-                        nomedia.CreateNewFile();
+                    if (!saveToAlbum)
+                    {
+                        // Ensure this media doesn't show up in gallery apps
+                        using (Java.IO.File nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
+                            nomedia.CreateNewFile();
+                    }
                 }
 
                 return Uri.FromFile(new Java.IO.File(GetUniquePath(mediaStorageDir.Path, name, isPhoto)));
@@ -464,13 +425,13 @@ namespace Plugin.Media
                             if (contentPath == null || !contentPath.StartsWith("file"))
                             {
 
-                                Uri outputPath = GetOutputMediaFile(context, "temp", null, isPhoto, saveToAlbum);
+                                Uri outputPath = GetOutputMediaFile(context, "temp", null, isPhoto, false);
 
                                 try
                                 {
                                     using (Stream input = context.ContentResolver.OpenInputStream(uri))
-                                    using (Stream output = File.Create(outputPath.Path))
-                                        input.CopyTo(output);
+                                        using (Stream output = File.Create(outputPath.Path))
+                                            input.CopyTo(output);
 
                                     contentPath = outputPath.Path;
                                 }

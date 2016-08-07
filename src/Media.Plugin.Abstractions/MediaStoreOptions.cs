@@ -75,6 +75,26 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         /// <value>The size of the photo.</value>
         public PhotoSize PhotoSize { get; set; } = PhotoSize.Full;
+
+        int quality = 100;
+        /// <summary>
+        /// The compression quality to use, 0 is the maximum compression (worse quality),
+        /// and 100 minimum compression (best quality)
+        /// Default is 100
+        /// </summary>
+        public int CompressionQuality
+        {
+            get { return quality; }
+            set
+            {
+                if (value > 100)
+                    quality = 100;
+                else if (value < 0)
+                    quality = 0;
+                else
+                    quality = value;
+            }
+        }
     }
 
     /// <summary>
@@ -114,6 +134,26 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         /// <value>The size of the photo.</value>
         public PhotoSize PhotoSize { get; set; } = PhotoSize.Full;
+
+        int quality = 100;
+        /// <summary>
+        /// The compression quality to use, 0 is the maximum compression (worse quality),
+        /// and 100 minimum compression (best quality)
+        /// Default is 100
+        /// </summary>
+        public int CompressionQuality
+        {
+            get { return quality; }
+            set
+            {
+                if (value > 100)
+                    quality = 100;
+                else if (value < 0)
+                    quality = 0;
+                else
+                    quality = value;
+            }
+        }
 
     }
 

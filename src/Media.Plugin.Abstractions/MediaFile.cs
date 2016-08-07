@@ -68,6 +68,13 @@ namespace Plugin.Media.Abstractions
 
                 return albumPath;
             }
+            set
+            {
+                if (isDisposed)
+                    throw new ObjectDisposedException(null);
+
+                albumPath = value;
+            }
         }
 
         /// <summary>
@@ -93,7 +100,8 @@ namespace Plugin.Media.Abstractions
         private bool isDisposed;
         private readonly Action<bool> dispose;
         private readonly Func<Stream> streamGetter;
-        private readonly string path, albumPath;
+        private readonly string path;
+        private string albumPath;
         private readonly bool deletePathOnDispose;
 
         private void Dispose(bool disposing)

@@ -100,7 +100,7 @@ namespace Plugin.Media
 
             var capture = new CameraCaptureUI();
             capture.PhotoSettings.Format = CameraCaptureUIPhotoFormat.Jpeg;
-            capture.PhotoSettings.MaxResolution = CameraCaptureUIMaxPhotoResolution.HighestAvailable;
+            capture.PhotoSettings.MaxResolution = GetMaxResolution(options?.PhotoSize ?? PhotoSize.Full);
 
             var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
             if (result == null)
@@ -137,6 +137,23 @@ namespace Plugin.Media
             return new MediaFile(file.Path, () => file.OpenStreamForReadAsync().Result, albumPath: aPath);
         }
 
+        public CameraCaptureUIMaxPhotoResolution GetMaxResolution(PhotoSize photoSize)
+        {
+            switch(photoSize)
+            {
+                case PhotoSize.Full:
+                    return CameraCaptureUIMaxPhotoResolution.HighestAvailable;
+                case PhotoSize.Large:
+                    return CameraCaptureUIMaxPhotoResolution.Large3M;
+                case PhotoSize.Medium:
+                    return CameraCaptureUIMaxPhotoResolution.MediumXga;
+                case PhotoSize.Small:
+                    return CameraCaptureUIMaxPhotoResolution.SmallVga;
+            }
+
+            return CameraCaptureUIMaxPhotoResolution.HighestAvailable;
+        }
+
         /// <summary>
         /// Picks a photo from the default gallery
         /// </summary>
@@ -153,7 +170,30 @@ namespace Plugin.Media
             if (result == null)
                 return null;
 
-            return new MediaFile(result.Path, () => result.OpenStreamForReadAsync().Result);
+            string aPath = result.Path;
+            string path = result.Path;
+            StorageFile copy = null;
+            //copy local
+            try
+            {
+                var fileNameNoEx = Path.GetFileNameWithoutExtension(aPath);
+                copy = await result.CopyAsync(ApplicationData.Current.LocalFolder, 
+                    fileNameNoEx + result.FileType, NameCollisionOption.GenerateUniqueName);
+
+                path = copy.Path;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("unable to save to app directory:" + ex);
+            }
+
+            return new MediaFile(path, () =>
+                {
+                    if (copy != null)
+                        return result.OpenStreamForReadAsync().Result;
+
+                    return result.OpenStreamForReadAsync().Result;
+                }, albumPath: aPath);
         }
 
         /// <summary>
