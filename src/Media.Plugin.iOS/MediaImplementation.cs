@@ -96,7 +96,8 @@ namespace Plugin.Media
 
             var cameraOptions = new StoreCameraMediaOptions
             {
-                PhotoSize = options?.PhotoSize ?? PhotoSize.Full
+                PhotoSize = options?.PhotoSize ?? PhotoSize.Full,
+                CompressionQuality = options?.CompressionQuality ?? 100
             };
 
             return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
