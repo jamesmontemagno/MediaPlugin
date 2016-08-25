@@ -9,6 +9,8 @@ namespace MediaTest.iOS
 {
     public partial class ViewController : UIViewController
     {
+		private OverlayProvider _overlayProvider = new OverlayProvider();
+
         public ViewController(IntPtr handle) : base(handle)
         {
         }
@@ -29,7 +31,8 @@ namespace MediaTest.iOS
                 {
                     Name = "test1.jpg",
                     SaveToAlbum = AlbumSwitch.On,
-                    PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full
+                    PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
+					OverlayViewProvider = new Func<object>(_overlayProvider.ProvideOverlay)
                 });
 
                 if (test == null)
@@ -68,7 +71,8 @@ namespace MediaTest.iOS
                 var test = await CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
                 {
                     Name = "test1.mp4",
-                    SaveToAlbum = true
+                    SaveToAlbum = true,
+					OverlayViewProvider = new Func<object>(_overlayProvider.ProvideOverlay)
                 });
 
                 if (test == null)
