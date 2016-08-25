@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 
 using UIKit;
+using ImageIO;
 
 namespace MediaTest.iOS
 {
@@ -38,7 +39,13 @@ namespace MediaTest.iOS
                 if (test == null)
                     return;
 
-                new UIAlertView("Success", test.Path, null, "OK").Show();
+                var url = new NSUrl(test.Path, false);
+				var imageSource = CGImageSource.FromUrl(url, null);
+				var imageProperties = imageSource.CopyProperties(new NSDictionary(), 0);
+
+				var stringFileFormatMetadata = imageProperties.DescriptionInStringsFileFormat;
+
+				new UIAlertView("Success", stringFileFormatMetadata, null, "OK").Show();
 
                 var stream = test.GetStream();
                 using (var data = NSData.FromStream(stream))
@@ -57,10 +64,16 @@ namespace MediaTest.iOS
                 if (test == null)
                     return;
 
-                new UIAlertView("Success", test.Path, null, "OK").Show();
+				var url = new NSUrl(test.Path, false);
+				var imageSource = CGImageSource.FromUrl(url, null);
+				var imageProperties = imageSource.CopyProperties(new NSDictionary(), 0);
+
+				var stringFileFormatMetadata = imageProperties.DescriptionInStringsFileFormat;
+
+				new UIAlertView("Success", stringFileFormatMetadata, null, "OK").Show();
 
                 var stream = test.GetStream();
-                using (var data = NSData.FromStream(stream))
+				using (var data = NSData.FromStream(stream))
                     MainImage.Image = UIImage.LoadFromData(data);
 
                 test.Dispose();
