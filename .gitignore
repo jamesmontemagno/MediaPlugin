@@ -235,3 +235,6 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+# OS X File system
+.DS_Store
