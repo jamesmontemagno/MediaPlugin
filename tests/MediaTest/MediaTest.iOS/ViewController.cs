@@ -33,19 +33,19 @@ namespace MediaTest.iOS
                     Name = "test1.jpg",
                     SaveToAlbum = AlbumSwitch.On,
                     PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
-					OverlayViewProvider = new Func<object>(_overlayProvider.ProvideOverlay)
+		    OverlayViewProvider = new Func<object>(_overlayProvider.ProvideOverlay)
                 });
 
                 if (test == null)
                     return;
 
                 var url = new NSUrl(test.Path, false);
-				var imageSource = CGImageSource.FromUrl(url, null);
-				var imageProperties = imageSource.CopyProperties(new NSDictionary(), 0);
-
-				var stringFileFormatMetadata = imageProperties.DescriptionInStringsFileFormat;
-
-				new UIAlertView("Success", stringFileFormatMetadata, null, "OK").Show();
+		var imageSource = CGImageSource.FromUrl(url, null);
+		var imageProperties = imageSource.CopyProperties(new NSDictionary(), 0);
+	
+		var stringFileFormatMetadata = imageProperties.DescriptionInStringsFileFormat;
+	
+		new UIAlertView("Success", stringFileFormatMetadata, null, "OK").Show();
 
                 var stream = test.GetStream();
                 using (var data = NSData.FromStream(stream))
@@ -64,13 +64,13 @@ namespace MediaTest.iOS
                 if (test == null)
                     return;
 
-				var url = new NSUrl(test.Path, false);
-				var imageSource = CGImageSource.FromUrl(url, null);
-				var imageProperties = imageSource.CopyProperties(new NSDictionary(), 0);
+		var url = new NSUrl(test.Path, false);
+		var imageSource = CGImageSource.FromUrl(url, null);
+		var imageProperties = imageSource.CopyProperties(new NSDictionary(), 0);
 
-				var stringFileFormatMetadata = imageProperties.DescriptionInStringsFileFormat;
+		var stringFileFormatMetadata = imageProperties.DescriptionInStringsFileFormat;
 
-				new UIAlertView("Success", stringFileFormatMetadata, null, "OK").Show();
+		new UIAlertView("Success", stringFileFormatMetadata, null, "OK").Show();
 
                 var stream = test.GetStream();
 				using (var data = NSData.FromStream(stream))
@@ -85,7 +85,7 @@ namespace MediaTest.iOS
                 {
                     Name = "test1.mp4",
                     SaveToAlbum = true,
-					OverlayViewProvider = new Func<object>(_overlayProvider.ProvideOverlay)
+		    OverlayViewProvider = new Func<object>(_overlayProvider.ProvideOverlay)
                 });
 
                 if (test == null)

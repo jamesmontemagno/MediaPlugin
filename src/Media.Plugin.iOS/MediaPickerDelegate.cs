@@ -324,52 +324,52 @@ namespace Plugin.Media
                 }
             }
 
-			//iOS quality is 0.0-1.0
-			var quality = (options.CompressionQuality / 100f);
-			var imageNSData = image.AsJPEG(quality);
+	    //iOS quality is 0.0-1.0
+	    var quality = (options.CompressionQuality / 100f);
+	    var imageNSData = image.AsJPEG(quality);
 
-			if (meta != null)
-			{
-				var dataProvider = new CGDataProvider(imageNSData);
-				var cgImageFromJPEG = CGImage.FromJPEG(dataProvider, null, false, CGColorRenderingIntent.Default);
-				var imageNSMutableData = new NSMutableData();
-				var destination = CGImageDestination.Create(imageNSMutableData, UTType.JPEG, 1, null);
-				var cgImageMetadata = new CGImageMetadata(meta.Copy().Handle);
-				var destinationOptions = new CGImageDestinationOptions();
+	    if (meta != null)
+	    {
+		var dataProvider = new CGDataProvider(imageNSData);
+		var cgImageFromJPEG = CGImage.FromJPEG(dataProvider, null, false, CGColorRenderingIntent.Default);
+		var imageNSMutableData = new NSMutableData();
+		var destination = CGImageDestination.Create(imageNSMutableData, UTType.JPEG, 1, null);
+		var cgImageMetadata = new CGImageMetadata(meta.Copy().Handle);
+		var destinationOptions = new CGImageDestinationOptions();
 
-				var exifDictionary = meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary;
-				var tiffDictionary = meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary;
-				var gpsDictionary = meta[ImageIO.CGImageProperties.GPSDictionary] as NSDictionary;
+		var exifDictionary = meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary;
+		var tiffDictionary = meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary;
+		var gpsDictionary = meta[ImageIO.CGImageProperties.GPSDictionary] as NSDictionary;
 
-				if (exifDictionary != null)
-				{
-					destinationOptions.ExifDictionary = new CGImagePropertiesExif(exifDictionary);
-				}
-				if (tiffDictionary != null)
-				{
-					destinationOptions.TiffDictionary = new CGImagePropertiesTiff(tiffDictionary);
-				}
-				if (gpsDictionary != null)
-				{
-					destinationOptions.GpsDictionary = new CGImagePropertiesGps(gpsDictionary);
-				}
+		if (exifDictionary != null)
+		{
+			destinationOptions.ExifDictionary = new CGImagePropertiesExif(exifDictionary);
+		}
+		if (tiffDictionary != null)
+		{
+			destinationOptions.TiffDictionary = new CGImagePropertiesTiff(tiffDictionary);
+		}
+		if (gpsDictionary != null)
+		{
+			destinationOptions.GpsDictionary = new CGImagePropertiesGps(gpsDictionary);
+		}
 
                 destination.AddImageAndMetadata(cgImageFromJPEG, cgImageMetadata, destinationOptions);
 
-				var success = destination.Close();
-				if (success)
-				{
-					imageNSMutableData.Save(path, true);
-				}
-				else 
-				{
-					imageNSData.Save(path, true);
-				}
-			}
-			else 
-			{
-				imageNSData.Save(path, true);
-			}
+		var success = destination.Close();
+		if (success)
+		{
+			imageNSMutableData.Save(path, true);
+		}
+		else 
+		{
+			imageNSData.Save(path, true);
+		}
+	    }
+	    else 
+	    {
+		imageNSData.Save(path, true);
+	    }
 
             Action<bool> dispose = null;
             string aPath = null;
@@ -402,34 +402,34 @@ namespace Plugin.Media
             return new MediaFile(path, () => File.OpenRead(path), dispose: dispose, albumPath: aPath);
         }
 
-		private async Task<NSDictionary> GetPictureMetaDataAsync(NSDictionary info)
-		{
-			switch (source)
-			{
-				case UIImagePickerControllerSourceType.Camera:
-					return info[UIImagePickerController.MediaMetadata] as NSDictionary;
-				case UIImagePickerControllerSourceType.PhotoLibrary:
-					return await GetLibraryAssetPictureMetaDataAsync(info);
-				default:
-					return null;
-			}
-		}
+	private async Task<NSDictionary> GetPictureMetaDataAsync(NSDictionary info)
+	{
+	    switch (source)
+	    {
+		case UIImagePickerControllerSourceType.Camera:
+		    return info[UIImagePickerController.MediaMetadata] as NSDictionary;
+		case UIImagePickerControllerSourceType.PhotoLibrary:
+		    return await GetLibraryAssetPictureMetaDataAsync(info);
+		default:
+		    return null;
+	    }
+	}
 
-		private async Task<NSDictionary> GetLibraryAssetPictureMetaDataAsync(NSDictionary info)
-		{
-			var nsUrl = info[UIImagePickerController.ReferenceUrl] as NSUrl;
-			var assetsLibrary = new ALAssetsLibrary();
-			var asset = await assetsLibrary.AssetForUrlAsync(nsUrl);
-			if (asset != null)
-			{
-				var representation = asset.DefaultRepresentation;
-				return representation.Metadata;
-			}
-			else
-			{
-				return null;
-			}
-		}
+	private async Task<NSDictionary> GetLibraryAssetPictureMetaDataAsync(NSDictionary info)
+	{
+	    var nsUrl = info[UIImagePickerController.ReferenceUrl] as NSUrl;
+	    var assetsLibrary = new ALAssetsLibrary();
+	    var asset = await assetsLibrary.AssetForUrlAsync(nsUrl);
+	    if (asset != null)
+	    {
+		var representation = asset.DefaultRepresentation;
+		return representation.Metadata;
+	    }
+	    else
+	    {
+		return null;
+	    }
+	}
 
 
 
