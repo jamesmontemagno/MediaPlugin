@@ -333,10 +333,29 @@ namespace Plugin.Media
 				var dataProvider = new CGDataProvider(imageNSData);
 				var cgImageFromJPEG = CGImage.FromJPEG(dataProvider, null, false, CGColorRenderingIntent.Default);
 				var imageNSMutableData = new NSMutableData();
-				var destination = CGImageDestination.Create(imageNSMutableData, UTType.JPEG, 1);
-				var cgImageMetadata = new CGImageMetadata(meta.Handle);
-				var optionsDictionary = new NSDictionary();
-				destination.AddImageAndMetadata(cgImageFromJPEG, cgImageMetadata, optionsDictionary);
+				var destination = CGImageDestination.Create(imageNSMutableData, UTType.JPEG, 1, null);
+				var cgImageMetadata = new CGImageMetadata(meta.Copy().Handle);
+				var destinationOptions = new CGImageDestinationOptions();
+
+				var exifDictionary = meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary;
+				var tiffDictionary = meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary;
+				var gpsDictionary = meta[ImageIO.CGImageProperties.GPSDictionary] as NSDictionary;
+
+				if (exifDictionary != null)
+				{
+					destinationOptions.ExifDictionary = new CGImagePropertiesExif(exifDictionary);
+				}
+				if (tiffDictionary != null)
+				{
+					destinationOptions.TiffDictionary = new CGImagePropertiesTiff(tiffDictionary);
+				}
+				if (gpsDictionary != null)
+				{
+					destinationOptions.GpsDictionary = new CGImagePropertiesGps(gpsDictionary);
+				}
+
+                destination.AddImageAndMetadata(cgImageFromJPEG, cgImageMetadata, destinationOptions);
+
 				var success = destination.Close();
 				if (success)
 				{
