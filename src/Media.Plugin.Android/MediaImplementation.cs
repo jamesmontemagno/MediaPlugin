@@ -365,9 +365,9 @@ namespace Plugin.Media
                     return;
 
                 if (e.Error != null)
-                    tcs.SetResult(null);
+                    tcs.SetException(e.Error);
                 else if (e.IsCanceled)
-                    tcs.SetResult(null);
+                    tcs.SetCanceled();
                 else
                     tcs.SetResult(e.Media);
             };
