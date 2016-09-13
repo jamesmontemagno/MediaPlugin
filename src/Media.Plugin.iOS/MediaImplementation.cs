@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 
 using UIKit;
+using AVFoundation;
 
 namespace Plugin.Media
 {
@@ -44,7 +45,7 @@ namespace Plugin.Media
         public MediaImplementation()
         {
             StatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
-            IsCameraAvailable = UIImagePickerController.IsSourceTypeAvailable(UIImagePickerControllerSourceType.Camera);
+			IsCameraAvailable = UIImagePickerController.IsSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) && GetHasCameraAuthorization();
 
             var availableCameraMedia = UIImagePickerController.AvailableMediaTypes(UIImagePickerControllerSourceType.Camera) ?? new string[0];
             var avaialbleLibraryMedia = UIImagePickerController.AvailableMediaTypes(UIImagePickerControllerSourceType.PhotoLibrary) ?? new string[0];
@@ -57,6 +58,7 @@ namespace Plugin.Media
                     IsTakePhotoSupported = IsPickPhotoSupported = true;
             }
         }
+
         /// <inheritdoc/>
         public bool IsCameraAvailable { get; }
 
@@ -330,5 +332,16 @@ namespace Plugin.Media
                     return UIImagePickerControllerQualityType.High;
             }
         }
+
+		private static bool GetHasCameraAuthorization()
+		{
+			if (UIImagePickerController.IsSourceTypeAvailable(UIImagePickerControllerSourceType.Camera))
+			{
+				AVAuthorizationStatus status = AVCaptureDevice.GetAuthorizationStatus(AVMediaType.Video);
+				return status == AVAuthorizationStatus.Authorized;
+			}
+
+			return false;
+		}
     }
 }
