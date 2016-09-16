@@ -10,9 +10,12 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Graphics.Display;
+using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
 using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -38,7 +41,11 @@ namespace Plugin.Media
     {
         // store the pic here
         StorageFile file;
-        
+
+        DisplayInformation displayInfo = DisplayInformation.GetForCurrentView();
+
+        VideoRotation rotation;
+
         //ihuete
         CameraCaptureUIMode Mode;
         bool IsRecording = false;
@@ -116,8 +123,6 @@ namespace Plugin.Media
             mainGrid.Children.Add(this);
         }
 
-
-
         public async void AppResuming(object sender, object e)
         {
             // get current frame
@@ -149,6 +154,7 @@ namespace Plugin.Media
         {
 #if WINDOWS_PHONE_APP
             Windows.Phone.UI.Input.HardwareButtons.BackPressed -= HardwareButtons_BackPressed;
+            displayInfo.OrientationChanged -= DisplayInfo_OrientationChanged;
 #endif
         }
 
@@ -222,7 +228,7 @@ namespace Plugin.Media
             }
             Options = options;
             // Create new MediaCapture 
-            MyMediaCapture = new MediaCapture();
+            MyMediaCapture = new MediaCapture();            
             var videoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
             var backCamera = videoDevices.FirstOrDefault(
                 item => item.EnclosureLocation != null
@@ -239,9 +245,14 @@ namespace Plugin.Media
             }
             else if(options.DefaultCamera == CameraDevice.Rear && backCamera != null)
             {
-              captureSettings.VideoDeviceId = backCamera.Id; ;
+              captureSettings.VideoDeviceId = backCamera.Id;
             }
             await MyMediaCapture.InitializeAsync(captureSettings);
+
+            
+            displayInfo.OrientationChanged += DisplayInfo_OrientationChanged;
+
+            DisplayInfo_OrientationChanged(displayInfo, null);
 
             // Assign to Xaml CaptureElement.Source and start preview
             myCaptureElement.Source = MyMediaCapture;
@@ -265,6 +276,55 @@ namespace Plugin.Media
             return file;
         }
 
+        private void DisplayInfo_OrientationChanged(DisplayInformation sender, object args)
+        {
+            if (mediaCapture != null)
+            {
+                rotation = VideoRotationLookup(sender.CurrentOrientation, false);
+                mediaCapture.SetPreviewRotation(rotation);                
+                mediaCapture.SetRecordRotation(rotation);
+            }
+        }
+
+        private VideoRotation VideoRotationLookup(DisplayOrientations displayOrientation, bool counterclockwise)
+        {
+            switch (displayOrientation)
+            {
+                case DisplayOrientations.Landscape:
+                    return VideoRotation.None;
+
+                case DisplayOrientations.Portrait:
+                    return (counterclockwise) ? VideoRotation.Clockwise270Degrees : VideoRotation.Clockwise90Degrees;
+
+                case DisplayOrientations.LandscapeFlipped:
+                    return VideoRotation.Clockwise180Degrees;
+
+                case DisplayOrientations.PortraitFlipped:
+                    return (counterclockwise) ? VideoRotation.Clockwise90Degrees :
+                    VideoRotation.Clockwise270Degrees;
+
+                default:
+                    return VideoRotation.None;
+            }
+        }
+
+        private BitmapRotation GetBitmapRotationFromVideoRotation()
+        {
+            switch (rotation)
+            {
+                case VideoRotation.None:
+                    return BitmapRotation.None;
+                case VideoRotation.Clockwise90Degrees:
+                    return BitmapRotation.Clockwise90Degrees;
+                case VideoRotation.Clockwise180Degrees:
+                    return BitmapRotation.Clockwise180Degrees;
+                case VideoRotation.Clockwise270Degrees:
+                    return BitmapRotation.Clockwise270Degrees;
+                default:
+                    return BitmapRotation.None;
+            }
+        }
+
         /// <summary>
         /// This is a loop which waits async until the flag has been set.
         /// </summary>
@@ -284,13 +344,44 @@ namespace Plugin.Media
                 // Create new file in the pictures library     
                 if (Mode == CameraCaptureUIMode.Photo)
                 {
-                    file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
-
-
+                    string photoPath = string.Empty;
                     // create a jpeg image
                     var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
 
-                    await MyMediaCapture.CapturePhotoToStorageFileAsync(imgEncodingProperties, file);
+                    using (var imageStream = new InMemoryRandomAccessStream())
+                    {
+                        await MyMediaCapture.CapturePhotoToStreamAsync(imgEncodingProperties, imageStream);
+
+                        BitmapDecoder dec = await BitmapDecoder.CreateAsync(imageStream);
+                        BitmapEncoder enc = await BitmapEncoder.CreateForTranscodingAsync(imageStream, dec);
+
+                        enc.BitmapTransform.Rotation = GetBitmapRotationFromVideoRotation();
+
+                        await enc.FlushAsync();
+                        
+                        StorageFile capturefile = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
+                        photoPath = capturefile.Name;
+
+                        //using (var fileStream = await capturefile.OpenAsync(FileAccessMode.ReadWrite))
+                        using (var fileStream = await capturefile.OpenStreamForWriteAsync())
+                        {
+                            try
+                            {
+                                await RandomAccessStream.CopyAsync(imageStream, fileStream.AsOutputStream());
+                            }
+                            catch { }
+                        }
+                    }
+
+                    file = await ApplicationData.Current.LocalFolder.GetFileAsync("_____ccuiphoto.jpg");
+
+                    //file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
+
+
+                    //// create a jpeg image
+                    //var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
+
+                    //await MyMediaCapture.CapturePhotoToStorageFileAsync(imgEncodingProperties, file);
 
                     // when pic has been taken, set stopFlag
                     StopFlag = true;
@@ -317,7 +408,6 @@ namespace Plugin.Media
                 StopFlag = true;
             }
         }
-
 
         public UIElementCollection mainGridChildren { get; set; }
 
