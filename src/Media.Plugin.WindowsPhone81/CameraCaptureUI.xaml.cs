@@ -1,15 +1,10 @@
 ﻿using Plugin.Media.Abstractions;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
 using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
@@ -18,12 +13,6 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -228,7 +217,7 @@ namespace Plugin.Media
             }
             Options = options;
             // Create new MediaCapture 
-            MyMediaCapture = new MediaCapture();            
+            MyMediaCapture = new MediaCapture();
             var videoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
             var backCamera = videoDevices.FirstOrDefault(
                 item => item.EnclosureLocation != null
@@ -239,17 +228,17 @@ namespace Plugin.Media
                   && item.EnclosureLocation.Panel == Windows.Devices.Enumeration.Panel.Front);
 
             var captureSettings = new MediaCaptureInitializationSettings();
-            if(options.DefaultCamera == CameraDevice.Front && frontCamera != null)
+            if (options.DefaultCamera == CameraDevice.Front && frontCamera != null)
             {
-              captureSettings.VideoDeviceId = frontCamera.Id;
+                captureSettings.VideoDeviceId = frontCamera.Id;
             }
-            else if(options.DefaultCamera == CameraDevice.Rear && backCamera != null)
+            else if (options.DefaultCamera == CameraDevice.Rear && backCamera != null)
             {
-              captureSettings.VideoDeviceId = backCamera.Id;
+                captureSettings.VideoDeviceId = backCamera.Id;
             }
             await MyMediaCapture.InitializeAsync(captureSettings);
 
-            
+
             displayInfo.OrientationChanged += DisplayInfo_OrientationChanged;
 
             DisplayInfo_OrientationChanged(displayInfo, null);
@@ -281,7 +270,7 @@ namespace Plugin.Media
             if (mediaCapture != null)
             {
                 rotation = VideoRotationLookup(sender.CurrentOrientation, false);
-                mediaCapture.SetPreviewRotation(rotation);                
+                mediaCapture.SetPreviewRotation(rotation);
                 mediaCapture.SetRecordRotation(rotation);
             }
         }
@@ -352,36 +341,30 @@ namespace Plugin.Media
                     {
                         await MyMediaCapture.CapturePhotoToStreamAsync(imgEncodingProperties, imageStream);
 
-                        BitmapDecoder dec = await BitmapDecoder.CreateAsync(imageStream);
-                        BitmapEncoder enc = await BitmapEncoder.CreateForTranscodingAsync(imageStream, dec);
+                        var decoder = await BitmapDecoder.CreateAsync(imageStream);
+                        var encoder = await BitmapEncoder.CreateForTranscodingAsync(imageStream, decoder);
 
-                        enc.BitmapTransform.Rotation = GetBitmapRotationFromVideoRotation();
+                        encoder.BitmapTransform.Rotation = GetBitmapRotationFromVideoRotation();
 
-                        await enc.FlushAsync();
-                        
-                        StorageFile capturefile = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
+                        await encoder.FlushAsync();
+
+                        var capturefile = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
                         photoPath = capturefile.Name;
 
-                        //using (var fileStream = await capturefile.OpenAsync(FileAccessMode.ReadWrite))
                         using (var fileStream = await capturefile.OpenStreamForWriteAsync())
                         {
                             try
                             {
                                 await RandomAccessStream.CopyAsync(imageStream, fileStream.AsOutputStream());
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                            }
                         }
                     }
 
                     file = await ApplicationData.Current.LocalFolder.GetFileAsync("_____ccuiphoto.jpg");
-
-                    //file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
-
-
-                    //// create a jpeg image
-                    //var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
-
-                    //await MyMediaCapture.CapturePhotoToStorageFileAsync(imgEncodingProperties, file);
 
                     // when pic has been taken, set stopFlag
                     StopFlag = true;
@@ -392,7 +375,7 @@ namespace Plugin.Media
                     camerButton.Icon = new SymbolIcon(Symbol.Stop);
 
                     file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuivideo.mp4", CreationCollisionOption.ReplaceExisting);
-                    
+
                     // create a jpeg image
                     var videoEncodingProperties = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Vga);
 

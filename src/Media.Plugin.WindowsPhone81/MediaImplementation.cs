@@ -19,18 +19,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
-using Windows.Media.Capture;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
 using Plugin.Media.Abstractions;
-using Windows.UI.Xaml.Controls;
-using Windows.Media.MediaProperties;
-using Windows.UI.Xaml;
 using System.Threading;
 using System.Linq;
 using Windows.ApplicationModel.Activation;
-using Plugin.Media;
 using System.Diagnostics;
 
 namespace Plugin.Media
@@ -100,25 +95,13 @@ namespace Plugin.Media
             }
         }
         /// <inheritdoc/>
-        public bool IsTakePhotoSupported
-        {
-            get { return true; }
-        }
+        public bool IsTakePhotoSupported { get; } = true;
         /// <inheritdoc/>
-        public bool IsPickPhotoSupported
-        {
-            get { return true; }
-        }
+        public bool IsPickPhotoSupported { get; } = true;
         /// <inheritdoc/>
-        public bool IsTakeVideoSupported
-        {
-            get { return true; }
-        }
+        public bool IsTakeVideoSupported { get; } = true;
         /// <inheritdoc/>
-        public bool IsPickVideoSupported
-        {
-            get { return true; }
-        }
+        public bool IsPickVideoSupported { get; } = true;
 
         /// <summary>
         /// Take a photo async with specified options
