@@ -32,7 +32,8 @@ Additionally, the following has been added for you:
 
 
 ### iOS
-The library will automatically ask for permission when taking photos/videos or access the libraries.
+
+Your app is required to have keys for NSCameraUsageDescription and NSPhotoLibraryUsageDescription in order to access the device's camera and photo library. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features.
 
 ### Windows Phone 8/8.1 Silverlight
 

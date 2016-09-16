@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 
 using UIKit;
+using Foundation;
 
 namespace Plugin.Media
 {
@@ -94,6 +95,8 @@ namespace Plugin.Media
             if (!IsPickPhotoSupported)
                 throw new NotSupportedException();
 
+            CheckPhotoUsageDescription();
+
             var cameraOptions = new StoreCameraMediaOptions
             {
                 PhotoSize = options?.PhotoSize ?? PhotoSize.Full,
@@ -132,6 +135,8 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
+            CheckCameraUsageDescription();
+
             VerifyCameraOptions(options);
 
             return GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeImage, options);
@@ -157,6 +162,9 @@ namespace Plugin.Media
         {
             if (!IsPickVideoSupported)
                 throw new NotSupportedException();
+
+
+            CheckPhotoUsageDescription();
 
             return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie);
         }
@@ -189,6 +197,8 @@ namespace Plugin.Media
                 throw new NotSupportedException();
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
+
+            CheckCameraUsageDescription();
 
             VerifyCameraOptions(options);
 
@@ -328,6 +338,29 @@ namespace Plugin.Media
                     return UIImagePickerControllerQualityType.Medium;
                 default:
                     return UIImagePickerControllerQualityType.High;
+            }
+        }
+
+
+        void CheckCameraUsageDescription()
+        {
+            var info = NSBundle.MainBundle.InfoDictionary;
+
+            if (UIDevice.CurrentDevice.CheckSystemVersion(10, 0))
+            {
+                if (!info.ContainsKey(new NSString("NSCameraUsageDescription")))
+                    throw new UnauthorizedAccessException("On iOS 10 and higher you must set NSCameraUsageDescription in your Info.plist file to enable Authorization Requests for Camera access!");
+            }
+        }
+
+        void CheckPhotoUsageDescription()
+        {
+            var info = NSBundle.MainBundle.InfoDictionary;
+
+            if (UIDevice.CurrentDevice.CheckSystemVersion(10, 0))
+            {
+                if (!info.ContainsKey(new NSString("NSPhotoLibraryUsageDescription")))
+                    throw new UnauthorizedAccessException("On iOS 10 and higher you must set NSPhotoLibraryUsageDescription in your Info.plist file to enable Authorization Requests for Photo Library access!");
             }
         }
     }

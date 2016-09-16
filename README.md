@@ -156,7 +156,8 @@ By adding these permissions [Google Play will automatically filter out devices](
 
 **iOS** 
 
-Since iOS 10, your app is required to have keys for NSCameraUsageDescription and NSPhotoLibraryUsageDescription in order to access the device's camera and photo library, respectively. Without these keys, your app will be likely to crash with a very unhelpful stack trace. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features.
+Your app is required to have keys for NSCameraUsageDescription and NSPhotoLibraryUsageDescription in order to access the device's camera and photo library. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features.
+
 
 **Windows Phone 8/8.1 Silverlight:**
 
