@@ -343,7 +343,7 @@ namespace Plugin.Media
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine("Unable to move viles: " + ex.Message);
+                    System.Diagnostics.Debug.WriteLine("Unable to move files: " + ex.Message);
                 }
 
                 return true;
