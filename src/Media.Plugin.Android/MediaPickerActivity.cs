@@ -318,11 +318,33 @@ namespace Plugin.Media
                 if (t.Result.Item1 == null)
                     return false;
 
-                File.Delete(moveTo);
-                File.Move(t.Result.Item1, moveTo);
+                try
+                {
+                    if (url.Scheme == "content")
+                        context.ContentResolver.Delete(url, null, null);
+                }
+                catch(Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to delete content resolver file: " + ex.Message);
+                }
 
-                if (url.Scheme == "content")
-                    context.ContentResolver.Delete(url, null, null);
+                try
+                {
+                    File.Delete(moveTo);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to delete normal file: " + ex.Message);
+                }
+
+                try
+                {
+                    File.Move(t.Result.Item1, moveTo);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to move viles: " + ex.Message);
+                }
 
                 return true;
             }, TaskScheduler.Default);
