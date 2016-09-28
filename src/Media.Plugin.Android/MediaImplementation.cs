@@ -363,11 +363,11 @@ namespace Plugin.Media
 
                 if (e.RequestId != id)
                     return;
-
-                if (e.Error != null)
-                    tcs.SetException(e.Error);
-                else if (e.IsCanceled)
+                
+                if(e.IsCanceled)
                     tcs.SetResult(null);
+                else if (e.Error != null)
+                    tcs.SetException(e.Error);
                 else
                     tcs.SetResult(e.Media);
             };
