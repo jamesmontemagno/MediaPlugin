@@ -174,6 +174,19 @@ namespace Plugin.Media
             File.Create(GetLocalPath(this.path)).Close();
         }
 
+        private void DeleteOutputFile()
+        {
+            if (this.path?.Scheme != "file")
+                return;
+                
+            var localPath = GetLocalPath(this.path);
+
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+            }
+        }
+
         internal static Task<MediaPickedEventArgs> GetMediaFileAsync(Context context, int requestCode, string action, bool isPhoto, ref Uri path, Uri data, bool saveToAlbum)
         {
             Task<Tuple<string, bool>> pathFuture;
@@ -267,6 +280,9 @@ namespace Plugin.Media
 
                 if (resultCode == Result.Canceled)
                 {
+                    //delete empty file
+                    DeleteOutputFile();
+
                     future = TaskFromResult(new MediaPickedEventArgs(requestCode, isCanceled: true));
 
                     Finish();
@@ -294,7 +310,12 @@ namespace Plugin.Media
             else
             {
                 if (resultCode == Result.Canceled)
+                {
+                    //delete empty file
+                    DeleteOutputFile();
+
                     SetResult(Result.Canceled);
+                }
                 else
                 {
                     Intent resultData = new Intent();
