@@ -101,6 +101,7 @@ namespace Plugin.Media
             var capture = new CameraCaptureUI();
             capture.PhotoSettings.Format = CameraCaptureUIPhotoFormat.Jpeg;
             capture.PhotoSettings.MaxResolution = GetMaxResolution(options?.PhotoSize ?? PhotoSize.Full);
+            capture.PhotoSettings.AllowCropping = options?.AllowCropping ?? false;
 
             var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
             if (result == null)
@@ -163,6 +164,7 @@ namespace Plugin.Media
             var picker = new FileOpenPicker();
             picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             picker.ViewMode = PickerViewMode.Thumbnail;
+           
             foreach (var filter in SupportedImageFileTypes)
                 picker.FileTypeFilter.Add(filter);
 
@@ -215,6 +217,7 @@ namespace Plugin.Media
             capture.VideoSettings.MaxResolution = GetResolutionFromQuality(options.Quality);
             capture.VideoSettings.MaxDurationInSeconds = (float)options.DesiredLength.TotalSeconds;
             capture.VideoSettings.Format = CameraCaptureUIVideoFormat.Mp4;
+            capture.VideoSettings.AllowTrimming = options?.AllowCropping ?? false;
 
             var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Video);
             if (result == null)

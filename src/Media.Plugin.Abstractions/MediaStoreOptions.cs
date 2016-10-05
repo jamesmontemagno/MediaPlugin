@@ -104,6 +104,15 @@ namespace Plugin.Media.Abstractions
         : StoreMediaOptions
     {
         /// <summary>
+        /// Allow cropping on photos and trimming on videos
+        /// Applies only iOS and UWP
+        /// </summary>
+        public bool AllowCropping
+        {
+            get;set;
+        }
+
+        /// <summary>
         /// Default camera
         /// Should work on iOS and Windows, but not guaranteed on Android as not every camera implements it
         /// </summary>
