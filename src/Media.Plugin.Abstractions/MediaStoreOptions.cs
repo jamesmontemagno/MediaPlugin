@@ -105,6 +105,7 @@ namespace Plugin.Media.Abstractions
     {
         /// <summary>
         /// Default camera
+        /// Should work on iOS and Windows, but not guaranteed on Android as not every camera implements it
         /// </summary>
         public CameraDevice DefaultCamera
         {
