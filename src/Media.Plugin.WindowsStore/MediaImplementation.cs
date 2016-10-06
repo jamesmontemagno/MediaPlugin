@@ -103,7 +103,7 @@ namespace Plugin.Media
             capture.PhotoSettings.MaxResolution = GetMaxResolution(options?.PhotoSize ?? PhotoSize.Full);
             //we can only disable cropping if resolution is set to max
             if (capture.PhotoSettings.MaxResolution == CameraCaptureUIMaxPhotoResolution.HighestAvailable)
-                capture.PhotoSettings.AllowCropping = options?.AllowCropping ?? false;
+                capture.PhotoSettings.AllowCropping = options?.AllowCropping ?? true;
             
 
             var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
@@ -218,7 +218,7 @@ namespace Plugin.Media
 
             var capture = new CameraCaptureUI();
             capture.VideoSettings.MaxResolution = GetResolutionFromQuality(options.Quality);
-            capture.VideoSettings.AllowTrimming = options?.AllowCropping ?? false;
+            capture.VideoSettings.AllowTrimming = options?.AllowCropping ?? true;
 
             if(capture.VideoSettings.AllowTrimming)
                 capture.VideoSettings.MaxDurationInSeconds = (float)options.DesiredLength.TotalSeconds;

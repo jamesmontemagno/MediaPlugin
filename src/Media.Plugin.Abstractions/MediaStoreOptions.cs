@@ -97,6 +97,8 @@ namespace Plugin.Media.Abstractions
         }
     }
 
+    
+
     /// <summary>
     /// 
     /// </summary>
@@ -105,10 +107,11 @@ namespace Plugin.Media.Abstractions
     {
         /// <summary>
         /// Allow cropping on photos and trimming on videos
+        /// If null will use default
         /// Photo: UWP cropping can only be disabled on full size
         /// Video: UWP trimming when disabled won't allow time limit to be set
         /// </summary>
-        public bool AllowCropping { get; set; } = true;
+        public bool? AllowCropping { get; set; } = null;
 
         /// <summary>
         /// Default camera
