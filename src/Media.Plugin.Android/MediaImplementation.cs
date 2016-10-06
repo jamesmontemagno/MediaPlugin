@@ -26,6 +26,7 @@ using Plugin.Media.Abstractions;
 using Plugin.Permissions;
 using Android.Media;
 using Android.Graphics;
+using System.Text.RegularExpressions;
 
 namespace Plugin.Media
 {
@@ -287,12 +288,16 @@ namespace Plugin.Media
             return true;
         }
 
+
+        const string IllegalCharacters = "[|\\?*<\":>/']";
         private void VerifyOptions(StoreMediaOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException("options");
             if (System.IO.Path.IsPathRooted(options.Directory))
                 throw new ArgumentException("options.Directory must be a relative path", "options");
+            options.Name = Regex.Replace(options.Name, IllegalCharacters, string.Empty);
+            options.Directory = Regex.Replace(options.Name, IllegalCharacters, string.Empty);
         }
 
         private Intent CreateMediaIntent(int id, string type, string action, StoreMediaOptions options, bool tasked = true)
