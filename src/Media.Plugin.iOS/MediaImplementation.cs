@@ -240,7 +240,7 @@ namespace Plugin.Media
             if (sourceType == UIImagePickerControllerSourceType.Camera)
             {
                 picker.CameraDevice = GetUICameraDevice(options.DefaultCamera);
-                picker.AllowsImageEditing = options?.AllowCropping ?? false;
+                picker.AllowsEditing = options?.AllowCropping ?? false;
 
                 if (options.OverlayViewProvider != null)
                 {

@@ -158,6 +158,8 @@ namespace Plugin.Media
             catch (Exception ex)
             {
                 OnMediaPicked(new MediaPickedEventArgs(this.id, ex));
+                //must finish here because an exception has occured else blank screen
+                Finish();
             }
             finally
             {
@@ -171,7 +173,19 @@ namespace Plugin.Media
             if (this.path.Scheme != "file")
                 return;
 
-            File.Create(GetLocalPath(this.path)).Close();
+            var newPath = GetLocalPath(this.path);
+            try
+            {
+                var stream = File.Create(newPath);
+                stream.Close();
+                stream.Dispose();
+
+            }
+            catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Unable to create path: " + newPath + " " + ex.Message + "This means you have illegal characters");
+                throw ex;
+            }
         }
 
         private void DeleteOutputFile()

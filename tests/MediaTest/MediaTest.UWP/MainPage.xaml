@@ -9,8 +9,33 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel Padding="10" >
+            <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Album" Margin="10"/>
+            <ToggleSwitch x:Name="ToggleSaveToAlbum"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Resize" Margin="10"/>
+                <ToggleSwitch x:Name="ToggleResize"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Crop" Margin="10"/>
+                <ToggleSwitch x:Name="ToggleCrop"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="25" Margin="10"/>
+                <Slider x:Name="SliderQuality" Width="200" Value="92" Minimum="25" Maximum="100"/>
+                <TextBlock Text="100" Margin="10"/>
+            </StackPanel>
+
             <Button x:Name="ButtonTakePhoto" Margin="10" Content="Take Photo" Click="ButtonTakePhoto_Click"/>
             <Button x:Name="ButtonPickPhoto" Margin="10" Content="Pick Photo" Click="ButtonPickPhoto_Click"/>
+            <Button x:Name="ButtonTakeVideo" Margin="10" Content="Take Video" Click="ButtonTakeVIdeo_Click"/>
+            <Button x:Name="ButtonPickVideo" Margin="10" Content="Pick Video" Click="ButtonPickVideo_Click"/>
+            <Image Margin="10" Stretch="Uniform" Height="200" Width="200" x:Name="Photo"/>
+
         </StackPanel>
     </Grid>
 </Page>

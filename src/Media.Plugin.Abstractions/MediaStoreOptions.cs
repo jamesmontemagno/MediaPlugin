@@ -105,12 +105,10 @@ namespace Plugin.Media.Abstractions
     {
         /// <summary>
         /// Allow cropping on photos and trimming on videos
-        /// Applies only iOS and UWP
+        /// Photo: UWP cropping can only be disabled on full size
+        /// Video: UWP trimming when disabled won't allow time limit to be set
         /// </summary>
-        public bool AllowCropping
-        {
-            get;set;
-        }
+        public bool AllowCropping { get; set; } = true;
 
         /// <summary>
         /// Default camera

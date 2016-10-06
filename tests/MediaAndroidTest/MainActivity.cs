@@ -38,24 +38,32 @@ namespace MediaAndroidTest
 
             button.Click += async delegate
             {
-                var size = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full;
-                var media = new Plugin.Media.MediaImplementation();
-                var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+                try
                 {
-                    Directory = "Sample",
-                    Name = $"{DateTime.Now}_{size}.jpg",
-                    SaveToAlbum = switchSaveToAlbum.Checked,
-                    PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
-                    DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Front
-                });
-                if (file == null)
-                    return;
-                var path = file.Path;
-                Toast.MakeText(this, path, ToastLength.Long).Show();
-                System.Diagnostics.Debug.WriteLine(path);
+                    var size = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full;
+                    var media = new Plugin.Media.MediaImplementation();
+                    var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+                    {
+                        Directory = "Sample",
+                        Name = $"{DateTime.Now}_{size}|\\?*<\":>/'.jpg".Replace(" ", string.Empty),
+                        SaveToAlbum = switchSaveToAlbum.Checked,
+                        PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Small : Plugin.Media.Abstractions.PhotoSize.Full,
+                        DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Front
+                    });
+                    if (file == null)
+                        return;
+                    var path = file.Path;
+                    Toast.MakeText(this, path, ToastLength.Long).Show();
+                    System.Diagnostics.Debug.WriteLine(path);
 
-                image.SetImageBitmap(BitmapFactory.DecodeFile(file.Path));
-                file.Dispose();
+                    var bitmap = BitmapFactory.DecodeFile(file.Path);
+                    image.SetImageBitmap(bitmap);
+                    file.Dispose();
+                }
+                catch(Exception ex)
+                {
+                    Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
+                }
             };
 
             var pick = FindViewById<Button>(Resource.Id.button1);
@@ -80,7 +88,7 @@ namespace MediaAndroidTest
                   var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
                   {
                       Directory = "Sample",
-                      Name = "test.jpg",
+                      Name = "test.jp4",
                       SaveToAlbum = true
                   });
                   if (file == null)

@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -36,7 +37,57 @@ namespace MediaTest.UWP
             {
                 Directory = "Sample",
                 Name = "test.jpg",
-                SaveToAlbum = true,
+                SaveToAlbum = ToggleSaveToAlbum.IsOn,
+                AllowCropping = ToggleCrop.IsOn,
+                PhotoSize = ToggleResize.IsOn ? Plugin.Media.Abstractions.PhotoSize.Large : Plugin.Media.Abstractions.PhotoSize.Full,
+                CompressionQuality = (int)SliderQuality.Value
+            });
+            if (file == null)
+                return;
+            var path = file.Path;
+            System.Diagnostics.Debug.WriteLine(path);
+
+            var dialog = new MessageDialog(path);
+            await dialog.ShowAsync();
+
+            Photo.Source = new BitmapImage(new Uri(path));
+
+            file.Dispose();
+        }
+
+        private async void ButtonPickPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            
+            var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
+            {
+                PhotoSize = ToggleResize.IsOn ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
+                CompressionQuality = (int)SliderQuality.Value
+            });
+            if (file == null)
+                return;
+            var path = file.Path;
+            System.Diagnostics.Debug.WriteLine(path);
+            var dialog = new MessageDialog(path);
+            await dialog.ShowAsync();
+
+            Photo.Source = new BitmapImage(new Uri(path));
+
+            file.Dispose();
+        }
+
+       
+
+        private async void ButtonTakeVIdeo_Click(object sender, RoutedEventArgs e)
+        {
+            var file = await CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
+            {
+                Directory = "Sample",
+                Name = "test.mp4",
+                SaveToAlbum = ToggleSaveToAlbum.IsOn,
+                AllowCropping = ToggleCrop.IsOn,
+                PhotoSize = ToggleResize.IsOn ? Plugin.Media.Abstractions.PhotoSize.Large : Plugin.Media.Abstractions.PhotoSize.Full,
+                CompressionQuality = (int)SliderQuality.Value,
+                Quality = ToggleResize.IsOn ? Plugin.Media.Abstractions.VideoQuality.High : Plugin.Media.Abstractions.VideoQuality.Low
             });
             if (file == null)
                 return;
@@ -49,16 +100,17 @@ namespace MediaTest.UWP
             file.Dispose();
         }
 
-        private async void ButtonPickPhoto_Click(object sender, RoutedEventArgs e)
+        private async void ButtonPickVideo_Click(object sender, RoutedEventArgs e)
         {
-            
-            var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync();
+            var file = await CrossMedia.Current.PickVideoAsync();
             if (file == null)
                 return;
             var path = file.Path;
             System.Diagnostics.Debug.WriteLine(path);
             var dialog = new MessageDialog(path);
             await dialog.ShowAsync();
+
+            //Photo.Source = 
 
             file.Dispose();
         }
