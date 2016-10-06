@@ -307,6 +307,9 @@ namespace Plugin.Media
                         case PhotoSize.Small:
                             percent = .25f;
                             break;
+                        case PhotoSize.Custom:
+                            percent = (float)options.CustomPhotoSize / 100f;
+                            break;
                     }
 
                     //calculate new size

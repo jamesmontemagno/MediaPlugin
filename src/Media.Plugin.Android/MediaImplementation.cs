@@ -133,7 +133,7 @@ namespace Plugin.Media
             {
                 try
                 {
-                    await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality);
+                    await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
                 }
                 catch (Exception ex)
                 {
@@ -219,7 +219,7 @@ namespace Plugin.Media
 
             try
             {
-                await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality);
+                await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
             }
             catch(Exception ex)
             {
@@ -388,7 +388,7 @@ namespace Plugin.Media
         /// <param name="filePath">The file image path</param>
         /// <param name="photoSize">Photo size to go to.</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> FixOrientationAndResizeAsync(string filePath, PhotoSize photoSize, int quality)
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -415,6 +415,9 @@ namespace Plugin.Media
                                 break;
                             case PhotoSize.Small:
                                 percent = .25f;
+                                break;
+                            case PhotoSize.Custom:
+                                percent = (float)customPhotoSize / 100f;
                                 break;
                         }
 
@@ -502,7 +505,7 @@ namespace Plugin.Media
         /// <param name="filePath">The file image path</param>
         /// <param name="photoSize">Photo size to go to.</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality)
+        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -529,6 +532,9 @@ namespace Plugin.Media
                                 break;
                             case PhotoSize.Small:
                                 percent = .25f;
+                                break;
+                            case PhotoSize.Custom:
+                                percent = (float)customPhotoSize / 100f;
                                 break;
                         }
 

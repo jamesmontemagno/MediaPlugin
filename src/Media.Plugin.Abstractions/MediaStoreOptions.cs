@@ -76,6 +76,26 @@ namespace Plugin.Media.Abstractions
         /// <value>The size of the photo.</value>
         public PhotoSize PhotoSize { get; set; } = PhotoSize.Full;
 
+        int customPhotoSize = 100;
+        /// <summary>
+        /// The custom photo size to use, 100 full size (same as Full),
+        /// and 1 being smallest size at 1% of original
+        /// Default is 100
+        /// </summary>
+        public int CustomPhotoSize
+        {
+            get { return customPhotoSize; }
+            set
+            {
+                if (value > 100)
+                    customPhotoSize = 100;
+                else if (value < 1)
+                    customPhotoSize = 1;
+                else
+                    customPhotoSize = value;
+            }
+        }
+
         int quality = 100;
         /// <summary>
         /// The compression quality to use, 0 is the maximum compression (worse quality),
@@ -146,6 +166,28 @@ namespace Plugin.Media.Abstractions
         /// <value>The size of the photo.</value>
         public PhotoSize PhotoSize { get; set; } = PhotoSize.Full;
 
+
+        int customPhotoSize = 100;
+        /// <summary>
+        /// The custom photo size to use, 100 full size (same as Full),
+        /// and 1 being smallest size at 1% of original
+        /// Default is 100
+        /// </summary>
+        public int CustomPhotoSize
+        {
+            get { return customPhotoSize; }
+            set
+            {
+                if (value > 100)
+                    customPhotoSize = 100;
+                else if (value < 1)
+                    customPhotoSize = 1;
+                else
+                    customPhotoSize = value;
+            }
+        }
+
+
         int quality = 100;
         /// <summary>
         /// The compression quality to use, 0 is the maximum compression (worse quality),
@@ -188,7 +230,14 @@ namespace Plugin.Media.Abstractions
         /// <summary>
         /// Untouched
         /// </summary>
-        Full
+        Full,
+        /// <summary>
+        /// Custom size between 1-100
+        /// Must set the CustomPhotoSize value
+        /// Only applies to iOS and Android
+        /// Windows will auto configure back to small, medium, large, and full
+        /// </summary>
+        Custom
     }
 
     /// <summary>

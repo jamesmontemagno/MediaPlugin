@@ -100,7 +100,7 @@ namespace Plugin.Media
 
             var capture = new CameraCaptureUI();
             capture.PhotoSettings.Format = CameraCaptureUIPhotoFormat.Jpeg;
-            capture.PhotoSettings.MaxResolution = GetMaxResolution(options?.PhotoSize ?? PhotoSize.Full);
+            capture.PhotoSettings.MaxResolution = GetMaxResolution(options?.PhotoSize ?? PhotoSize.Full, options?.CustomPhotoSize ?? 100);
             //we can only disable cropping if resolution is set to max
             if (capture.PhotoSettings.MaxResolution == CameraCaptureUIMaxPhotoResolution.HighestAvailable)
                 capture.PhotoSettings.AllowCropping = options?.AllowCropping ?? true;
@@ -141,8 +141,19 @@ namespace Plugin.Media
             return new MediaFile(file.Path, () => file.OpenStreamForReadAsync().Result, albumPath: aPath);
         }
 
-        public CameraCaptureUIMaxPhotoResolution GetMaxResolution(PhotoSize photoSize)
+        public CameraCaptureUIMaxPhotoResolution GetMaxResolution(PhotoSize photoSize, int customPhotoSize)
         {
+            if(photoSize == PhotoSize.Custom)
+            {
+                if (customPhotoSize <= 25)
+                    photoSize = PhotoSize.Small;
+                else if (customPhotoSize <= 50)
+                    photoSize = PhotoSize.Medium;
+                else if (customPhotoSize <= 75)
+                    photoSize = PhotoSize.Large;
+                else
+                    photoSize = PhotoSize.Large;
+            }
             switch(photoSize)
             {
                 case PhotoSize.Full:
@@ -153,6 +164,7 @@ namespace Plugin.Media
                     return CameraCaptureUIMaxPhotoResolution.MediumXga;
                 case PhotoSize.Small:
                     return CameraCaptureUIMaxPhotoResolution.SmallVga;
+                
             }
 
             return CameraCaptureUIMaxPhotoResolution.HighestAvailable;
