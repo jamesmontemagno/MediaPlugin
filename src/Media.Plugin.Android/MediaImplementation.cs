@@ -300,8 +300,13 @@ namespace Plugin.Media
                 throw new ArgumentNullException("options");
             if (System.IO.Path.IsPathRooted(options.Directory))
                 throw new ArgumentException("options.Directory must be a relative path", "options");
-            options.Name = Regex.Replace(options.Name, IllegalCharacters, string.Empty).Replace(@"\", string.Empty);
-            options.Directory = Regex.Replace(options.Directory, IllegalCharacters, string.Empty).Replace(@"\", string.Empty);
+
+            if(!string.IsNullOrWhiteSpace(options.Name))
+                options.Name = Regex.Replace(options.Name, IllegalCharacters, string.Empty).Replace(@"\", string.Empty);
+
+
+            if (!string.IsNullOrWhiteSpace(options.Directory))
+                options.Directory = Regex.Replace(options.Directory, IllegalCharacters, string.Empty).Replace(@"\", string.Empty);
         }
 
         private Intent CreateMediaIntent(int id, string type, string action, StoreMediaOptions options, bool tasked = true)
