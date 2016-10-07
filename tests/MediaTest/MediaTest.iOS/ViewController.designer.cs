@@ -20,7 +20,19 @@ namespace MediaTest.iOS
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISwitch CroppingSwitch { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISwitch FrontSwitch { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UIImageView MainImage { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISwitch OverlaySwitch { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -33,6 +45,10 @@ namespace MediaTest.iOS
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UISwitch SizeSwitch { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISlider SliderQuality { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -49,9 +65,24 @@ namespace MediaTest.iOS
                 AlbumSwitch = null;
             }
 
+            if (CroppingSwitch != null) {
+                CroppingSwitch.Dispose ();
+                CroppingSwitch = null;
+            }
+
+            if (FrontSwitch != null) {
+                FrontSwitch.Dispose ();
+                FrontSwitch = null;
+            }
+
             if (MainImage != null) {
                 MainImage.Dispose ();
                 MainImage = null;
+            }
+
+            if (OverlaySwitch != null) {
+                OverlaySwitch.Dispose ();
+                OverlaySwitch = null;
             }
 
             if (PickPhoto != null) {
@@ -67,6 +98,11 @@ namespace MediaTest.iOS
             if (SizeSwitch != null) {
                 SizeSwitch.Dispose ();
                 SizeSwitch = null;
+            }
+
+            if (SliderQuality != null) {
+                SliderQuality.Dispose ();
+                SliderQuality = null;
             }
 
             if (TakePhoto != null) {

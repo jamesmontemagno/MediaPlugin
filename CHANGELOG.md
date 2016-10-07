@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.5.1-betaX]
+### [2.6.0]
 * All: Ensure you call await CrossMedia.Current.Initialize(); before accessing any APIs
 * All: Resize when taking a photo
 * All: Save original album location when picking photo

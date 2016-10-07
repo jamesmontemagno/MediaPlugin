@@ -25,11 +25,17 @@ namespace MediaTest.iOS
 
             TakePhoto.TouchUpInside += async (sender, args) =>
             {
+                Func<object> func = CreateOverlay;
                 var test = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
                 {
                     Name = "test1.jpg",
                     SaveToAlbum = AlbumSwitch.On,
-                    PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full
+                    PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
+                    OverlayViewProvider = OverlaySwitch.On ? func : null,
+                    AllowCropping = CroppingSwitch.On,
+                    CompressionQuality = (int)SliderQuality.Value,
+                    Directory = "Sample",
+                    DefaultCamera = FrontSwitch.On ? Plugin.Media.Abstractions.CameraDevice.Front : Plugin.Media.Abstractions.CameraDevice.Rear
                 });
 
                 if (test == null)
@@ -49,7 +55,8 @@ namespace MediaTest.iOS
                 var test = await CrossMedia.Current.PickPhotoAsync(
                     new Plugin.Media.Abstractions.PickMediaOptions
                     {
-                        PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full
+                        PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
+                        CompressionQuality = (int)SliderQuality.Value
                     });
                 if (test == null)
                     return;
@@ -90,6 +97,17 @@ namespace MediaTest.iOS
                 test.Dispose();
             };
             // Perform any additional setup after loading the view, typically from a nib.
+        }
+
+        public object CreateOverlay()
+        {
+            var imageView = new UIImageView(UIImage.FromBundle("face-template.png"));
+            imageView.ContentMode = UIViewContentMode.ScaleAspectFit;
+
+            var screen = UIScreen.MainScreen.Bounds;
+            imageView.Frame = screen;
+
+            return imageView;
         }
 
         public override void DidReceiveMemoryWarning()

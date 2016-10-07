@@ -13,204 +13,129 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="5" translatesAutoresizingMaskIntoConstraints="NO">
-                                <rect key="frame" x="69" y="66" width="46" height="30"/>
-                                <state key="normal" title="Pick P">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="70" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="20" y="38" width="123" height="30"/>
+                                <state key="normal" title="Take Photo">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="54" y="46" width="46" height="30"/>
-                                </variation>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="8" translatesAutoresizingMaskIntoConstraints="NO">
-                                <rect key="frame" x="69" y="104" width="46" height="30"/>
-                                <state key="normal" title="Take P">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="73" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="20" y="76" width="123" height="30"/>
+                                <state key="normal" title="Pick Photo">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="54" y="84" width="46" height="30"/>
-                                </variation>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="9" translatesAutoresizingMaskIntoConstraints="NO">
-                                <rect key="frame" x="69" y="148" width="46" height="30"/>
-                                <state key="normal" title="Pick V">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="74" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="534" y="1010" width="46" height="30"/>
+                                <state key="normal" title="Button">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="54" y="128" width="46" height="30"/>
-                                </variation>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="10" translatesAutoresizingMaskIntoConstraints="NO">
-                                <rect key="frame" x="69" y="192" width="46" height="30"/>
-                                <state key="normal" title="Take V">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="75" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="20" y="114" width="123" height="30"/>
+                                <state key="normal" title="Take Video">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="54" y="172" width="46" height="30"/>
-                                </variation>
                             </button>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" id="26" translatesAutoresizingMaskIntoConstraints="NO">
-                                <rect key="frame" x="20" y="308" width="160" height="240"/>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="20" y="304" width="280" height="244"/>
-                                </variation>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="76" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="20" y="152" width="123" height="30"/>
+                                <state key="normal" title="Pick Video">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Save to Album" lineBreakMode="tailTruncation" minimumFontSize="10" id="77" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="20" y="190" width="272" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="78" fixedFrame="YES">
+                                <rect key="frame" x="20" y="219" width="51" height="31"/>
+                            </switch>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Make Smaller" lineBreakMode="tailTruncation" minimumFontSize="10" id="79" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="24" y="258" width="138" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="80" fixedFrame="YES">
+                                <rect key="frame" x="20" y="284" width="51" height="31"/>
+                            </switch>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Show Overlay" lineBreakMode="tailTruncation" minimumFontSize="10" id="81" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="174" y="190" width="138" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="82" fixedFrame="YES">
+                                <rect key="frame" x="170" y="219" width="51" height="31"/>
+                            </switch>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Quality Level 1-100" lineBreakMode="tailTruncation" minimumFontSize="10" id="83" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="168" y="259" width="154" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Cropping" lineBreakMode="tailTruncation" minimumFontSize="10" id="84" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="170" y="48" width="154" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="92" minValue="1" maxValue="100" id="85" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="160" y="284" width="152" height="31"/>
+                            </slider>
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="86" fixedFrame="YES">
+                                <rect key="frame" x="170" y="78" width="51" height="31"/>
+                            </switch>
+                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="87" fixedFrame="YES">
+                                <rect key="frame" x="170" y="151" width="51" height="31"/>
+                            </switch>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Use Front" lineBreakMode="tailTruncation" minimumFontSize="10" id="88" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="174" y="117" width="150" height="21"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="89" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="24" y="690" width="160" height="240"/>
                             </imageView>
-                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="27" fixedFrame="YES">
-                                <rect key="frame" x="52" y="210" width="51" height="31"/>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="123" y="210" width="51" height="31"/>
-                                </variation>
-                            </switch>
-                            <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="28">
-                                <rect key="frame" x="52" y="249" width="51" height="31"/>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="123" y="249" width="51" height="31"/>
-                                </variation>
-                            </switch>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="size" lineBreakMode="tailTruncation" minimumFontSize="10" id="29" translatesAutoresizingMaskIntoConstraints="NO">
-                                <rect key="frame" x="56" y="215" width="42" height="21"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="20" y="215" width="78" height="20.5"/>
-                                </variation>
-                            </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="album" lineBreakMode="tailTruncation" minimumFontSize="10" id="30" translatesAutoresizingMaskIntoConstraints="NO">
-                                <rect key="frame" x="56" y="254" width="42" height="21"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                                <variation key="heightClass=regular-widthClass=compact">
-                                    <rect key="frame" x="20" y="253.5" width="78" height="20.5"/>
-                                </variation>
-                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="90" translatesAutoresizingMaskIntoConstraints="NO" fixedFrame="YES">
+                                <rect key="frame" x="20" y="690" width="160" height="240"/>
+                            </imageView>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" id="91" translatesAutoresizingMaskIntoConstraints="NO" image="face-template.png">
+                                <rect key="frame" x="24" y="334" width="556" height="246"/>
+                            </imageView>
                         </subviews>
-                        <variation key="default">
-                            <mask key="subviews">
-                                <exclude reference="5"/>
-                                <exclude reference="8"/>
-                                <exclude reference="9"/>
-                                <exclude reference="10"/>
-                                <exclude reference="26"/>
-                                <exclude reference="27"/>
-                                <exclude reference="28"/>
-                                <exclude reference="29"/>
-                                <exclude reference="30"/>
-                            </mask>
-                            <mask key="constraints">
-                                <exclude reference="14"/>
-                                <exclude reference="15"/>
-                                <exclude reference="16"/>
-                                <exclude reference="17"/>
-                                <exclude reference="18"/>
-                                <exclude reference="19"/>
-                                <exclude reference="20"/>
-                                <exclude reference="21"/>
-                                <exclude reference="22"/>
-                                <exclude reference="23"/>
-                                <exclude reference="24"/>
-                                <exclude reference="25"/>
-                                <exclude reference="31"/>
-                                <exclude reference="32"/>
-                                <exclude reference="38"/>
-                                <exclude reference="39"/>
-                                <exclude reference="52"/>
-                                <exclude reference="53"/>
-                                <exclude reference="59"/>
-                                <exclude reference="60"/>
-                                <exclude reference="61"/>
-                                <exclude reference="62"/>
-                                <exclude reference="63"/>
-                                <exclude reference="64"/>
-                                <exclude reference="65"/>
-                                <exclude reference="66"/>
-                            </mask>
-                        </variation>
-                        <variation key="heightClass=regular-widthClass=compact">
-                            <mask key="subviews">
-                                <include reference="5"/>
-                                <include reference="8"/>
-                                <include reference="9"/>
-                                <include reference="10"/>
-                                <include reference="26"/>
-                                <include reference="27"/>
-                                <include reference="28"/>
-                                <include reference="29"/>
-                                <include reference="30"/>
-                            </mask>
-                            <mask key="constraints">
-                                <include reference="14"/>
-                                <include reference="15"/>
-                                <include reference="16"/>
-                                <include reference="17"/>
-                                <include reference="18"/>
-                                <include reference="19"/>
-                                <include reference="20"/>
-                                <include reference="21"/>
-                                <include reference="22"/>
-                                <include reference="23"/>
-                                <include reference="24"/>
-                                <include reference="25"/>
-                                <include reference="31"/>
-                                <include reference="32"/>
-                                <include reference="38"/>
-                                <include reference="39"/>
-                                <include reference="52"/>
-                                <include reference="53"/>
-                                <include reference="59"/>
-                                <include reference="60"/>
-                                <include reference="61"/>
-                                <include reference="62"/>
-                                <include reference="63"/>
-                                <include reference="64"/>
-                                <include reference="65"/>
-                                <include reference="66"/>
-                            </mask>
-                        </variation>
                         <constraints>
-                            <constraint id="14" firstItem="5" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
-                            <constraint id="15" firstItem="8" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
-                            <constraint id="16" firstItem="9" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
-                            <constraint id="17" firstItem="10" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="54"/>
-                            <constraint id="18" firstItem="5" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="26"/>
-                            <constraint id="19" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="5" secondAttribute="trailing" constant="220"/>
-                            <constraint id="20" firstItem="8" firstAttribute="top" secondItem="5" secondAttribute="bottom" constant="8"/>
-                            <constraint id="21" firstItem="9" firstAttribute="top" secondItem="8" secondAttribute="bottom" constant="14"/>
-                            <constraint id="22" firstItem="10" firstAttribute="top" secondItem="9" secondAttribute="bottom" constant="14"/>
-                            <constraint id="23" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="9" secondAttribute="trailing" constant="220"/>
-                            <constraint id="24" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="8" secondAttribute="trailing" constant="220"/>
-                            <constraint id="25" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="10" secondAttribute="trailing" constant="220"/>
-                            <constraint id="31" firstItem="29" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="13"/>
-                            <constraint id="32" firstItem="29" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
-                            <constraint id="38" firstItem="30" firstAttribute="top" secondItem="29" secondAttribute="bottom" constant="18"/>
-                            <constraint id="39" firstItem="30" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
-                            <constraint id="52" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="29" secondAttribute="trailing" constant="222"/>
-                            <constraint id="53" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="30" secondAttribute="trailing" constant="222"/>
-                            <constraint id="59" firstItem="27" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="8"/>
-                            <constraint id="60" firstItem="27" firstAttribute="leading" secondItem="29" secondAttribute="trailing" constant="25"/>
-                            <constraint id="61" firstItem="28" firstAttribute="top" secondItem="27" secondAttribute="bottom" constant="8"/>
-                            <constraint id="62" firstItem="28" firstAttribute="leading" secondItem="30" secondAttribute="trailing" constant="25"/>
-                            <constraint id="63" firstItem="26" firstAttribute="top" secondItem="28" secondAttribute="bottom" constant="24"/>
-                            <constraint id="64" firstItem="26" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20"/>
-                            <constraint id="65" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="26" secondAttribute="trailing" constant="20"/>
-                            <constraint id="66" firstItem="8bC-Xf-vdC" firstAttribute="bottom" secondItem="26" secondAttribute="bottom" constant="20"/>
+                            <constraint id="178" firstItem="91" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="24"/>
+                            <constraint id="179" firstItem="8bC-Xf-vdC" firstAttribute="bottom" secondItem="91" secondAttribute="bottom" constant="20"/>
+                            <constraint id="182" firstItem="8bC-Xf-vdC" firstAttribute="trailing" secondItem="91" secondAttribute="trailing" constant="20"/>
+                            <constraint id="183" firstItem="91" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="314"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="PickPhoto" destination="5" id="name-outlet-5"/>
-                        <outlet property="TakePhoto" destination="8" id="name-outlet-8"/>
-                        <outlet property="PickVideo" destination="9" id="name-outlet-9"/>
-                        <outlet property="TakeVideo" destination="10" id="name-outlet-10"/>
-                        <outlet property="SizeSwitch" destination="27" id="name-outlet-27"/>
-                        <outlet property="AlbumSwitch" destination="28" id="name-outlet-28"/>
-                        <outlet property="MainImage" destination="26" id="name-outlet-26"/>
+                        <outlet property="TakePhoto" destination="70" id="name-outlet-70"/>
+                        <outlet property="PickPhoto" destination="73" id="name-outlet-73"/>
+                        <outlet property="TakeVideo" destination="75" id="name-outlet-75"/>
+                        <outlet property="PickVideo" destination="76" id="name-outlet-76"/>
+                        <outlet property="SliderQuality" destination="85" id="name-outlet-85"/>
+                        <outlet property="AlbumSwitch" destination="78" id="name-outlet-78"/>
+                        <outlet property="SizeSwitch" destination="80" id="name-outlet-80"/>
+                        <outlet property="OverlaySwitch" destination="82" id="name-outlet-82"/>
+                        <outlet property="CroppingSwitch" destination="86" id="name-outlet-86"/>
+                        <outlet property="FrontSwitch" destination="87" id="name-outlet-87"/>
+                        <outlet property="MainImage" destination="91" id="name-outlet-91"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -218,7 +143,7 @@
             <point key="canvasLocation" x="0.0" y="0.0"/>
         </scene>
     </scenes>
-    <simulatedMetricsContainer key="defaultSimulatedMetrics">
-        <simulatedScreenMetrics key="destination" type="retina4"/>
-    </simulatedMetricsContainer>
+    <resources>
+        <image name="face-template.png" width="1600" height="1679"/>
+    </resources>
 </document>

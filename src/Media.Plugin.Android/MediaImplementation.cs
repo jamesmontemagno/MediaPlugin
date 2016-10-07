@@ -272,6 +272,10 @@ namespace Plugin.Media
 
         async Task<bool> RequestStoragePermission()
         {
+            //We always have permission on anything lower than marshmallow.
+            if ((int)Build.VERSION.SdkInt < 23)
+                return true;
+
             var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
             if (status != Permissions.Abstractions.PermissionStatus.Granted)
             {
@@ -421,7 +425,28 @@ namespace Plugin.Media
                                 break;
                         }
 
-                        using (var originalImage = BitmapFactory.DecodeFile(filePath))
+
+                        //First decode to just get dimensions
+                        var options = new BitmapFactory.Options
+                        {
+                            InJustDecodeBounds = true
+                        };
+
+                        //already on background task
+                        BitmapFactory.DecodeFile(filePath, options);
+
+                        var finalWidth = (int)(options.OutWidth * percent);
+                        var finalHeight = (int)(options.OutHeight * percent);
+
+                        //calculate sample size
+                        options.InSampleSize = CalculateInSampleSize(options, finalWidth, finalHeight);
+                        
+                        //turn off decode
+                        options.InJustDecodeBounds = false;
+
+
+                        //this now will return the requested width/height from file, so no longer need to scale
+                        using (var originalImage = BitmapFactory.DecodeFile(filePath, options))
                         {
                            
 
@@ -433,26 +458,13 @@ namespace Plugin.Media
                                 matrix.PostRotate(rotation);
                                 using (var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true))
                                 {
-                                    if (photoSize != PhotoSize.Full)
+                                    //always need to compress to save back to disk
+                                    using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                     {
-                                        using (var compressedImage = Bitmap.CreateScaledBitmap(rotatedImage, (int)(rotatedImage.Width * percent), (int)(rotatedImage.Height * percent), false))
-                                        {
-                                            using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
-                                            {
-                                                compressedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-                                                stream.Close();
-                                            }
-                                            compressedImage.Recycle();
-                                        }
+                                        rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+                                        stream.Close();
                                     }
-                                    else
-                                    {
-                                        using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
-                                        {
-                                            rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-                                            stream.Close();
-                                        }
-                                    }
+                                    
                                     rotatedImage.Recycle();
                                 }
                                 originalImage.Recycle();
@@ -461,17 +473,13 @@ namespace Plugin.Media
                                 return true;
                             }
 
-
-                            using (var compressedImage = Bitmap.CreateScaledBitmap(originalImage, (int)(originalImage.Width * percent), (int)(originalImage.Height * percent), false))
+                            //always need to compress to save back to disk
+                            using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                             {
-                                using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
-                                {
-                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-                                    stream.Close();
-                                }
-
-                                compressedImage.Recycle();
+                                originalImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+                                stream.Close();
                             }
+                            
 
                             originalImage.Recycle();
                             // Dispose of the Java side bitmap.
@@ -497,6 +505,33 @@ namespace Plugin.Media
                 return Task.FromResult(false);
 #endif
             }
+
+        }
+
+        public int CalculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight)
+        {
+            // Raw height and width of image
+            var height = options.OutHeight;
+            var width = options.OutWidth;
+            var inSampleSize = 1;
+
+            if (height > reqHeight || width > reqWidth)
+            {
+
+                var halfHeight = height / 2;
+                var halfWidth = width / 2;
+
+                // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+                // height and width larger than the requested height and width.
+                while ((halfHeight / inSampleSize) >= reqHeight
+                        && (halfWidth / inSampleSize) >= reqWidth)
+                {
+                    inSampleSize *= 2;
+                }
+            }
+
+            return inSampleSize;
         }
 
         /// <summary>
@@ -538,21 +573,38 @@ namespace Plugin.Media
                                 break;
                         }
 
-                        using (var originalImage = BitmapFactory.DecodeFile(filePath))
+
+                        //First decode to just get dimensions
+                        var options = new BitmapFactory.Options
                         {
-                            
-                            using (var compressedImage = Bitmap.CreateScaledBitmap(originalImage, (int)(originalImage.Width * percent), (int)(originalImage.Height * percent), false))
+                            InJustDecodeBounds = true
+                        };
+
+                        //already on background task
+                        BitmapFactory.DecodeFile(filePath, options);
+
+                        var finalWidth = (int)(options.OutWidth * percent);
+                        var finalHeight = (int)(options.OutHeight * percent);
+
+                        //calculate sample size
+                        options.InSampleSize = CalculateInSampleSize(options, finalWidth, finalHeight);
+
+                        //turn off decode
+                        options.InJustDecodeBounds = false;
+
+
+                        //this now will return the requested width/height from file, so no longer need to scale
+                        using (var originalImage = BitmapFactory.DecodeFile(filePath, options))
+                        {
+
+                            //always need to compress to save back to disk
+                            using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                             {
-                                using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
-                                {
-                                   
-                                    compressedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-                                    stream.Close();
-                                }
 
-                                compressedImage.Recycle();
-
+                                originalImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+                                stream.Close();
                             }
+                            
                             originalImage.Recycle();
 
                             // Dispose of the Java side bitmap.
