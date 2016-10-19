@@ -34,7 +34,7 @@ Additionally, the following has been added for you:
 **ANDROID N**
 If your application targets Android N (API 24) or newer, you must use version 2.6.0+.
 
-You must also add a few additional configuration files to adher to the new strict mode:
+You must also add a few additional configuration files to adhere to the new strict mode:
 
 1.) Add the following to your AndroidManifest.xml inside the <application> tags:
 
