@@ -69,6 +69,8 @@ namespace MediaAndroidTest
             var pick = FindViewById<Button>(Resource.Id.button1);
             pick.Click += async (sender, args) =>
               {
+					try
+					{
                   var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
                   {
                       PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full
@@ -79,16 +81,22 @@ namespace MediaAndroidTest
                   Toast.MakeText(this, path, ToastLength.Long).Show();
                   System.Diagnostics.Debug.WriteLine(path);
                   image.SetImageBitmap(BitmapFactory.DecodeFile(file.Path));
-                  file.Dispose();
+                  file.Dispose();}
+				  catch (Exception ex)
+				  {
+					  Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
+				  }
               };
 
             FindViewById<Button>(Resource.Id.button2).Click += async (sender, args) =>
               {
+				try
+				{
                   var media = new Plugin.Media.MediaImplementation();
                   var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
                   {
                       Directory = "Sample",
-                      Name = "test.jp4",
+                      Name = "test.mp4",
                       SaveToAlbum = true
                   });
                   if (file == null)
@@ -99,7 +107,11 @@ namespace MediaAndroidTest
 
 
                   file.Dispose();
-                  
+                  }
+				  catch (Exception ex)
+				  {
+					  Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
+				  }
               };
 
 

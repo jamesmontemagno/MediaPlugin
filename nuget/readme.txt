@@ -8,6 +8,7 @@ Changelog:
 * iOS & Android: Ability to resize when picking photo
 * iOS & Android: Set Quality Level when taking photo
 * Android: Fix images that get rotated in the wrong direction
+* Android: Updates for Android N Strict Mode, see documentation if you target N+
 * iOS: Fix for rotating device.
 * iOS: Added custom overlay method
 * Windows RT: Bug fixes & Video Support
@@ -29,6 +30,37 @@ The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` permissions are required, 
 Additionally, the following has been added for you:
 [assembly: UsesFeature("android.hardware.camera", Required = false)]
 [assembly: UsesFeature("android.hardware.camera.autofocus", Required = false)]
+
+**ANDROID N**
+If your application targets Android N (API 24) or newer, you must use version 2.6.0+.
+
+You must also add a few additional configuration files to adher to the new strict mode:
+
+1.) Add the following to your AndroidManifest.xml inside the <application> tags:
+
+<provider android:name="android.support.v4.content.FileProvider" 
+				android:authorities="YOUR_APP_PACKAGE_NAME.fileprovider" 
+				android:exported="false" 
+				android:grantUriPermissions="true">
+			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
+				android:resource="@xml/file_paths"></meta-data>
+</provider>
+
+YOUR_APP_PACKAGE_NAME must be set to your app package name!
+
+2.) Add a new folder called xml into your Resources folder and add a new XML file called `file_paths.xml`
+
+Add the following code:
+
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path name="my_images" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Pictures" />
+    <external-path name="my_movies" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Movies" />
+</paths>
+
+YOUR_APP_PACKAGE_NAME must be set to your app package name!
+
+You can read more at: https://developer.android.com/training/camera/photobasics.html
 
 
 ### iOS

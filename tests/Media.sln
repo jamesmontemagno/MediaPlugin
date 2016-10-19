@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\nuget\Plugin.nuspec = ..\nuget\Plugin.nuspec
 		..\nuget\readme.txt = ..\nuget\readme.txt
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestsApps", "TestsApps", "{EAB7ED86-6B88-4D76-9CCC-83BFDF137EA8}"

@@ -7,6 +7,7 @@
 * iOS & Android: Ability to resize when picking photo
 * iOS & Android: Set Quality Level when taking photo
 * Android: Fix images that get rotated in the wrong direction
+* Android: Updates for Android N Strict Mode, see documentation if you target N+
 * iOS: Fix for rotating device.
 * iOS: Added custom overlay method
 * Windows RT: Bug fixes & Video Support

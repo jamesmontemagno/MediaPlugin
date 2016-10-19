@@ -17,6 +17,7 @@
     <DevInstrumentationEnabled>True</DevInstrumentationEnabled>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <JavaMaximumHeapSize>1G</JavaMaximumHeapSize>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -88,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\Main.axml" />
+    <AndroidResource Include="Resources\xml\file_paths.xml" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\Strings.xml" />
@@ -113,6 +115,9 @@
       <Version>1.0.4.1</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\xml\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

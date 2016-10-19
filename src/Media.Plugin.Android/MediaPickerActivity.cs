@@ -28,6 +28,7 @@ using Path = System.IO.Path;
 using Uri = Android.Net.Uri;
 using Plugin.Media.Abstractions;
 using Android.Net;
+using Android.Support.V4.Content;
 
 namespace Plugin.Media
 {
@@ -146,11 +147,45 @@ namespace Plugin.Media
                         this.path = GetOutputMediaFile(this, b.GetString(ExtraPath), this.title, this.isPhoto, false);
 
                         Touch();
-                        pickIntent.PutExtra(MediaStore.ExtraOutput, this.path);
+
+						var targetsNOrNewer = false;
+
+						try
+						{
+							targetsNOrNewer = (int)Application.Context.ApplicationInfo.TargetSdkVersion >= 24;
+						}
+						catch(Exception appInfoEx)
+						{
+							System.Diagnostics.Debug.WriteLine("Unable to get application info for targetSDK, trying to get from package manager: " + appInfoEx);
+							targetsNOrNewer = false;
+
+							var appInfo = PackageManager.GetApplicationInfo(Application.Context.PackageName, 0);
+							if (appInfo != null)
+							{
+								targetsNOrNewer = (int)appInfo.TargetSdkVersion >= 24;
+							}
+						}
+
+						if (targetsNOrNewer && this.path.Scheme == "file")
+						{
+							var photoURI = FileProvider.GetUriForFile(this,
+																	  Application.Context.PackageName + ".fileprovider",
+							                                          new Java.IO.File(this.path.Path));
+
+
+
+							pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
+						}
+						else
+						{
+							pickIntent.PutExtra(MediaStore.ExtraOutput, this.path);
+						}
                     }
                     else
                         this.path = Uri.Parse(b.GetString(ExtraPath));
                 }
+
+
 
                 if (!ran)
                     StartActivityForResult(pickIntent, this.id);
