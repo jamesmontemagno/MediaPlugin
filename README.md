@@ -156,7 +156,7 @@ By adding these permissions [Google Play will automatically filter out devices](
 
 **iOS** 
 
-Your app is required to have keys for NSCameraUsageDescription and NSPhotoLibraryUsageDescription in order to access the device's camera and photo library. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features.
+Your app is required to have keys in your Info.plist for `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` in order to access the device's camera and photo/video library. If you are using the Video capabilities of the library then you must also add `NSMicrophoneUsageDescription`.  The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features. You can read me here: https://blog.xamarin.com/new-ios-10-privacy-permission-settings/
 
 
 **Windows Phone 8/8.1 Silverlight:**
