@@ -133,7 +133,7 @@ namespace Plugin.Media
             {
                 try
                 {
-                    await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
+                    await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
                 }
                 catch (Exception ex)
                 {
