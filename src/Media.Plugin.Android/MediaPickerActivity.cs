@@ -350,20 +350,11 @@ namespace Plugin.Media
                 }
                 else
                 {
-                    if ((int)Build.VERSION.SdkInt >= 22)
-                    {
-                        var e = await GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
-                        OnMediaPicked(e);
-                        Finish();
-                    }
-                    else
-                    {
-                        future = GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
-
-                        Finish();
-
-                        future.ContinueWith(t => OnMediaPicked(t.Result));
-                    }
+                    
+                    var e = await GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
+                    OnMediaPicked(e);
+                    Finish();
+                   
                 }
             }
             else
