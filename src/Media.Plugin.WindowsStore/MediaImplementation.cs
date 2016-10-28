@@ -207,7 +207,7 @@ namespace Plugin.Media
             return new MediaFile(path, () =>
                 {
                     if (copy != null)
-                        return result.OpenStreamForReadAsync().Result;
+                        return copy.OpenStreamForReadAsync().Result;
 
                     return result.OpenStreamForReadAsync().Result;
                 }, albumPath: aPath);
@@ -275,7 +275,30 @@ namespace Plugin.Media
             if (result == null)
                 return null;
 
-            return new MediaFile(result.Path, () => result.OpenStreamForReadAsync().Result);
+            string aPath = result.Path;
+            string path = result.Path;
+            StorageFile copy = null;
+            //copy local
+            try
+            {
+                var fileNameNoEx = Path.GetFileNameWithoutExtension(aPath);
+                copy = await result.CopyAsync(ApplicationData.Current.LocalFolder,
+                    fileNameNoEx + result.FileType, NameCollisionOption.GenerateUniqueName);
+
+                path = copy.Path;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("unable to save to app directory:" + ex);
+            }
+
+            return new MediaFile(path, () =>
+            {
+                if (copy != null)
+                    return copy.OpenStreamForReadAsync().Result;
+
+                return result.OpenStreamForReadAsync().Result;
+            }, albumPath: aPath);
         }
 
         private readonly HashSet<string> devices = new HashSet<string>();
