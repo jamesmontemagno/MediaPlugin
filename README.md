@@ -144,8 +144,8 @@ You can now save a photo or video to the camera roll/gallery. When creating the 
 Android: When you set SaveToAlbum this will make it so your photos are public in the Pictures/YourDirectory or Movies/YourDirectory. This is the only way Android can detect the photos.
 
 
-### **IMPORTANT**
-**Android:**
+###  Important Permission Information
+#### Android 
 The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` & `CAMERA` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions.
 
 By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardward. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
@@ -154,8 +154,7 @@ By adding these permissions [Google Play will automatically filter out devices](
 [assembly: UsesFeature("android.hardware.camera", Required = false)]
 [assembly: UsesFeature("android.hardware.camera.autofocus", Required = false)]
 ```
-
-**ANDROID N**
+#### ANDROID N
 
 If your application targets Android N (API 24) or newer, you must use version 2.6.0+.
 
@@ -190,9 +189,19 @@ Add the following code:
 You can read more at: https://developer.android.com/training/camera/photobasics.html
 
 
-**iOS** 
+#### iOS
 
 Your app is required to have keys in your Info.plist for `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` in order to access the device's camera and photo/video library. If you are using the Video capabilities of the library then you must also add `NSMicrophoneUsageDescription`.  The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features. You can read me here: https://blog.xamarin.com/new-ios-10-privacy-permission-settings/
+
+Such as:
+```
+<key>NSCameraUsageDescription</key>
+<string>This app needs access to the camera to take photos.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app needs access to photos.</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>This app needs access to microphone.</string>
+```
 
 
 **Windows Phone 8/8.1 Silverlight:**
