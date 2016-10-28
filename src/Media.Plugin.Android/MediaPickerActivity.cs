@@ -524,12 +524,22 @@ namespace Plugin.Media
 
 
                             // If they don't follow the "rules", try to copy the file locally
-                            if (contentPath == null || !contentPath.StartsWith("file"))
+							if (contentPath == null || !contentPath.StartsWith("file", StringComparison.InvariantCultureIgnoreCase))
                             {
+								string fileName = null;
+								try
+								{
+									fileName = Path.GetFileName(contentPath);
+								}
+								catch(Exception ex)
+								{ 
+									System.Diagnostics.Debug.WriteLine("Unable to get file path name, using new unique " + ex);
+								}
 
-                                Uri outputPath = GetOutputMediaFile(context, "temp", null, isPhoto, false);
 
-                                try
+								var outputPath = GetOutputMediaFile(context, "temp", fileName, isPhoto, false);
+
+								try
                                 {
                                     using (Stream input = context.ContentResolver.OpenInputStream(uri))
                                         using (Stream output = File.Create(outputPath.Path))
@@ -537,11 +547,12 @@ namespace Plugin.Media
 
                                     contentPath = outputPath.Path;
                                 }
-                                catch (Java.IO.FileNotFoundException)
+                                catch (Java.IO.FileNotFoundException fnfEx)
                                 {
                                     // If there's no data associated with the uri, we don't know
                                     // how to open this. contentPath will be null which will trigger
                                     // MediaFileNotFoundException.
+									System.Diagnostics.Debug.WriteLine("Unable to save picked file from disk " + fnfEx);
                                 }
                             }
 
