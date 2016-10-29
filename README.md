@@ -25,8 +25,6 @@ Build Status:
 |Windows 10 UWP|Yes|10+|
 |Xamarin.Mac|No||
 
-**Note**: For Android you must target API 23 currently. Changes in Android N and Strict mode cause issues when taking/picking media. I will be implementing changes soon for version 2.6.0.
-
 
 ### API Usage
 
