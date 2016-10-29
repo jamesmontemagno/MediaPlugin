@@ -408,6 +408,15 @@ namespace Plugin.Media
                 {
                     try
                     {
+                        //First decode to just get dimensions
+                        var options = new BitmapFactory.Options
+                        {
+                            InJustDecodeBounds = true
+                        };
+
+                        //already on background task
+                        BitmapFactory.DecodeFile(filePath, options);
+
                         var rotation = GetRotation(filePath);
 
                         if (rotation == 0 && photoSize == PhotoSize.Full)
@@ -429,16 +438,7 @@ namespace Plugin.Media
                                 percent = (float)customPhotoSize / 100f;
                                 break;
                         }
-
-
-                        //First decode to just get dimensions
-                        var options = new BitmapFactory.Options
-                        {
-                            InJustDecodeBounds = true
-                        };
-
-                        //already on background task
-                        BitmapFactory.DecodeFile(filePath, options);
+                        
 
                         var finalWidth = (int)(options.OutWidth * percent);
                         var finalHeight = (int)(options.OutHeight * percent);
