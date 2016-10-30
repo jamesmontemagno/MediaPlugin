@@ -7,6 +7,7 @@ Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a 
 ### Setup
 * Available on NuGet: http://www.nuget.org/packages/Xam.Plugin.Media [![NuGet](https://img.shields.io/nuget/v/Xam.Plugin.Media.svg?label=NuGet)](https://www.nuget.org/packages/Xam.Plugin.Media/)
 * Install into your PCL project and Client projects.
+* Please see the additional setup for each platforms permissions.
 
 Build Status: 
 * [![Build status](https://ci.appveyor.com/api/projects/status/872kljawr91vphty?svg=true)](https://ci.appveyor.com/project/JamesMontemagno/mediaplugin)
@@ -71,8 +72,9 @@ bool IsPickVideoSupported { get; }
 /// <summary>
 /// Picks a photo from the default gallery
 /// </summary>
+/// <param name="options">Pick Photo Media Options</param>
 /// <returns>Media file or null if canceled</returns>
-Task<MediaFile> PickPhotoAsync();
+Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null);
 
 /// <summary>
 /// Take a photo async with specified options
@@ -132,19 +134,123 @@ takePhoto.Clicked += async (sender, args) =>
 };
 ```
 
-### Compressing Photos (In Beta)
-When calling `TakePhotoAsync` or `PickPhotoAsync` you can specify multiple options. First is `PhotoSize` which sill shrink the photo down to 75%, 50%, or 25% it's original size. Additionally, it is recommended to set the `CompressionQuality`, which is a value from 0 the most compressed all the way to 100, which is no compression. A good setting from testing is around 92.
+### Directories and File Names
+Setting these properties are optional. Any illegal characters will be removed and if the name of the file is a duplicate then a number will be appended to the end. The default implementation is to specify a unique time code to each value. 
 
 
-### Saving Photo/Video to Camera Roll/Gallery (In Beta for picking)
+## Photo & Video Settings
+
+### Compressing Photos
+When calling `TakePhotoAsync` or `PickPhotoAsync` you can specify multiple options to reduce the size and quality of the photo that is taken or picked. These are applied to the `StoreCameraMediaOptions` and `PickMediaOptions`.
+
+#### Resize Photo Size
+ By default the photo that is taken/picked is the maxiumum size and quality available. For most applications this is not needed and can be Resized. This can be accomplished by adjusting the `PhotoSize` property on the options. The easiest is to adjust it to `Small, Medium, or Large`, which is 25%, 50%, or 75% or the original.
+
+```csharp
+var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+{
+    PhotoSize = PhotoSize.Medium,
+});
+```
+
+Or you can set to a custom percentage:
+
+```csharp
+var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+{
+    PhotoSize = PhotoSize.Custom,
+    CustomPhotoSize = 90 //Resize to 90% of original
+});
+```
+
+#### Photo Quality
+Set the `CompressionQuality`, which is a value from 0 the most compressed all the way to 100, which is no compression. A good setting from testing is around 92.
+
+```csharp
+var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+{
+    CompressionQuality = 92
+});
+```
+
+
+### Saving Photo/Video to Camera Roll/Gallery 
 You can now save a photo or video to the camera roll/gallery. When creating the ```StoreCameraMediaOptions``` or ```StoreVideoMediaOptions``` simply set ```SaveToAlbum``` to true. When your user takes a photo it will still store temporary data, but also if needed make a copy to the public gallery (based on platform). In the MediaFile you will now see a AlbumPath that you can query as well.
+
+```csharp
+var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+{
+    SaveToAlbum = true
+});
+
+//Get the public album path
+var aPpath = file.AlbumPath; 
+
+//Get private path
+var path = file.Path;
+```
+
+This will restult in 2 photos being saved for the photo. One in your private folder and one in a public directory that is shown. The value will be returned at `AlbumPath`.
 
 Android: When you set SaveToAlbum this will make it so your photos are public in the Pictures/YourDirectory or Movies/YourDirectory. This is the only way Android can detect the photos.
 
 
+### Allow Cropping
+Both iOS and UWP have crop controls built into the the camera control when taking a photo. On iOS the default is `false` and UWP the default is `true`. You can adjust the `AllowCropping` property when taking a photo to allow your user to crop.
+
+```csharp
+var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+{
+    AllowCropping = true
+});
+```
+
+### Default Camera 
+By default when you take a photo or video the default system camera will be selected. Simply set the `DefaultCamera` on `StoreCameraMediaOptions`. This option does not guarantee that the actual camera will be selected because each platform is different. It seems to work extremely well on iOS, but not so much on Android. Your mileage may vary.
+
+```csharp
+var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+{
+    DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Front
+});
+```
+
+### Take Photo Overlay (iOS Only Preview)
+On iOS you are able to specify an overlay on top of the camera. It will show up on the live camera and on the final preview, but it is not saved as part of the photo, which means it is not a filter.
+
+```csharp
+//Load an image as an overlay (this is in the iOS Project)
+Func<object> func = () =>
+{
+    var imageView = new UIImageView(UIImage.FromBundle("face-template.png"));
+    imageView.ContentMode = UIViewContentMode.ScaleAspectFit;
+
+    var screen = UIScreen.MainScreen.Bounds;
+    imageView.Frame = screen;
+
+    return imageView;
+};
+
+//Take Photo, could be in iOS Project, or in shared code where there function is passed up via Dependency Services.
+var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+{
+    OverlayViewProvider = fund
+});
+```
+
+
 ###  Important Permission Information
+Please read these as they must be implemented for all platforms.
+
 #### Android 
-The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` & `CAMERA` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions.
+The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` & `CAMERA` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add the Permission Plugin code into your Main or Base Activities:
+
+```csharp
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+{
+    PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+}
+```
 
 By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardward. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
 
@@ -152,6 +258,8 @@ By adding these permissions [Google Play will automatically filter out devices](
 [assembly: UsesFeature("android.hardware.camera", Required = false)]
 [assembly: UsesFeature("android.hardware.camera.autofocus", Required = false)]
 ```
+
+
 #### ANDROID N
 
 If your application targets Android N (API 24) or newer, you must use version 2.6.0+.
@@ -228,15 +336,45 @@ protected override void OnActivated(IActivatedEventArgs args)
 Set `Webcam` permission.
 
 
-Thanks!
-
 #### Windows Phone 8.1 RT Photo Capture
 This feature was made possible by Daniel Meixner and his great open source project:  https://diycameracaptureui.codeplex.com/
 
 Made possible under Ms-PL license:  https://diycameracaptureui.codeplex.com/license
 
+### Permission Recommendations
+By default, the Media Plugin will attempt to request multiple permissions, but each platform handles this a bit differently, such as iOS which will only pop up permissions once. I recommend adding the [Permissions Plugin](http://github.com/jamesmontemagno/PermissionsPlugin) into your application and before taking any photo or picking photos that you check permissions ahead of time. 
+
+Here is an example:
+```csharp
+var cameraStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Camera);
+var storageStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+
+if (cameraStatus != PermissionStatus.Granted || storageStatus != PermissionStatus.Granted)
+{
+    var results = await CrossPermissions.Current.RequestPermissionsAsync(new[] {Permission.Camera, Permission.Storage});
+    cameraStatus = results[Permission.Camera];
+    storageStatus = results[Permission.Storage];
+}
+
+if (cameraStatus == PermissionStatus.Granted && storageStatus == PermissionStatus.Granted)
+{
+     var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+    {
+        Directory = "Sample",
+        Name = "test.jpg"
+    });
+}
+else
+{
+    await DisplayAlert("Permissions Denied", "Unable to take photos.", "OK");
+    //On iOS you may want to send your user to the settings screen.
+    //CrossPermissions.Current.OpenAppSettings();
+}
+```
+
+
 #### License
-This is a derivative to [Xamarin.Mobile's Media](http://github.com/xamarin/xamarin.mobile) with a cross platform API and other enhancements.
+Licensed under MIT, see license file. This is a derivative to [Xamarin.Mobile's Media](http://github.com/xamarin/xamarin.mobile) with a cross platform API and other enhancements.
 //
 //  Copyright 2011-2013, Xamarin Inc.
 //

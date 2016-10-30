@@ -8,9 +8,12 @@
 * iOS & Android: Set Quality Level when taking photo
 * Android: Fix images that get rotated in the wrong direction
 * Android: Updates for Android N Strict Mode, see documentation if you target N+
-* iOS: Fix for rotating device.
-* iOS: Added custom overlay method
+* iOS & Android: Fix for rotating device.
+* iOS: Added custom overlay method (Preview)
+* iOS: iOS 10 support for new permissions, please see documentations
 * Windows RT: Bug fixes & Video Support
+
+* Addition Bug Fixes & Optimizations on all platforms
 
 ### [2.3.0]
 * Add UWP support

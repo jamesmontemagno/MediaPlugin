@@ -9,13 +9,14 @@ Changelog:
 * iOS & Android: Set Quality Level when taking photo
 * Android: Fix images that get rotated in the wrong direction
 * Android: Updates for Android N Strict Mode, see documentation if you target N+
-* iOS: Fix for rotating device.
-* iOS: Added custom overlay method
+* iOS & Android: Fix for rotating device.
+* iOS: Added custom overlay method (Preview)
+* iOS: iOS 10 support for new permissions, please see documentations
 * Windows RT: Bug fixes & Video Support
 
 Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 
-## Additional Required Setup
+## Additional Required Setup (Please Read!)
 
 ## Android 
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
