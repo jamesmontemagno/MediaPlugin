@@ -451,46 +451,53 @@ namespace Plugin.Media
 
 
                         //this now will return the requested width/height from file, so no longer need to scale
-                        using (var originalImage = BitmapFactory.DecodeFile(filePath, options))
+                        var originalImage = BitmapFactory.DecodeFile(filePath, options);
+                        
+                        if (finalWidth != originalImage.Width || finalHeight != originalImage.Height)
                         {
-                           
-
-                            //if we need to rotate then go for it.
-                            //then compresse it if needed
-                            if (rotation != 0)
+                            originalImage = Bitmap.CreateScaledBitmap(originalImage, finalWidth, finalHeight, true);
+                        }
+                        //if we need to rotate then go for it.
+                        //then compresse it if needed
+                        if (rotation != 0)
+                        {
+                            var matrix = new Matrix();
+                            matrix.PostRotate(rotation);
+                            using (var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true))
                             {
-                                var matrix = new Matrix();
-                                matrix.PostRotate(rotation);
-                                using (var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true))
-                                {
-                                    //always need to compress to save back to disk
-                                    using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
-                                    {
-                                        rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-                                        stream.Close();
-                                    }
                                     
-                                    rotatedImage.Recycle();
+                                //always need to compress to save back to disk
+                                using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                                {
+                                    rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+                                    stream.Close();
                                 }
-                                originalImage.Recycle();
-                                // Dispose of the Java side bitmap.
-                                GC.Collect();
-                                return true;
+                                rotatedImage.Recycle();
                             }
-
-                            //always need to compress to save back to disk
-                            using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
-                            {
-                                originalImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-                                stream.Close();
-                            }
-                            
-
                             originalImage.Recycle();
+                            originalImage.Dispose();
                             // Dispose of the Java side bitmap.
                             GC.Collect();
                             return true;
                         }
+
+                            
+
+                        //always need to compress to save back to disk
+                        using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                        {
+                            originalImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+                            stream.Close();
+                        }
+                            
+                            
+
+                        originalImage.Recycle();
+                        originalImage.Dispose();
+                        // Dispose of the Java side bitmap.
+                        GC.Collect();
+                        return true;
+                        
                     }
                     catch (Exception ex)
                     {

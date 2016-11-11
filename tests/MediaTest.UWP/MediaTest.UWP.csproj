@@ -127,11 +127,11 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
+    <ProjectReference Include="..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
       <Project>{6edb0588-ffc5-4ef5-8a99-9e241d0f878d}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\Media.Plugin.UWP\Media.Plugin.UWP.csproj">
+    <ProjectReference Include="..\..\src\Media.Plugin.UWP\Media.Plugin.UWP.csproj">
       <Project>{04125cd7-f3b6-4960-b1ba-9f584384ebdf}</Project>
       <Name>Media.Plugin.UWP</Name>
     </ProjectReference>

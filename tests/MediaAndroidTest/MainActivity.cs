@@ -60,7 +60,7 @@ namespace MediaAndroidTest
                     image.SetImageBitmap(bitmap);
                     file.Dispose();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
                 }
@@ -69,49 +69,51 @@ namespace MediaAndroidTest
             var pick = FindViewById<Button>(Resource.Id.button1);
             pick.Click += async (sender, args) =>
               {
-					try
-					{
-                  var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
+                  try
                   {
-                      PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full
-                  });
-                  if (file == null)
-                      return;
-                  var path = file.Path;
-                  Toast.MakeText(this, path, ToastLength.Long).Show();
-                  System.Diagnostics.Debug.WriteLine(path);
-                  image.SetImageBitmap(BitmapFactory.DecodeFile(file.Path));
-                  file.Dispose();}
-				  catch (Exception ex)
-				  {
-					  Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
-				  }
+                      var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
+                      {
+                          PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Large : Plugin.Media.Abstractions.PhotoSize.Full
+                      });
+                      if (file == null)
+                          return;
+                      var path = file.Path;
+                      Toast.MakeText(this, path, ToastLength.Long).Show();
+                      System.Diagnostics.Debug.WriteLine(path);
+                      var bitmap = BitmapFactory.DecodeFile(file.Path);
+                      image.SetImageBitmap(bitmap);
+                      file.Dispose();
+                  }
+                  catch (Exception ex)
+                  {
+                      Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
+                  }
               };
 
             FindViewById<Button>(Resource.Id.button2).Click += async (sender, args) =>
               {
-				try
-				{
-                  var media = new Plugin.Media.MediaImplementation();
-                  var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
+                  try
                   {
-                      Directory = "Sample",
-                      Name = "test.mp4",
-                      SaveToAlbum = true
-                  });
-                  if (file == null)
-                      return;
-                  var path = file.Path;
-                  System.Diagnostics.Debug.WriteLine(path);
-                  Toast.MakeText(this, path, ToastLength.Long).Show();
+                      var media = new Plugin.Media.MediaImplementation();
+                      var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
+                      {
+                          Directory = "Sample",
+                          Name = "test.mp4",
+                          SaveToAlbum = true
+                      });
+                      if (file == null)
+                          return;
+                      var path = file.Path;
+                      System.Diagnostics.Debug.WriteLine(path);
+                      Toast.MakeText(this, path, ToastLength.Long).Show();
 
 
-                  file.Dispose();
+                      file.Dispose();
                   }
-				  catch (Exception ex)
-				  {
-					  Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
-				  }
+                  catch (Exception ex)
+                  {
+                      Toast.MakeText(this, ex.Message, ToastLength.Long).Show();
+                  }
               };
 
 
@@ -130,7 +132,7 @@ namespace MediaAndroidTest
             };
 
         }
-        
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
