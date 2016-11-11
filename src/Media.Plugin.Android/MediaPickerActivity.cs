@@ -29,6 +29,7 @@ using Uri = Android.Net.Uri;
 using Plugin.Media.Abstractions;
 using Android.Net;
 using Android.Support.V4.Content;
+using Android.Content.PM;
 
 namespace Plugin.Media
 {
@@ -172,8 +173,7 @@ namespace Plugin.Media
 																	  Application.Context.PackageName + ".fileprovider",
 							                                          new Java.IO.File(this.path.Path));
 
-
-
+							GrantUriPermissionsForIntent(pickIntent, photoURI);
 							pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
 						}
 						else
@@ -242,6 +242,16 @@ namespace Plugin.Media
                 System.Diagnostics.Debug.WriteLine("Unable to delete file: " + ex.Message);
             }
         }
+
+		private void GrantUriPermissionsForIntent(Intent intent, Uri uri)
+		{
+			var resInfoList = PackageManager.QueryIntentActivities(intent, PackageInfoFlags.MatchDefaultOnly);
+			foreach (var resolveInfo in resInfoList)
+			{
+				var packageName = resolveInfo.ActivityInfo.PackageName;
+				GrantUriPermission(packageName, uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+			}
+		}
 
         internal static Task<MediaPickedEventArgs> GetMediaFileAsync(Context context, int requestCode, string action, bool isPhoto, ref Uri path, Uri data, bool saveToAlbum)
         {
