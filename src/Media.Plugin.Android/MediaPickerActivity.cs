@@ -362,9 +362,9 @@ namespace Plugin.Media
                 {
                     
                     var e = await GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
-                    OnMediaPicked(e);
                     Finish();
-                   
+                    OnMediaPicked(e);
+
                 }
             }
             else
