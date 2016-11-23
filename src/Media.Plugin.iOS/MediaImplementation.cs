@@ -267,25 +267,36 @@ namespace Plugin.Media
             return picker;
         }
 
-        private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+        /// <summary>
+        /// Gets the visible view controller.
+        /// </summary>
+        /// <returns>The visible view controller.</returns>
+        UIViewController GetVisibleViewController()
         {
-            UIWindow window = UIApplication.SharedApplication.KeyWindow;
-            if (window == null)
-                throw new InvalidOperationException("There's no current active window");
+            var rootController = UIApplication.SharedApplication.KeyWindow.RootViewController;
 
-            UIViewController viewController = window.RootViewController;
+            if (rootController.PresentedViewController == null)
+                return rootController;
 
-            if (viewController == null)
+            if (rootController.PresentedViewController is UINavigationController)
             {
-                window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null);
-                if (window == null)
-                    throw new InvalidOperationException("Could not find current view controller");
-                else
-                    viewController = window.RootViewController;
+                return ((UINavigationController)rootController.PresentedViewController).VisibleViewController;
             }
 
-            while (viewController.PresentedViewController != null)
-                viewController = viewController.PresentedViewController;
+            if (rootController.PresentedViewController is UITabBarController)
+            {
+                return ((UITabBarController)rootController.PresentedViewController).SelectedViewController;
+            }
+
+            return rootController.PresentedViewController;
+        }
+
+        private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+        {
+           
+
+            var viewController = GetVisibleViewController();
+
 
             MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
