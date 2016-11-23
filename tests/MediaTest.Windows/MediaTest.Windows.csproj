@@ -104,11 +104,11 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\..\Media\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
+    <ProjectReference Include="..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
       <Project>{6edb0588-ffc5-4ef5-8a99-9e241d0f878d}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Media\Media.Plugin.WindowsStore\Media.Plugin.WindowsStore.csproj">
+    <ProjectReference Include="..\..\src\Media.Plugin.WindowsStore\Media.Plugin.WindowsStore.csproj">
       <Project>{ed9a4ca1-c04c-457d-9a2e-7995ccf12356}</Project>
       <Name>Media.Plugin.WindowsStore</Name>
     </ProjectReference>
