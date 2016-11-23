@@ -329,6 +329,7 @@ namespace Plugin.Media
             });
         }
 
+        bool completed;
         /// <summary>
         /// OnActivity Result
         /// </summary>
@@ -337,6 +338,7 @@ namespace Plugin.Media
         /// <param name="data"></param>
         protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
+            completed = true;
             base.OnActivityResult(requestCode, resultCode, data);
 
 
@@ -591,16 +593,21 @@ namespace Plugin.Media
 
         private static void OnMediaPicked(MediaPickedEventArgs e)
         {
-
-
-            var picked = MediaPicked;
-            if (picked != null)
-                picked(null, e);
+            MediaPicked?.Invoke(null, e);
         }
 
         public void OnScanCompleted(string path, Uri uri)
         {
             Console.WriteLine("scan complete: " + path);
+        }
+
+        protected override void OnDestroy()
+        {
+            if(!completed)
+            {
+                DeleteOutputFile();
+            }
+            base.OnDestroy();
         }
     }
 
@@ -663,5 +670,7 @@ namespace Plugin.Media
 
             return tcs.Task;
         }
+
+       
     }
 }
