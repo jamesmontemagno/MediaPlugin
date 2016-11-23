@@ -267,36 +267,25 @@ namespace Plugin.Media
             return picker;
         }
 
-        /// <summary>
-        /// Gets the visible view controller.
-        /// </summary>
-        /// <returns>The visible view controller.</returns>
-        UIViewController GetVisibleViewController()
-        {
-            var rootController = UIApplication.SharedApplication.KeyWindow.RootViewController;
-
-            if (rootController.PresentedViewController == null)
-                return rootController;
-
-            if (rootController.PresentedViewController is UINavigationController)
-            {
-                return ((UINavigationController)rootController.PresentedViewController).VisibleViewController;
-            }
-
-            if (rootController.PresentedViewController is UITabBarController)
-            {
-                return ((UITabBarController)rootController.PresentedViewController).SelectedViewController;
-            }
-
-            return rootController.PresentedViewController;
-        }
-
         private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
         {
-           
+            UIWindow window = UIApplication.SharedApplication.KeyWindow;
+            if (window == null)
+                throw new InvalidOperationException("There's no current active window");
 
-            var viewController = GetVisibleViewController();
+            UIViewController viewController = window.RootViewController;
 
+            if (viewController == null)
+            {
+                window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null);
+                if (window == null)
+                    throw new InvalidOperationException("Could not find current view controller");
+                else
+                    viewController = window.RootViewController;
+            }
+
+            while (viewController.PresentedViewController != null)
+                viewController = viewController.PresentedViewController;
 
             MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
@@ -312,7 +301,13 @@ namespace Plugin.Media
                 ndelegate.DisplayPopover();
             }
             else
+            {
+                if (UIDevice.CurrentDevice.CheckSystemVersion(9, 0))
+                {
+                    picker.ModalPresentationStyle = UIModalPresentationStyle.OverCurrentContext;
+                }
                 viewController.PresentViewController(picker, true, null);
+            }
 
             return ndelegate.Task.ContinueWith(t =>
             {
