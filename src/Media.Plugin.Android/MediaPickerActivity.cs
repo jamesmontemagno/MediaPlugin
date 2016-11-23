@@ -355,7 +355,7 @@ namespace Plugin.Media
                     future = TaskFromResult(new MediaPickedEventArgs(requestCode, isCanceled: true));
 
                     Finish();
-
+                    await Task.Delay(50);
                     future.ContinueWith(t => OnMediaPicked(t.Result));
                 }
                 else
@@ -363,6 +363,7 @@ namespace Plugin.Media
                     
                     var e = await GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
                     Finish();
+                    await Task.Delay(50);
                     OnMediaPicked(e);
 
                 }
