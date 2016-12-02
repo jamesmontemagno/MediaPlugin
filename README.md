@@ -252,6 +252,9 @@ public override void OnRequestPermissionsResult(int requestCode, string[] permis
 }
 ```
 
+You MUST set your Target version to API 23+ and Compile against API 23+:
+![image](https://cloud.githubusercontent.com/assets/1676321/17110560/7279341c-5252-11e6-89be-8c10b38c0ea6.png)
+
 By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardward. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
 
 ```
