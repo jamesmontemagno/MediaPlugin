@@ -376,7 +376,12 @@ namespace Plugin.Media
             string aPath = null;
             Action<bool> dispose = null;
             if (source != UIImagePickerControllerSourceType.Camera)
+            {
                 dispose = d => File.Delete(path);
+                //try to get the album path's url
+                var url2 = (NSUrl)info[UIImagePickerController.ReferenceUrl];
+                aPath = url2?.AbsoluteString;
+            }
             else
             {
                 if (this.options.SaveToAlbum)
