@@ -128,8 +128,8 @@ namespace Plugin.Media
             if (options == null)
                 return media;
 
-            //check to see if we need to rotate if success
-            if (!string.IsNullOrWhiteSpace(media?.Path) && options.PhotoSize != PhotoSize.Full)
+            //check to see if we picked a file, and if so then try to fix orientation and resize
+            if (!string.IsNullOrWhiteSpace(media?.Path))
             {
                 try
                 {
@@ -419,7 +419,8 @@ namespace Plugin.Media
 
                         var rotation = GetRotation(filePath);
 
-                        if (rotation == 0 && photoSize == PhotoSize.Full)
+						// if we don't need to rotate, aren't resizing, and aren't adjusting quality then simply return
+						if (rotation == 0 && photoSize == PhotoSize.Full && quality == 100)
                             return false;
 
                         var percent = 1.0f;
