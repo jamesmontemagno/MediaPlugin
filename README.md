@@ -131,8 +131,14 @@ takePhoto.Clicked += async (sender, args) =>
         file.Dispose();
         return stream;
     }); 
+    
+    //or:
+    //image.Source = ImageSource.FromFile(file.Path);
+    //image.Dispose();
 };
 ```
+
+To see more examples of usage without Xamarin.Forms open up the test folder in this project.
 
 ### Directories and File Names
 Setting these properties are optional. Any illegal characters will be removed and if the name of the file is a duplicate then a number will be appended to the end. The default implementation is to specify a unique time code to each value. 
