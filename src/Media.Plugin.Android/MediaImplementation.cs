@@ -65,53 +65,6 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsPickVideoSupported => true;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public Intent GetPickPhotoUI()
-        {
-            int id = GetRequestId();
-            return CreateMediaIntent(id, "image/*", Intent.ActionPick, null, tasked: false);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public Intent GetTakePhotoUI(StoreCameraMediaOptions options)
-        {
-            if (!IsCameraAvailable)
-                throw new NotSupportedException();
-
-            VerifyOptions(options);
-
-            int id = GetRequestId();
-            return CreateMediaIntent(id, "image/*", MediaStore.ActionImageCapture, options, tasked: false);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public Intent GetPickVideoUI()
-        {
-            int id = GetRequestId();
-            return CreateMediaIntent(id, "video/*", Intent.ActionPick, null, tasked: false);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public Intent GetTakeVideoUI(StoreVideoOptions options)
-        {
-            if (!IsCameraAvailable)
-                throw new NotSupportedException();
-
-            VerifyOptions(options);
-
-            return CreateMediaIntent(GetRequestId(), "video/*", MediaStore.ActionVideoCapture, options, tasked: false);
-        }
 
         /// <summary>
         /// Picks a photo from the default gallery

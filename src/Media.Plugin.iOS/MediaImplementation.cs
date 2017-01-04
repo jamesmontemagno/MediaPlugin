@@ -73,19 +73,7 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsPickVideoSupported { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public MediaPickerController GetPickPhotoUI()
-        {
-            if (!IsPickPhotoSupported)
-                throw new NotSupportedException();
-
-            var d = new MediaPickerDelegate(null, UIImagePickerControllerSourceType.PhotoLibrary, null);
-            return SetupController(d, UIImagePickerControllerSourceType.PhotoLibrary, TypeImage);
-        }
-
+        
         /// <summary>
         /// Picks a photo from the default gallery
         /// </summary>
@@ -105,23 +93,7 @@ namespace Plugin.Media
 
             return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public MediaPickerController GetTakePhotoUI(StoreCameraMediaOptions options)
-        {
-            if (!IsTakePhotoSupported)
-                throw new NotSupportedException();
-            if (!IsCameraAvailable)
-                throw new NotSupportedException();
-
-            VerifyCameraOptions(options);
-
-            var d = new MediaPickerDelegate(null, UIImagePickerControllerSourceType.PhotoLibrary, options);
-            return SetupController(d, UIImagePickerControllerSourceType.Camera, TypeImage, options);
-        }
+ 
 
         /// <summary>
         /// Take a photo async with specified options
@@ -141,18 +113,7 @@ namespace Plugin.Media
 
             return GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeImage, options);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public MediaPickerController GetPickVideoUI()
-        {
-            if (!IsPickVideoSupported)
-                throw new NotSupportedException();
-
-            var d = new MediaPickerDelegate(null, UIImagePickerControllerSourceType.PhotoLibrary, null);
-            return SetupController(d, UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie);
-        }
+     
 
         /// <summary>
         /// Picks a video from the default gallery
@@ -168,23 +129,7 @@ namespace Plugin.Media
 
             return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie);
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public MediaPickerController GetTakeVideoUI(StoreVideoOptions options)
-        {
-            if (!IsTakeVideoSupported)
-                throw new NotSupportedException();
-            if (!IsCameraAvailable)
-                throw new NotSupportedException();
-
-            VerifyCameraOptions(options);
-
-            var d = new MediaPickerDelegate(null, UIImagePickerControllerSourceType.Camera, options);
-            return SetupController(d, UIImagePickerControllerSourceType.Camera, TypeMovie, options);
-        }
+        
 
         /// <summary>
         /// Take a video with specified options
