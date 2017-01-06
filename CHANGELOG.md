@@ -1,5 +1,17 @@
 ## Changelog
 
+### [2.6.2]
+* Android: Fix issue where Zero byte image was being saved
+* Android: Work around to add small delay when closing activity
+* Android: Compress image even if size is full
+* iOS: Align root pages for modal pages
+* iOS: Fix compat with Rg.Plugins.Popup
+* iOS: Return album path when picking photo
+
+### [2.6.1]
+* Android: Ensure files are resized when picking photo
+* Andriid: Explicit grant URI for camera intent
+
 ### [2.6.0]
 * All: Ensure you call await CrossMedia.Current.Initialize(); before accessing any APIs
 * All: Resize when taking a photo
