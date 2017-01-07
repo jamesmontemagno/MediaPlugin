@@ -326,13 +326,21 @@ namespace Plugin.Media
             }
         }
 
+        private bool mLock = false;
         async private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (!IsRecording)
             {
+                if (mLock)
+                {
+                    return;
+                }
+
+
                 // Create new file in the pictures library     
                 if (Mode == CameraCaptureUIMode.Photo)
                 {
+                    mLock = true;
                     string photoPath = string.Empty;
                     // create a jpeg image
                     var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
@@ -359,6 +367,7 @@ namespace Plugin.Media
                             }
                             catch (Exception ex)
                             {
+                                mLock = false;
                                 Debug.WriteLine(ex.Message);
                             }
                         }
