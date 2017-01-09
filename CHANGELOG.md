@@ -3,6 +3,7 @@
 ### [2.6.3]
 * All: No longer delete files when picked. You are in control.
 * Windows Phone 8.1 RT: Handle button mashing on photo button better.
+* Android: Re-save EXIF on rotation
 
 ### [2.6.2]
 * Android: Fix issue where Zero byte image was being saved

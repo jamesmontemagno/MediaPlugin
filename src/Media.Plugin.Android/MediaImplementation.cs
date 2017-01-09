@@ -424,6 +424,9 @@ namespace Plugin.Media
                                 using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                 {
                                     rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+
+
+
                                     stream.Close();
                                 }
                                 rotatedImage.Recycle();
@@ -432,6 +435,9 @@ namespace Plugin.Media
                             originalImage.Dispose();
                             // Dispose of the Java side bitmap.
                             GC.Collect();
+
+                            //Save out new exif data
+                            SetExifData(filePath, Orientation.Normal);
                             return true;
                         }
 
@@ -598,6 +604,25 @@ namespace Plugin.Media
             }
         }
 
+
+        void SetExifData(string filePath, Orientation orientation)
+        {
+            try
+            {
+                using (var ei = new ExifInterface(filePath))
+                {
+
+                    ei.SetAttribute(ExifInterface.TagOrientation, Java.Lang.Integer.ToString((int)orientation));
+                    ei.SaveAttributes();                    
+                }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                throw ex;
+#endif
+            }
+        }
 
         static int GetRotation(string filePath)
         {
