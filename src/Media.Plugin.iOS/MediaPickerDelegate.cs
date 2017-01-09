@@ -330,11 +330,9 @@ namespace Plugin.Media
             var quality = (options.CompressionQuality / 100f);
             image.AsJPEG(quality).Save(path, true);
 
-            Action<bool> dispose = null;
             string aPath = null;
             if (source != UIImagePickerControllerSourceType.Camera)
             {
-                dispose = d => File.Delete(path);
 
                 //try to get the album path's url
                 var url = (NSUrl)info[UIImagePickerController.ReferenceUrl];
@@ -358,7 +356,7 @@ namespace Plugin.Media
 
             }
 
-            return new MediaFile(path, () => File.OpenRead(path), dispose: dispose, albumPath: aPath);
+            return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
         }
 
 
@@ -374,10 +372,8 @@ namespace Plugin.Media
             File.Move(url.Path, path);
 
             string aPath = null;
-            Action<bool> dispose = null;
             if (source != UIImagePickerControllerSourceType.Camera)
             {
-                dispose = d => File.Delete(path);
                 //try to get the album path's url
                 var url2 = (NSUrl)info[UIImagePickerController.ReferenceUrl];
                 aPath = url2?.AbsoluteString;
@@ -399,7 +395,7 @@ namespace Plugin.Media
                 }
             }
 
-            return new MediaFile(path, () => File.OpenRead(path), dispose: dispose, albumPath: aPath);
+            return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
         }
 
         private static string GetUniquePath(string type, string path, string name)

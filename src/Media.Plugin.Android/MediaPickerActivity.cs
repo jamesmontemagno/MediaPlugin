@@ -299,28 +299,6 @@ namespace Plugin.Media
                     var mf = new MediaFile(resultPath, () =>
                       {
                           return File.OpenRead(resultPath);
-                      }, deletePathOnDispose: t.Result.Item2, dispose: (dis) =>
-                      {
-                          if (t.Result.Item2)
-                          {
-                              try
-                              {
-                                  File.Delete(t.Result.Item1);
-                                  // We don't really care if this explodes for a normal IO reason.
-                              }
-                              catch (UnauthorizedAccessException uac)
-                              {
-                                System.Diagnostics.Debug.WriteLine("Unable to delete file, unauthorized " + uac.Message);
-                              }
-                              catch (DirectoryNotFoundException dnfe)
-                              {
-                                System.Diagnostics.Debug.WriteLine("Unable to delete file, not found: " + dnfe.Message);
-                              }
-                              catch (IOException ioe)
-                              {
-                                System.Diagnostics.Debug.WriteLine("Unable to delete file, io exception: " + ioe.Message);
-                              }
-                          }
                       }, albumPath: aPath);
                     return new MediaPickedEventArgs(requestCode, false, mf);
                 }

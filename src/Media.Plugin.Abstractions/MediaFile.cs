@@ -32,14 +32,10 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         /// <param name="path"></param>
         /// <param name="streamGetter"></param>
-        /// <param name="deletePathOnDispose"></param>
-        /// <param name="dispose"></param>
-        public MediaFile(string path, Func<Stream> streamGetter, bool deletePathOnDispose = false, Action<bool> dispose = null, string albumPath = null)
+        public MediaFile(string path, Func<Stream> streamGetter, string albumPath = null)
         {
-            this.dispose = dispose;
             this.streamGetter = streamGetter;
             this.path = path;
-            this.deletePathOnDispose = deletePathOnDispose;
             this.albumPath = albumPath;
         }
         /// <summary>
@@ -97,21 +93,19 @@ namespace Plugin.Media.Abstractions
             GC.SuppressFinalize(this);
         }
 
-        private bool isDisposed;
-        private readonly Action<bool> dispose;
-        private readonly Func<Stream> streamGetter;
-        private readonly string path;
-        private string albumPath;
-        private readonly bool deletePathOnDispose;
+		bool isDisposed;
+		Func<Stream> streamGetter;
+        string path;
+        string albumPath;
 
-        private void Dispose(bool disposing)
+        void Dispose(bool disposing)
         {
             if (isDisposed)
                 return;
 
             isDisposed = true;
-            if (dispose != null)
-                dispose(disposing);
+			if(disposing)
+				streamGetter = null;
         }
         /// <summary>
         /// 

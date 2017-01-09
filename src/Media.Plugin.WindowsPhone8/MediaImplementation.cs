@@ -181,6 +181,7 @@ namespace Plugin.Media
                 return;
             }
 
+			string aPath = photoResult.OriginalFileName;
             string path = photoResult.OriginalFileName;
 
             long pos = photoResult.ChosenPhoto.Position;
@@ -204,21 +205,13 @@ namespace Plugin.Media
                 }
             }
 
-            Action<bool> dispose = null;
-            if (options == null)
-            {
-                dispose = d =>
-                {
-                    using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-                        store.DeleteFile(path);
-                };
-            }
+          
 
             switch (photoResult.TaskResult)
             {
                 case TaskResult.OK:
                     photoResult.ChosenPhoto.Position = pos;
-                    tcs.SetResult(new MediaFile(path, () => photoResult.ChosenPhoto, dispose: dispose));
+                    tcs.SetResult(new MediaFile(path, () => photoResult.ChosenPhoto, albumPath: aPath));
                     break;
 
                 case TaskResult.None:
