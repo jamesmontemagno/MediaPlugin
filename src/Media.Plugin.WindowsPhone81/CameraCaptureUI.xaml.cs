@@ -326,70 +326,85 @@ namespace Plugin.Media
             }
         }
 
+		bool clickLock;
         async private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (!IsRecording)
-            {
-                // Create new file in the pictures library     
-                if (Mode == CameraCaptureUIMode.Photo)
-                {
-                    string photoPath = string.Empty;
-                    // create a jpeg image
-                    var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
+			if (clickLock)
+				return;
+			
+			clickLock = true;
 
-                    using (var imageStream = new InMemoryRandomAccessStream())
-                    {
-                        await MyMediaCapture.CapturePhotoToStreamAsync(imgEncodingProperties, imageStream);
+			try
+			{
+				
 
-                        var decoder = await BitmapDecoder.CreateAsync(imageStream);
-                        var encoder = await BitmapEncoder.CreateForTranscodingAsync(imageStream, decoder);
+				if (!IsRecording)
+				{
+					// Create new file in the pictures library     
+					if (Mode == CameraCaptureUIMode.Photo)
+					{
+						string photoPath = string.Empty;
+						// create a jpeg image
+						var imgEncodingProperties = ImageEncodingProperties.CreateJpeg();
 
-                        encoder.BitmapTransform.Rotation = GetBitmapRotationFromVideoRotation();
+						using (var imageStream = new InMemoryRandomAccessStream())
+						{
+							await MyMediaCapture.CapturePhotoToStreamAsync(imgEncodingProperties, imageStream);
 
-                        await encoder.FlushAsync();
+							var decoder = await BitmapDecoder.CreateAsync(imageStream);
+							var encoder = await BitmapEncoder.CreateForTranscodingAsync(imageStream, decoder);
 
-                        var capturefile = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
-                        photoPath = capturefile.Name;
+							encoder.BitmapTransform.Rotation = GetBitmapRotationFromVideoRotation();
 
-                        using (var fileStream = await capturefile.OpenStreamForWriteAsync())
-                        {
-                            try
-                            {
-                                await RandomAccessStream.CopyAsync(imageStream, fileStream.AsOutputStream());
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine(ex.Message);
-                            }
-                        }
-                    }
+							await encoder.FlushAsync();
 
-                    file = await ApplicationData.Current.LocalFolder.GetFileAsync("_____ccuiphoto.jpg");
+							var capturefile = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuiphoto.jpg", CreationCollisionOption.ReplaceExisting);
+							photoPath = capturefile.Name;
 
-                    // when pic has been taken, set stopFlag
-                    StopFlag = true;
-                }
-                else if (Mode == CameraCaptureUIMode.Video)
-                {
-                    IsRecording = true;
-                    camerButton.Icon = new SymbolIcon(Symbol.Stop);
+							using (var fileStream = await capturefile.OpenStreamForWriteAsync())
+							{
+								try
+								{
+									await RandomAccessStream.CopyAsync(imageStream, fileStream.AsOutputStream());
+								}
+								catch (Exception ex)
+								{
+									Debug.WriteLine(ex.Message);
+								}
+							}
+						}
 
-                    file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuivideo.mp4", CreationCollisionOption.ReplaceExisting);
+						file = await ApplicationData.Current.LocalFolder.GetFileAsync("_____ccuiphoto.jpg");
 
-                    // create a jpeg image
-                    var videoEncodingProperties = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Vga);
+						// when pic has been taken, set stopFlag
+						StopFlag = true;
+					}
+					else if (Mode == CameraCaptureUIMode.Video)
+					{
+						IsRecording = true;
+						camerButton.Icon = new SymbolIcon(Symbol.Stop);
 
-                    await MyMediaCapture.StartRecordToStorageFileAsync(videoEncodingProperties, file);
+						file = await ApplicationData.Current.LocalFolder.CreateFileAsync("_____ccuivideo.mp4", CreationCollisionOption.ReplaceExisting);
 
-                    // when pic has been taken, set stopFlag
-                    StopFlag = false;
-                }
-            }
-            else
-            {
-                await MyMediaCapture.StopRecordAsync();
-                StopFlag = true;
-            }
+						// create a jpeg image
+						var videoEncodingProperties = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Vga);
+
+						await MyMediaCapture.StartRecordToStorageFileAsync(videoEncodingProperties, file);
+
+						// when pic has been taken, set stopFlag
+						StopFlag = false;
+					}
+				}
+				else
+				{
+					await MyMediaCapture.StopRecordAsync();
+					StopFlag = true;
+				}
+			}
+			finally
+			{
+				clickLock = false;
+			}
         }
 
         public UIElementCollection mainGridChildren { get; set; }

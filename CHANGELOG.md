@@ -2,7 +2,7 @@
 
 ### [2.6.3]
 * All: No longer delete files when picked. You are in control.
-* Windows Phone 8.1 RT: 
+* Windows Phone 8.1 RT: Handle button mashing on photo button better.
 
 ### [2.6.2]
 * Android: Fix issue where Zero byte image was being saved
