@@ -55,7 +55,8 @@ namespace Plugin.Media.Abstractions
             string name = (self != null) ? self.Name : null;
             if (String.IsNullOrWhiteSpace(name))
             {
-                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var now = DateTime.Now;
+                var timestamp = $"{now.Year}{now.Month}{now.Day}_{now.Hour}{now.Minute}{now.Second}";
                 if (isPhoto)
                     name = "IMG_" + timestamp + ".jpg";
                 else

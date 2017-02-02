@@ -447,7 +447,9 @@ namespace Plugin.Media
 
             if (String.IsNullOrWhiteSpace(name))
             {
-                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+                var now = DateTime.Now;
+                string timestamp = $"{now.Year}{now.Month}{now.Day}_{now.Hour}{now.Minute}{now.Second}";
                 if (isPhoto)
                     name = "IMG_" + timestamp + ".jpg";
                 else
