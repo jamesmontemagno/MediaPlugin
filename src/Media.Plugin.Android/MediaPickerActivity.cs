@@ -30,6 +30,7 @@ using Plugin.Media.Abstractions;
 using Android.Net;
 using Android.Support.V4.Content;
 using Android.Content.PM;
+using System.Globalization;
 
 namespace Plugin.Media
 {
@@ -447,9 +448,7 @@ namespace Plugin.Media
 
             if (String.IsNullOrWhiteSpace(name))
             {
-
-                var now = DateTime.Now;
-                string timestamp = $"{now.Year}{now.Month}{now.Day}_{now.Hour}{now.Minute}{now.Second}";
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
                 if (isPhoto)
                     name = "IMG_" + timestamp + ".jpg";
                 else

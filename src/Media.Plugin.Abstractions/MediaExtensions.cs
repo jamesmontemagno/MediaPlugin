@@ -15,6 +15,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.IO;
 
 namespace Plugin.Media.Abstractions
@@ -55,8 +56,7 @@ namespace Plugin.Media.Abstractions
             string name = (self != null) ? self.Name : null;
             if (String.IsNullOrWhiteSpace(name))
             {
-                var now = DateTime.Now;
-                var timestamp = $"{now.Year}{now.Month}{now.Day}_{now.Hour}{now.Minute}{now.Second}";
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
                 if (isPhoto)
                     name = "IMG_" + timestamp + ".jpg";
                 else

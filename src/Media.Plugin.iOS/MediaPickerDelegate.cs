@@ -25,6 +25,7 @@ using AssetsLibrary;
 using Foundation;
 using UIKit;
 using NSAction = global::System.Action;
+using System.Globalization;
 
 namespace Plugin.Media
 {
@@ -422,8 +423,7 @@ namespace Plugin.Media
 
             if (String.IsNullOrWhiteSpace(name))
             {
-                var now = DateTime.Now;
-                var timestamp = $"{now.Year}{now.Month}{now.Day}_{now.Hour}{now.Minute}{now.Second}";
+                var timestamp = DateTime.Now.ToString("yyyMMdd_HHmmss", CultureInfo.InvariantCulture);
                 if (type == MediaImplementation.TypeImage)
                     name = "IMG_" + timestamp + ".jpg";
                 else
