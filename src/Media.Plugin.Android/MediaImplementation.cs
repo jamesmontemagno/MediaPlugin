@@ -79,7 +79,7 @@ namespace Plugin.Media
             var media = await TakeMediaAsync("image/*", Intent.ActionPick, null);
 
             if (options == null)
-                return media;
+                options = new PickMediaOptions();
 
             //check to see if we picked a file, and if so then try to fix orientation and resize
             if (!string.IsNullOrWhiteSpace(media?.Path))
