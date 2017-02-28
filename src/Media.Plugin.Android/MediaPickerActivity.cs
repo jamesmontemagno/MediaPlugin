@@ -38,7 +38,6 @@ namespace Plugin.Media
     /// Picker
     /// </summary>
     [Activity(ConfigurationChanges=Android.Content.PM.ConfigChanges.Orientation | Android.Content.PM.ConfigChanges.ScreenSize)]
-    [Android.Runtime.Preserve(AllMembers = true)]
     public class MediaPickerActivity
         : Activity, Android.Media.MediaScannerConnection.IOnScanCompletedListener
     {
