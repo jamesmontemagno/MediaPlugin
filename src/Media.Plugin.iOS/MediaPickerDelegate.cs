@@ -26,6 +26,13 @@ using Foundation;
 using UIKit;
 using NSAction = global::System.Action;
 using System.Globalization;
+using Photos;
+using CoreFoundation;
+using ImageIO;
+using CoreImage;
+using MobileCoreServices;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Plugin.Media
 {
@@ -279,14 +286,30 @@ namespace Plugin.Media
             return viewController.GetSupportedInterfaceOrientations().HasFlag(mask);
         }
 
+
         private async Task<MediaFile> GetPictureMediaFile(NSDictionary info)
         {
-            var image = (UIImage)info[UIImagePickerController.EditedImage];
-            if (image == null)
-                image = (UIImage)info[UIImagePickerController.OriginalImage];
+            var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
 
-            var meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
-
+            NSDictionary meta = null;
+            if (source == UIImagePickerControllerSourceType.Camera)
+            {
+                meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
+                if (meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+                {
+                    var newMeta = new NSMutableDictionary();
+                    newMeta.SetValuesForKeysWithDictionary(meta);
+                    var newTiffDict = new NSMutableDictionary();
+                    newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+                    newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
+                    newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
+                    meta = newMeta;
+                }
+            }
+            else
+            {
+                meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(info[UIImagePickerController.ReferenceUrl] as NSUrl);
+            }
 
             string path = GetOutputPath(MediaImplementation.TypeImage,
                 options.Directory ?? ((IsCaptured) ? String.Empty : "temp"),
@@ -340,7 +363,18 @@ namespace Plugin.Media
 
             //iOS quality is 0.0-1.0
             var quality = (options.CompressionQuality / 100f);
-            image.AsJPEG(quality).Save(path, true);
+            if (meta == null)
+            {
+                image.AsJPEG(quality).Save(path, true);
+            }
+            else
+            {
+                var success = SaveImageWithMetadata(image, quality, meta, path);
+                if (!success)
+                {
+                    image.AsJPEG(quality).Save(path, true);
+                }
+            }
 
             string aPath = null;
             if (source != UIImagePickerControllerSourceType.Camera)
@@ -371,6 +405,47 @@ namespace Plugin.Media
             return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
         }
 
+        private bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)
+        {
+            var imageData = image.AsJPEG(quality);
+            var dataProvider = new CGDataProvider(imageData);
+            var cgImageFromJpeg = CGImage.FromJPEG(dataProvider, null, false, CGColorRenderingIntent.Default);
+            var imageWithExif = new NSMutableData();
+            var destination = CGImageDestination.Create(imageWithExif, UTType.JPEG, 1);
+            var cgImageMetadata = new CGMutableImageMetadata();
+            var destinationOptions = new CGImageDestinationOptions();
+            if (meta.ContainsKey(ImageIO.CGImageProperties.ExifDictionary))
+            {
+                destinationOptions.ExifDictionary =
+                    new CGImagePropertiesExif(meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary);
+            }
+            if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
+            {
+                destinationOptions.TiffDictionary = new CGImagePropertiesTiff(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+            }
+            if (meta.ContainsKey(ImageIO.CGImageProperties.GPSDictionary))
+            {
+                destinationOptions.GpsDictionary =
+                    new CGImagePropertiesGps(meta[ImageIO.CGImageProperties.GPSDictionary] as NSDictionary);
+            }
+            if (meta.ContainsKey(ImageIO.CGImageProperties.JFIFDictionary))
+            {
+                destinationOptions.JfifDictionary =
+                    new CGImagePropertiesJfif(meta[ImageIO.CGImageProperties.JFIFDictionary] as NSDictionary);
+            }
+            if (meta.ContainsKey(ImageIO.CGImageProperties.IPTCDictionary))
+            {
+                destinationOptions.IptcDictionary =
+                    new CGImagePropertiesIptc(meta[ImageIO.CGImageProperties.IPTCDictionary] as NSDictionary);
+            }
+            destination.AddImageAndMetadata(cgImageFromJpeg, cgImageMetadata, destinationOptions);
+            var success = destination.Close();
+            if (success)
+            {
+                imageWithExif.Save(path, true);
+            }
+            return success;
+        }
 
 
         private async Task<MediaFile> GetMovieMediaFile(NSDictionary info)

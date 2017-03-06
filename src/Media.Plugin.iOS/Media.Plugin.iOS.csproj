@@ -45,6 +45,7 @@
     <Compile Include="NSDataStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UIImageExtensions.cs" />
+    <Compile Include="PhotoLibraryAccess.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
