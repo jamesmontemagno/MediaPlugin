@@ -1,5 +1,4 @@
-#addin nuget:https://nuget.org/api/v2/?package=Cake.FileHelpers&version=1.0.3.2
-#addin nuget:https://nuget.org/api/v2/?package=Cake.Xamarin&version=1.2.3
+#addin "Cake.FileHelpers"
 
 var TARGET = Argument ("target", Argument ("t", "Default"));
 var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.9999");
@@ -60,15 +59,9 @@ Task("Libraries").Does(()=>
     BuildAction(libraries);
 });
 
-Task("Samples")
-    .IsDependentOn("Libraries")
-    .Does(()=>
-{
-    //BuildAction(samples);
-});
 
 Task ("NuGet")
-	.IsDependentOn ("Samples")
+	.IsDependentOn ("Libraries")
 	.Does (() =>
 {
     if(!DirectoryExists("./Build/nuget/"))
@@ -83,16 +76,9 @@ Task ("NuGet")
 	});	
 });
 
-Task("Component")
-    .IsDependentOn("Samples")
-    .IsDependentOn("NuGet")
-    .Does(()=>
-{
-
-});
 
 //Build the component, which build samples, nugets, and libraries
-Task ("Default").IsDependentOn("Component");
+Task ("Default").IsDependentOn("NuGet");
 
 
 Task ("Clean").Does (() => 
