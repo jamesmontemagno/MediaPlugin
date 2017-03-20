@@ -26,13 +26,8 @@ using Foundation;
 using UIKit;
 using NSAction = global::System.Action;
 using System.Globalization;
-using Photos;
-using CoreFoundation;
 using ImageIO;
-using CoreImage;
 using MobileCoreServices;
-using System.Diagnostics;
-using System.Threading;
 
 namespace Plugin.Media
 {
@@ -295,7 +290,7 @@ namespace Plugin.Media
             if (source == UIImagePickerControllerSourceType.Camera)
             {
                 meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
-                if (meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+                if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
                 {
                     var newMeta = new NSMutableDictionary();
                     newMeta.SetValuesForKeysWithDictionary(meta);
@@ -304,6 +299,11 @@ namespace Plugin.Media
                     newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
                     newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
                     meta = newMeta;
+                }
+                var location = options.Location;
+                if (meta != null && location.Latitude > 0.0)
+                {
+                    meta = SetGpsLocation(meta, location);
                 }
             }
             else
@@ -403,6 +403,27 @@ namespace Plugin.Media
             }
 
             return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
+        }
+
+        private static NSDictionary SetGpsLocation(NSDictionary meta, Location location)
+        {
+            var newMeta = new NSMutableDictionary();
+            newMeta.SetValuesForKeysWithDictionary(meta);
+            var newGpsDict = new NSMutableDictionary();
+            newGpsDict.SetValueForKey(new NSNumber(location.Latitude), ImageIO.CGImageProperties.GPSLatitude);
+            newGpsDict.SetValueForKey(new NSString(location.Latitude > 0 ? "N" : "S"), ImageIO.CGImageProperties.GPSLatitudeRef);
+            newGpsDict.SetValueForKey(new NSNumber(location.Longitude), ImageIO.CGImageProperties.GPSLongitude);
+            newGpsDict.SetValueForKey(new NSString(location.Longitude > 0 ? "E" : "W"), ImageIO.CGImageProperties.GPSLongitudeRef);
+            newGpsDict.SetValueForKey(new NSNumber(location.Altitude), ImageIO.CGImageProperties.GPSAltitude);
+            newGpsDict.SetValueForKey(new NSNumber(0), ImageIO.CGImageProperties.GPSAltitudeRef);
+            newGpsDict.SetValueForKey(new NSNumber(location.Speed), ImageIO.CGImageProperties.GPSSpeed);
+            newGpsDict.SetValueForKey(new NSString("K"), ImageIO.CGImageProperties.GPSSpeedRef);
+            newGpsDict.SetValueForKey(new NSNumber(location.Direction), ImageIO.CGImageProperties.GPSImgDirection);
+            newGpsDict.SetValueForKey(new NSString("T"), ImageIO.CGImageProperties.GPSImgDirectionRef);
+            newGpsDict.SetValueForKey(new NSString(location.Timestamp.ToString("hh:mm:ss")), ImageIO.CGImageProperties.GPSTimeStamp);
+            newGpsDict.SetValueForKey(new NSString(location.Timestamp.ToString("yyyy:MM:dd")), ImageIO.CGImageProperties.GPSDateStamp);
+            newMeta[ImageIO.CGImageProperties.GPSDictionary] = newGpsDict;
+            return newMeta;
         }
 
         private bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)

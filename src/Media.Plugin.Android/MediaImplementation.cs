@@ -178,7 +178,10 @@ namespace Plugin.Media
             try
             {
                 //await FixOrientationAndResizeAsync(media.Path, options);
+                var exif = new ExifInterface(media.Path);
                 await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
+                SetMissingMetadata(exif, options.Location);
+                exif.SaveAttributes();
             }
             catch(Exception ex)
             {
@@ -636,7 +639,6 @@ namespace Plugin.Media
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
-            var exif = new ExifInterface(filePath);
 
             try
             {
@@ -699,7 +701,6 @@ namespace Plugin.Media
                             }
                             
                             originalImage.Recycle();
-                            exif.SaveAttributes();
 
                             // Dispose of the Java side bitmap.
                             GC.Collect();
@@ -740,6 +741,41 @@ namespace Plugin.Media
                 throw ex;
 #endif
             }
+        }
+
+        void SetMissingMetadata(ExifInterface exif, Location location)
+        {
+            Single[] position = new Single[6];
+            if (!exif.GetLatLong(position) && location.Latitude+location.Longitude > 0)
+            {
+                exif.SetAttribute(ExifInterface.TagGpsLatitude, coordinateToRational(location.Latitude));
+                exif.SetAttribute(ExifInterface.TagGpsLongitude, coordinateToRational(location.Longitude));
+                exif.SetAttribute(ExifInterface.TagGpsLatitudeRef, location.Latitude > 0 ? "N" : "S");
+                exif.SetAttribute(ExifInterface.TagGpsLongitudeRef, location.Longitude > 0 ? "E" : "W");
+            }
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagDatetime)))
+            {
+                exif.SetAttribute(ExifInterface.TagDatetime, DateTime.Now.ToString("yyyy:MM:dd hh:mm:ss"));
+            }
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagMake))) {
+                exif.SetAttribute(ExifInterface.TagMake, Build.Manufacturer);
+            }
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagModel)))
+            {
+                exif.SetAttribute(ExifInterface.TagModel, Build.Model);
+            }
+        }
+
+		private string coordinateToRational(double coord)
+        {
+            coord = coord > 0 ? coord : -coord;
+            int degrees = (int)coord;
+            coord = (coord % 1) * 60;
+            int minutes = (int)coord;
+            coord = (coord % 1) * 60000;
+            int sec = (int)coord;
+
+            return $"{degrees}/1,{minutes}/1,{sec}/1000";
         }
 
         static int GetRotation(string filePath)
