@@ -122,6 +122,13 @@ namespace Plugin.Media.Abstractions
                     quality = value;
             }
         }
+
+        bool rotateImage = true;
+        /// <summary>
+        /// Should the library rotate image according to received exif orientation.
+        /// Set to true by default.
+        /// </summary>
+        public bool RotateImage { get { return rotateImage; } set { rotateImage = value;} }
     }
 
     
@@ -227,7 +234,14 @@ namespace Plugin.Media.Abstractions
         /// Store provided location
         /// </summary>
         public Location Location { get; set; }
-    }
+
+        bool rotateImage = true;
+        /// <summary>
+        /// Should the library rotate image according to received exif orientation.
+        /// Set to true by default.
+        /// </summary>
+        public bool RotateImage { get { return rotateImage; } set { rotateImage = value; } }
+}
 
     /// <summary>
     /// Photo size enum.
