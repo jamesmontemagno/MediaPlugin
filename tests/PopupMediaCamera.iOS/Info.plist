@@ -63,5 +63,7 @@
 	<string>Can we use your camera</string>
 	<key>CFBundleShortVersionString</key>
 	<string></string>
+	<key>CFBundleName</key>
+	<string>PopupMediaCamera</string>
 </dict>
 </plist>
