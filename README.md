@@ -318,6 +318,7 @@ Such as:
 <string>This app needs access to microphone.</string>
 ```
 
+If you want the dialogs to be translated you must support the specific languages in your app. Read the [iOS Localization Guide](https://developer.xamarin.com/guides/ios/advanced_topics/localization_and_internationalization/)
 
 **Windows Phone 8/8.1 Silverlight:**
 
