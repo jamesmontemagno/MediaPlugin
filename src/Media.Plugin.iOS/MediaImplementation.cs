@@ -214,15 +214,17 @@ namespace Plugin.Media
 
         private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
         {
+            UIViewController viewController = null;
             UIWindow window = UIApplication.SharedApplication.KeyWindow;
             if (window == null)
                 throw new InvalidOperationException("There's no current active window");
 
-            UIViewController viewController = window.RootViewController;
+            if(window.WindowLevel == UIWindowLevel.Normal)
+                viewController = window.RootViewController;
 
             if (viewController == null)
             {
-                window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null);
+                window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null && w.WindowLevel == UIWindowLevel.Normal);
                 if (window == null)
                     throw new InvalidOperationException("Could not find current view controller");
                 else
