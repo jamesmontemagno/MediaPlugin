@@ -350,7 +350,7 @@ namespace Plugin.Media
                     var height = (image.CGImage.Height * percent);
 
                     //begin resizing image
-                    image = image.ResizeImageWithAspectRatio(width, height);
+                    image = image.ScaleImageWithOrientation(width, height);
                     //update exif pixel dimiensions
                     meta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSString(width.ToString()), ImageIO.CGImageProperties.ExifPixelXDimension);
                     meta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSString(height.ToString()), ImageIO.CGImageProperties.ExifPixelYDimension);

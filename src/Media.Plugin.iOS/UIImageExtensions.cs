@@ -66,5 +66,39 @@ namespace Plugin.Media
             UIGraphics.EndImageContext();
             return modifiedImage;
         }
+
+        public static UIImage ScaleImageWithOrientation(this UIImage sourceImage, float width, float height)
+        {
+		    const float PI_2 = (float)(Math.PI / 2.0);
+            UIImage resultImage;
+
+            using (CGImage image = sourceImage.CGImage)
+            {
+                CGImageAlphaInfo alpha = image.AlphaInfo == CGImageAlphaInfo.None ? CGImageAlphaInfo.NoneSkipLast  : image.AlphaInfo;
+                CGColorSpace color = CGColorSpace.CreateDeviceRGB();
+                var bitmap = new CGBitmapContext(IntPtr.Zero, (int)width, (int)height, image.BitsPerComponent, image.BytesPerRow, color, alpha);
+                bitmap.DrawImage(new Rectangle(0, 0, (int)width, (int)height), image);
+
+                switch (sourceImage.Orientation)
+                {
+                    case UIImageOrientation.Left:
+                        bitmap.RotateCTM(PI_2);
+                        bitmap.TranslateCTM(0, -height);
+                        break;
+                    case UIImageOrientation.Right:
+                        bitmap.RotateCTM(-PI_2);
+                        bitmap.TranslateCTM(-width, 0);
+                        break;
+                    case UIImageOrientation.Down:
+                        bitmap.TranslateCTM(width, height);
+                        bitmap.RotateCTM(-(float)Math.PI);
+                        break;
+                }
+
+                resultImage = UIImage.FromImage(bitmap.ToImage());
+            }
+
+            return resultImage;
+        }
     }
 }
