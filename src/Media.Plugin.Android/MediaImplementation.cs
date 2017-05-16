@@ -86,7 +86,7 @@ namespace Plugin.Media
             {
                 try
                 {
-                    await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
+                    await FixOrientationAndResizeAsync(media.Path, options);
                 }
                 catch (Exception ex)
                 {
@@ -172,7 +172,7 @@ namespace Plugin.Media
 
             try
             {
-                await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
+                await FixOrientationAndResizeAsync(media.Path, options);
             }
             catch(Exception ex)
             {
@@ -348,9 +348,28 @@ namespace Plugin.Media
         ///  Rotate an image if required and saves it back to disk.
         /// </summary>
         /// <param name="filePath">The file image path</param>
-        /// <param name="photoSize">Photo size to go to.</param>
+        /// <param name="mediaOptions">The options.</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> FixOrientationAndResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize)
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, PickMediaOptions mediaOptions)
+        {
+            return FixOrientationAndResizeAsync(
+                filePath,
+                new StoreCameraMediaOptions
+                {
+                    PhotoSize = mediaOptions.PhotoSize,
+                    CompressionQuality = mediaOptions.CompressionQuality,
+                    CustomPhotoSize = mediaOptions.CustomPhotoSize,
+                    ManualSize = mediaOptions.ManualSize
+                });
+        }
+
+        /// <summary>
+        ///  Rotate an image if required and saves it back to disk.
+        /// </summary>
+        /// <param name="filePath">The file image path</param>
+        /// <param name="mediaOptions">The options.</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, StoreCameraMediaOptions mediaOptions)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -372,12 +391,12 @@ namespace Plugin.Media
 
                         var rotation = GetRotation(filePath);
 
-						// if we don't need to rotate, aren't resizing, and aren't adjusting quality then simply return
-						if (rotation == 0 && photoSize == PhotoSize.Full && quality == 100)
+                        // if we don't need to rotate, aren't resizing, and aren't adjusting quality then simply return
+                        if (rotation == 0 && mediaOptions.PhotoSize == PhotoSize.Full && mediaOptions.CompressionQuality == 100)
                             return false;
 
                         var percent = 1.0f;
-                        switch (photoSize)
+                        switch (mediaOptions.PhotoSize)
                         {
                             case PhotoSize.Large:
                                 percent = .75f;
@@ -389,10 +408,18 @@ namespace Plugin.Media
                                 percent = .25f;
                                 break;
                             case PhotoSize.Custom:
-                                percent = (float)customPhotoSize / 100f;
+                                percent = (float)mediaOptions.CustomPhotoSize / 100f;
                                 break;
                         }
-                        
+
+                        if (mediaOptions.PhotoSize == PhotoSize.Manual && mediaOptions.ManualSize.HasValue)
+                        {
+                            var max = Math.Max(options.OutWidth, options.OutHeight);
+                            if (max > mediaOptions.ManualSize)
+                            {
+                                percent = (float)mediaOptions.ManualSize / (float)max;
+                            }
+                        }
 
                         var finalWidth = (int)(options.OutWidth * percent);
                         var finalHeight = (int)(options.OutHeight * percent);
@@ -423,7 +450,7 @@ namespace Plugin.Media
                                 //always need to compress to save back to disk
                                 using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                 {
-                                    rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+                                    rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
 
 
 
@@ -446,11 +473,11 @@ namespace Plugin.Media
                         //always need to compress to save back to disk
                         using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                         {
-                            originalImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
+                            originalImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
                             stream.Close();
                         }
-                            
-                            
+
+
 
                         originalImage.Recycle();
                         originalImage.Dispose();
