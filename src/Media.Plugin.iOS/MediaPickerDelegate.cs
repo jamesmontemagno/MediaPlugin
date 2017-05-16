@@ -313,12 +313,12 @@ namespace Plugin.Media
                             break;
                     }
 
-                    if (options.PhotoSize == PhotoSize.Manual && options.ManualSize.HasValue)
+                    if (options.PhotoSize == PhotoSize.MaxWidthHeight && options.MaxWidthHeight.HasValue)
                     {
                         var max = Math.Max(image.CGImage.Width, image.CGImage.Height);
-                        if (max > options.ManualSize)
+                        if (max > options.MaxWidthHeight)
                         {
-                            percent = (float)options.ManualSize / (float)max;
+                            percent = (float)options.MaxWidthHeight / (float)max;
                         }
                     }
 

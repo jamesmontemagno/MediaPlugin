@@ -70,12 +70,12 @@ namespace Plugin.Media.Abstractions
     public class PickMediaOptions
     {
         /// <summary>
-        /// Gets or sets the the manual size of the image.
-        /// The image will aspect resize to the ManualSize as the max size of the image height or width. 
-        /// This value is only used if PhotoSize is PhotoSize.Manual 
+        /// Gets or sets the the max width or height of the image.
+        /// The image will aspect resize to the MaxWidthHeight as the max size of the image height or width. 
+        /// This value is only used if PhotoSize is PhotoSize.MaxWidthHeight 
         /// </summary>
-        /// <value>The manual size of the image.</value>
-        public int? ManualSize { get; set; }
+        /// <value>The max width or height of the image.</value>
+        public int? MaxWidthHeight { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the photo.
@@ -151,12 +151,12 @@ namespace Plugin.Media.Abstractions
         }
 
         /// <summary>
-        /// Gets or sets the the manual size of the image.
-        /// The image will aspect resize to the ManualSize as the max size of the image height or width. 
-        /// This value is only used if PhotoSize is PhotoSize.Manual 
+        /// Gets or sets the the max width or height of the image.
+        /// The image will aspect resize to the MaxWidthHeight as the max size of the image height or width. 
+        /// This value is only used if PhotoSize is PhotoSize.MaxWidthHeight 
         /// </summary>
-        /// <value>The manual size of the image.</value>
-        public int? ManualSize { get; set; }
+        /// <value>The max width or height of the image.</value>
+        public int? MaxWidthHeight { get; set; }
 
         /// <summary>
         /// Get or set for an OverlayViewProvider
@@ -254,12 +254,12 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         Custom,
         /// <summary>
-        /// Manual photo size.
-        /// The property ManualSize must be set to a value. The ManualSize will be the max width or height of the image
+        /// Use the Max Width or Height photo size.
+        /// The property ManualSize must be set to a value. The MaxWidthHeight will be the max width or height of the image
         /// Currently this works on iOS and Android only.
         /// On Windows the PhotoSize will fall back to Full
         /// </summary>
-        Manual
+        MaxWidthHeight
     }
 
     /// <summary>

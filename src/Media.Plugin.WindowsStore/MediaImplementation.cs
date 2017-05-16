@@ -154,7 +154,7 @@ namespace Plugin.Media
                 else
                     photoSize = PhotoSize.Large;
             }
-            if (photoSize == PhotoSize.Manual) 
+            if (photoSize == PhotoSize.MaxWidthHeight) 
             {
                 photoSize = PhotoSize.Full;
             }

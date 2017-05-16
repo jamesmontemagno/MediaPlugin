@@ -359,7 +359,7 @@ namespace Plugin.Media
                     PhotoSize = mediaOptions.PhotoSize,
                     CompressionQuality = mediaOptions.CompressionQuality,
                     CustomPhotoSize = mediaOptions.CustomPhotoSize,
-                    ManualSize = mediaOptions.ManualSize
+                    MaxWidthHeight = mediaOptions.MaxWidthHeight
                 });
         }
 
@@ -412,12 +412,12 @@ namespace Plugin.Media
                                 break;
                         }
 
-                        if (mediaOptions.PhotoSize == PhotoSize.Manual && mediaOptions.ManualSize.HasValue)
+                        if (mediaOptions.PhotoSize == PhotoSize.MaxWidthHeight && mediaOptions.MaxWidthHeight.HasValue)
                         {
                             var max = Math.Max(options.OutWidth, options.OutHeight);
-                            if (max > mediaOptions.ManualSize)
+                            if (max > mediaOptions.MaxWidthHeight)
                             {
-                                percent = (float)mediaOptions.ManualSize / (float)max;
+                                percent = (float)mediaOptions.MaxWidthHeight / (float)max;
                             }
                         }
 
