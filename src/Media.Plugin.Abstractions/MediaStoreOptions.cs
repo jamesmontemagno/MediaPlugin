@@ -313,5 +313,16 @@ namespace Plugin.Media.Abstractions
             get;
             set;
         }
+
+        /// <summary>
+        /// Desired Video Size
+        /// Only available on Android - Set the desired file size in bytes.
+        /// Eg. 1000000 = 1MB
+        /// </summary>
+        public long DesiredSize
+        {
+            get;
+            set;
+        }
     }
 }
