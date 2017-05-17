@@ -36,6 +36,11 @@ namespace Plugin.Media
         /// </summary>
         public static UIStatusBarStyle StatusBarStyle { get; set; }
 
+        /// <summary>
+        /// Visibility of the status bar
+        /// </summary>
+        public static bool StatusBarHidden { get; set; }
+
         ///<inheritdoc/>
         public Task<bool> Initialize() => Task.FromResult(true);
 
@@ -45,6 +50,7 @@ namespace Plugin.Media
         public MediaImplementation()
         {
             StatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
+            StatusBarHidden = UIApplication.SharedApplication.StatusBarHidden;
             IsCameraAvailable = UIImagePickerController.IsSourceTypeAvailable(UIImagePickerControllerSourceType.Camera);
 
             var availableCameraMedia = UIImagePickerController.AvailableMediaTypes(UIImagePickerControllerSourceType.Camera) ?? new string[0];

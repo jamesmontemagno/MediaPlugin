@@ -83,6 +83,7 @@ namespace Plugin.Media
             if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
             {
                 UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
+                UIApplication.SharedApplication.StatusBarHidden = MediaImplementation.StatusBarHidden;
             }
 
             Dismiss(picker, () =>
@@ -100,6 +101,7 @@ namespace Plugin.Media
             if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
             {
                 UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
+                UIApplication.SharedApplication.StatusBarHidden = MediaImplementation.StatusBarHidden;
             }
 
             Dismiss(picker, () =>
