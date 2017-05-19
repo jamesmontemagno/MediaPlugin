@@ -108,7 +108,7 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission()))
+            if (!await RequestStoragePermission() || !await RequestCameraPermission())
             {
                 return null;
             }
@@ -208,7 +208,7 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission()))
+            if (!await RequestStoragePermission() || !await RequestCameraPermission())
             {
                 return null;
             }
@@ -229,13 +229,37 @@ namespace Plugin.Media
             if ((int)Build.VERSION.SdkInt < 23)
                 return true;
 
-            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
+            var permission = Permissions.Abstractions.Permission.Storage;
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(permission);
             if (status != Permissions.Abstractions.PermissionStatus.Granted)
             {
                 Console.WriteLine("Does not have storage permission granted, requesting.");
-                var results = await CrossPermissions.Current.RequestPermissionsAsync(Permissions.Abstractions.Permission.Storage);
-                if (results.ContainsKey(Permissions.Abstractions.Permission.Storage) &&
-                    results[Permissions.Abstractions.Permission.Storage] != Permissions.Abstractions.PermissionStatus.Granted)
+                var results = await CrossPermissions.Current.RequestPermissionsAsync(permission);
+                if (results.ContainsKey(permission) &&
+                    results[permission] != Permissions.Abstractions.PermissionStatus.Granted)
+                {
+                    Console.WriteLine("Storage permission Denied.");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        async Task<bool> RequestCameraPermission()
+        {
+            //We always have permission on anything lower than marshmallow.
+            if ((int)Build.VERSION.SdkInt < 23)
+                return true;
+
+            var permission = Permissions.Abstractions.Permission.Camera;
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(permission);
+            if (status != Permissions.Abstractions.PermissionStatus.Granted)
+            {
+                Console.WriteLine("Does not have storage permission granted, requesting.");
+                var results = await CrossPermissions.Current.RequestPermissionsAsync(permission);
+                if (results.ContainsKey(permission) &&
+                    results[permission] != Permissions.Abstractions.PermissionStatus.Granted)
                 {
                     Console.WriteLine("Storage permission Denied.");
                     return false;
