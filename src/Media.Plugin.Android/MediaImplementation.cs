@@ -27,6 +27,9 @@ using Plugin.Permissions;
 using Android.Media;
 using Android.Graphics;
 using System.Text.RegularExpressions;
+using Plugin.CurrentActivity;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Plugin.Media
 {
@@ -108,7 +111,7 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission()))
+            if (!(await RequestCameraPermissions()))
             {
                 return null;
             }
@@ -208,7 +211,7 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission()))
+            if (!(await RequestCameraPermissions()))
             {
                 return null;
             }
@@ -222,6 +225,50 @@ namespace Plugin.Media
         private int requestId;
         private TaskCompletionSource<MediaFile> completionSource;
 
+
+		async Task<bool> RequestCameraPermissions()
+		{
+			//We always have permission on anything lower than marshmallow.
+			if ((int)Build.VERSION.SdkInt < 23)
+				return true;
+
+            bool checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
+
+            var hasStoragePermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
+            var hasCameraPermission = Permissions.Abstractions.PermissionStatus.Granted;
+            if(checkCamera)
+                hasCameraPermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Camera);
+
+
+            var permissions = new List<Permissions.Abstractions.Permission>();
+
+            if (hasCameraPermission != Permissions.Abstractions.PermissionStatus.Granted)
+                permissions.Add(Permissions.Abstractions.Permission.Camera);
+
+            if(hasStoragePermission != Permissions.Abstractions.PermissionStatus.Granted)
+                permissions.Add(Permissions.Abstractions.Permission.Storage);
+
+            if (permissions.Count == 0) //good to go!
+                return true;
+
+            var results = await CrossPermissions.Current.RequestPermissionsAsync(permissions.ToArray());
+
+			if (results.ContainsKey(Permissions.Abstractions.Permission.Storage) &&
+					results[Permissions.Abstractions.Permission.Storage] != Permissions.Abstractions.PermissionStatus.Granted)
+			{
+				Console.WriteLine("Storage permission Denied.");
+				return false;
+			}
+
+			if (results.ContainsKey(Permissions.Abstractions.Permission.Camera) &&
+					results[Permissions.Abstractions.Permission.Camera] != Permissions.Abstractions.PermissionStatus.Granted)
+			{
+				Console.WriteLine("Camera permission Denied.");
+				return false;
+			}
+
+			return true;
+		}
 
         async Task<bool> RequestStoragePermission()
         {
@@ -244,6 +291,48 @@ namespace Plugin.Media
 
             return true;
         }
+
+        IList<string> requestedPermissions;
+		bool HasPermissionInManifest(string permission)
+		{
+			try
+			{
+				if (requestedPermissions != null)
+					return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
+
+				//try to use current activity else application context
+				var permissionContext = CrossCurrentActivity.Current.Activity ?? Android.App.Application.Context;
+
+				if (context == null)
+				{
+                    System.Diagnostics.Debug.WriteLine("Unable to detect current Activity or App Context. Please ensure Plugin.CurrentActivity is installed in your Android project and your Application class is registering with Application.IActivityLifecycleCallbacks.");
+					return false;
+				}
+
+				var info = context.PackageManager.GetPackageInfo(context.PackageName, Android.Content.PM.PackageInfoFlags.Permissions);
+
+				if (info == null)
+				{
+					System.Diagnostics.Debug.WriteLine("Unable to get Package info, will not be able to determine permissions to request.");
+					return false;
+				}
+
+				requestedPermissions = info.RequestedPermissions;
+
+				if (requestedPermissions == null)
+				{
+					System.Diagnostics.Debug.WriteLine("There are no requested permissions, please check to ensure you have marked permissions you want to request.");
+					return false;
+				}
+
+				return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
+			}
+			catch (Exception ex)
+			{
+				Console.Write("Unable to check manifest for permission: " + ex);
+			}
+			return false;
+		}
 
 
         const string IllegalCharacters = "[|\\?*<\":>/']";
