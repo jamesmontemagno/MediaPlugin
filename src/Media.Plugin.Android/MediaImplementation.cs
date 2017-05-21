@@ -405,6 +405,10 @@ namespace Plugin.Media
                     }
                     pickerIntent.PutExtra(MediaStore.ExtraDurationLimit, (int)vidOptions.DesiredLength.TotalSeconds);
                     pickerIntent.PutExtra(MediaStore.ExtraVideoQuality, (int)vidOptions.Quality);
+                    if (vidOptions.DesiredSize != 0)
+                    {
+                        pickerIntent.PutExtra(MediaStore.ExtraSizeLimit, vidOptions.DesiredSize);
+                    }
                 }
             }
             //pickerIntent.SetFlags(ActivityFlags.ClearTop);
