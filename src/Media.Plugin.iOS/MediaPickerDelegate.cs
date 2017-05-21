@@ -85,7 +85,6 @@ namespace Plugin.Media
             if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
             {
                 UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
-                UIApplication.SharedApplication.StatusBarHidden = MediaImplementation.StatusBarHidden;
             }
 
             Dismiss(picker, () =>
@@ -103,7 +102,6 @@ namespace Plugin.Media
             if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
             {
                 UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
-                UIApplication.SharedApplication.StatusBarHidden = MediaImplementation.StatusBarHidden;
             }
 
             Dismiss(picker, () =>
@@ -201,7 +199,7 @@ namespace Plugin.Media
 
         private void DidRotate(NSNotification notice)
         {
-            UIDevice device = (UIDevice)notice.Object;
+			UIDevice device = (UIDevice)notice.Object;
             if (!IsValidInterfaceOrientation(device.Orientation) || Popover == null)
                 return;
             if (orientation.HasValue && IsSameOrientationKind(orientation.Value, device.Orientation))

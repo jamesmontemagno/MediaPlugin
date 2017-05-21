@@ -36,10 +36,7 @@ namespace Plugin.Media
         /// </summary>
         public static UIStatusBarStyle StatusBarStyle { get; set; }
 
-        /// <summary>
-        /// Visibility of the status bar
-        /// </summary>
-        public static bool StatusBarHidden { get; set; }
+       
 
         ///<inheritdoc/>
         public Task<bool> Initialize() => Task.FromResult(true);
@@ -50,8 +47,7 @@ namespace Plugin.Media
         public MediaImplementation()
         {
             StatusBarStyle = UIApplication.SharedApplication.StatusBarStyle;
-            StatusBarHidden = UIApplication.SharedApplication.StatusBarHidden;
-			IsCameraAvailable = UIImagePickerController.IsCameraDeviceAvailable(UIKit.UIImagePickerControllerCameraDevice.Front)
+            IsCameraAvailable = UIImagePickerController.IsCameraDeviceAvailable(UIKit.UIImagePickerControllerCameraDevice.Front)
 									   | UIImagePickerController.IsCameraDeviceAvailable(UIKit.UIImagePickerControllerCameraDevice.Rear);
 
             var availableCameraMedia = UIImagePickerController.AvailableMediaTypes(UIImagePickerControllerSourceType.Camera) ?? new string[0];
@@ -221,7 +217,8 @@ namespace Plugin.Media
 
         private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
         {
-            UIViewController viewController = null;
+			
+			UIViewController viewController = null;
             UIWindow window = UIApplication.SharedApplication.KeyWindow;
             if (window == null)
                 throw new InvalidOperationException("There's no current active window");
