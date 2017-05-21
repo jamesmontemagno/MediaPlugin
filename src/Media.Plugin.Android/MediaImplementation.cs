@@ -39,7 +39,10 @@ namespace Plugin.Media
     [Android.Runtime.Preserve(AllMembers = true)]
     public class MediaImplementation : IMedia
     {
-        /// <summary>
+		const string TAG_PIXEL_X_DIMENSION = "PixelXDimension";
+		const string TAG_PIXEL_Y_DIMENSION = "PixelYDimension";
+
+		/// <summary>
         /// Implementation
         /// </summary>
         public MediaImplementation()
@@ -89,7 +92,17 @@ namespace Plugin.Media
             {
                 try
                 {
-                    await FixOrientationAndResizeAsync(media.Path, options);
+                    var originalMetadata = new ExifInterface(media.Path);
+
+                    if (options.RotateImage)
+                    {
+                        await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
+                    }
+                    else
+                    {
+                        await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, originalMetadata);
+                    }
+                    originalMetadata.SaveAttributes();
                 }
                 catch (Exception ex)
                 {
@@ -173,15 +186,25 @@ namespace Plugin.Media
 
             //check to see if we need to rotate if success
 
+
             try
             {
-                await FixOrientationAndResizeAsync(media.Path, options);
+                var exif = new ExifInterface(media.Path);
+                if (options.RotateImage)
+                {
+                    await FixOrientationAndResizeAsync(media.Path, options, exif);
+                }
+                else
+                {
+                    await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, exif);
+                }
+                SetMissingMetadata(exif, options.Location);
+                exif.SaveAttributes();
             }
             catch(Exception ex)
             {
                 Console.WriteLine("Unable to check orientation: " + ex);
             }
-            
 
             return media;
         }
@@ -438,8 +461,9 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="filePath">The file image path</param>
         /// <param name="mediaOptions">The options.</param>
+        /// <param name="exif">original metadata</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> FixOrientationAndResizeAsync(string filePath, PickMediaOptions mediaOptions)
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, PickMediaOptions mediaOptions, ExifInterface exif)
         {
             return FixOrientationAndResizeAsync(
                 filePath,
@@ -449,7 +473,8 @@ namespace Plugin.Media
                     CompressionQuality = mediaOptions.CompressionQuality,
                     CustomPhotoSize = mediaOptions.CustomPhotoSize,
                     MaxWidthHeight = mediaOptions.MaxWidthHeight
-                });
+                },
+                exif);
         }
 
         /// <summary>
@@ -457,8 +482,9 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="filePath">The file image path</param>
         /// <param name="mediaOptions">The options.</param>
+        /// <param name="exif">original metadata</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> FixOrientationAndResizeAsync(string filePath, StoreCameraMediaOptions mediaOptions)
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, StoreCameraMediaOptions mediaOptions, ExifInterface exif)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -478,7 +504,7 @@ namespace Plugin.Media
                         //already on background task
                         BitmapFactory.DecodeFile(filePath, options);
 
-                        var rotation = GetRotation(filePath);
+                        var rotation = GetRotation(exif);
 
                         // if we don't need to rotate, aren't resizing, and aren't adjusting quality then simply return
                         if (rotation == 0 && mediaOptions.PhotoSize == PhotoSize.Full && mediaOptions.CompressionQuality == 100)
@@ -527,6 +553,17 @@ namespace Plugin.Media
                         {
                             originalImage = Bitmap.CreateScaledBitmap(originalImage, finalWidth, finalHeight, true);
                         }
+                        if (rotation % 180 == 90)
+                        {
+                            var a = finalWidth;
+                            finalWidth = finalHeight;
+                            finalHeight = a;
+                        }
+
+                        //set scaled and rotated image dimensions
+                        exif.SetAttribute(TAG_PIXEL_X_DIMENSION, Java.Lang.Integer.ToString(finalWidth));
+                        exif.SetAttribute(TAG_PIXEL_Y_DIMENSION, Java.Lang.Integer.ToString(finalHeight));
+
                         //if we need to rotate then go for it.
                         //then compresse it if needed
                         if (rotation != 0)
@@ -535,38 +572,27 @@ namespace Plugin.Media
                             matrix.PostRotate(rotation);
                             using (var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true))
                             {
-                                    
                                 //always need to compress to save back to disk
                                 using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                 {
                                     rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
-
-
-
                                     stream.Close();
                                 }
                                 rotatedImage.Recycle();
                             }
-                            originalImage.Recycle();
-                            originalImage.Dispose();
-                            // Dispose of the Java side bitmap.
-                            GC.Collect();
+                            //change the orienation to "not rotated"
+                            exif.SetAttribute(ExifInterface.TagOrientation, Java.Lang.Integer.ToString((int)Orientation.Normal));
 
-                            //Save out new exif data
-                            SetExifData(filePath, Orientation.Normal);
-                            return true;
                         }
-
-                            
-
-                        //always need to compress to save back to disk
-                        using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                        else
                         {
-                            originalImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
-                            stream.Close();
+                            //always need to compress to save back to disk
+                            using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                            {
+                                originalImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
+                                stream.Close();
+                            }
                         }
-
-
 
                         originalImage.Recycle();
                         originalImage.Dispose();
@@ -627,8 +653,11 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="filePath">The file image path</param>
         /// <param name="photoSize">Photo size to go to.</param>
+        /// <param name="quality">Image quality (1-100)</param>
+        /// <param name="customPhotoSize">Custom size in percent</param>
+        /// <param name="exif">original metadata</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize)
+        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize, ExifInterface exif)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -639,8 +668,6 @@ namespace Plugin.Media
                 {
                     try
                     {
-                        
-
                         if (photoSize == PhotoSize.Full)
                             return false;
 
@@ -673,6 +700,10 @@ namespace Plugin.Media
 
                         var finalWidth = (int)(options.OutWidth * percent);
                         var finalHeight = (int)(options.OutHeight * percent);
+
+                        //set scaled image dimensions
+                        exif.SetAttribute(TAG_PIXEL_X_DIMENSION, Java.Lang.Integer.ToString(finalWidth));
+                        exif.SetAttribute(TAG_PIXEL_Y_DIMENSION, Java.Lang.Integer.ToString(finalHeight));
 
                         //calculate sample size
                         options.InSampleSize = CalculateInSampleSize(options, finalWidth, finalHeight);
@@ -720,45 +751,57 @@ namespace Plugin.Media
             }
         }
 
-
-        void SetExifData(string filePath, Orientation orientation)
+        void SetMissingMetadata(ExifInterface exif, Location location)
         {
-            try
+            Single[] position = new Single[6];
+            if (!exif.GetLatLong(position) && location.Latitude+location.Longitude > 0)
             {
-                using (var ei = new ExifInterface(filePath))
-                {
-
-                    ei.SetAttribute(ExifInterface.TagOrientation, Java.Lang.Integer.ToString((int)orientation));
-                    ei.SaveAttributes();                    
-                }
+                exif.SetAttribute(ExifInterface.TagGpsLatitude, coordinateToRational(location.Latitude));
+                exif.SetAttribute(ExifInterface.TagGpsLongitude, coordinateToRational(location.Longitude));
+                exif.SetAttribute(ExifInterface.TagGpsLatitudeRef, location.Latitude > 0 ? "N" : "S");
+                exif.SetAttribute(ExifInterface.TagGpsLongitudeRef, location.Longitude > 0 ? "E" : "W");
             }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagDatetime)))
             {
-#if DEBUG
-                throw ex;
-#endif
+                exif.SetAttribute(ExifInterface.TagDatetime, DateTime.Now.ToString("yyyy:MM:dd hh:mm:ss"));
+            }
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagMake))) {
+                exif.SetAttribute(ExifInterface.TagMake, Build.Manufacturer);
+            }
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagModel)))
+            {
+                exif.SetAttribute(ExifInterface.TagModel, Build.Model);
             }
         }
 
-        static int GetRotation(string filePath)
+        private string coordinateToRational(double coord)
+        {
+            coord = coord > 0 ? coord : -coord;
+            int degrees = (int)coord;
+            coord = (coord % 1) * 60;
+            int minutes = (int)coord;
+            coord = (coord % 1) * 60000;
+            int sec = (int)coord;
+
+            return $"{degrees}/1,{minutes}/1,{sec}/1000";
+        }
+
+        static int GetRotation(ExifInterface exif)
         {
             try
             {
-                using (var ei = new ExifInterface(filePath))
-                {
-                    var orientation = (Orientation)ei.GetAttributeInt(ExifInterface.TagOrientation, (int)Orientation.Normal);
+                var orientation = (Orientation)exif.GetAttributeInt(ExifInterface.TagOrientation, (int)Orientation.Normal);
 
-                    switch (orientation)
-                    {
-                        case Orientation.Rotate90:
-                            return 90;
-                        case Orientation.Rotate180:
-                            return 180;
-                        case Orientation.Rotate270:
-                            return 270;
-                        default:
-                            return 0;
-                    }
+                switch (orientation)
+                {
+                    case Orientation.Rotate90:
+                        return 90;
+                    case Orientation.Rotate180:
+                        return 180;
+                    case Orientation.Rotate270:
+                        return 270;
+                    default:
+                        return 0;
                 }
             }
             catch (Exception ex)
