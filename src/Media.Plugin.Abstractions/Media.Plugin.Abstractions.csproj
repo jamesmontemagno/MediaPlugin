@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="IMedia.cs" />
+    <Compile Include="Location.cs" />
     <Compile Include="MediaExtensions.cs" />
     <Compile Include="MediaFile.cs" />
     <Compile Include="MediaFileNotFoundException.cs" />
