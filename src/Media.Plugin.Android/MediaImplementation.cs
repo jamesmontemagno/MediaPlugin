@@ -758,7 +758,7 @@ namespace Plugin.Media
         void SetMissingMetadata(ExifInterface exif, Location location)
         {
             Single[] position = new Single[6];
-            if (!exif.GetLatLong(position) && location.Latitude+location.Longitude > 0)
+            if (!exif.GetLatLong(position) && location != null)
             {
                 exif.SetAttribute(ExifInterface.TagGpsLatitude, coordinateToRational(location.Latitude));
                 exif.SetAttribute(ExifInterface.TagGpsLongitude, coordinateToRational(location.Longitude));

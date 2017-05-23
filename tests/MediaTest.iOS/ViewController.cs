@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 
 using UIKit;
+using Plugin.Media.Abstractions;
 
 namespace MediaTest.iOS
 {
@@ -26,7 +27,7 @@ namespace MediaTest.iOS
             TakePhoto.TouchUpInside += async (sender, args) =>
             {
                 Func<object> func = CreateOverlay;
-                var test = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+				/*var test = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
                 {
                     Name = "test1.jpg",
                     SaveToAlbum = AlbumSwitch.On,
@@ -40,14 +41,25 @@ namespace MediaTest.iOS
 
                 if (test == null)
                     return;
+                */
+				var options = new StoreCameraMediaOptions
+				{
+					PhotoSize = PhotoSize.Medium,
+					CompressionQuality = 90,
+					//MaxWidthHeight = 760
+				};
 
-                new UIAlertView("Success", test.Path, null, "OK").Show();
+                string path;
+				using (var file = await CrossMedia.Current.TakePhotoAsync(options))
+					path = file?.Path;
 
-                var stream = test.GetStream();
+                new UIAlertView("Success", path, null, "OK").Show();
+
+                /*var stream = test.GetStream();
                 using (var data = NSData.FromStream(stream))
                     MainImage.Image = UIImage.LoadFromData(data);
 
-                test.Dispose();
+                test.Dispose();*/
             };
 
             PickPhoto.TouchUpInside += async (sender, args) =>
