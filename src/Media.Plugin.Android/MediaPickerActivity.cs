@@ -67,6 +67,7 @@ namespace Plugin.Media
         private string action;
 
         private int seconds;
+        private long size;
         private VideoQuality quality;
 
         private bool tasked;
@@ -83,6 +84,7 @@ namespace Plugin.Media
             outState.PutString(ExtraType, this.type);
             outState.PutString(ExtraAction, this.action);
             outState.PutInt(MediaStore.ExtraDurationLimit, this.seconds);
+            outState.PutLong(MediaStore.ExtraSizeLimit, this.size);
             outState.PutInt(MediaStore.ExtraVideoQuality, (int)this.quality);
             outState.PutBoolean(ExtraSaveToAlbum, saveToAlbum);
             outState.PutBoolean(ExtraTasked, this.tasked);
@@ -132,6 +134,11 @@ namespace Plugin.Media
                         this.seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
                         if (this.seconds != 0)
                             pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
+                        this.size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
+                        if (this.size != 0)
+                        {
+                            pickIntent.PutExtra(MediaStore.ExtraSizeLimit, this.size);
+                        }
                     }
 
                     this.saveToAlbum = b.GetBoolean(ExtraSaveToAlbum);
