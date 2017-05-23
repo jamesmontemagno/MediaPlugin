@@ -284,42 +284,20 @@ namespace Plugin.Media
         {
             var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
 
-            NSDictionary meta = null;
-            if (source == UIImagePickerControllerSourceType.Camera)
-            {
-                meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
-                if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
-                {
-                    var newMeta = new NSMutableDictionary();
-                    newMeta.SetValuesForKeysWithDictionary(meta);
-                    var newTiffDict = new NSMutableDictionary();
-                    newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
-                    newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
-                    newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
-                    meta = newMeta;
-                }
-                var location = options.Location;
-                if (meta != null && location.Latitude > 0.0)
-                {
-                    meta = SetGpsLocation(meta, location);
-                }
-            }
-            else
-            {
-                meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(info[UIImagePickerController.ReferenceUrl] as NSUrl);
-            }
-
             string path = GetOutputPath(MediaImplementation.TypeImage,
                 options.Directory ?? ((IsCaptured) ? String.Empty : "temp"),
                 options.Name);
 
             var cgImage = image.CGImage;
 
+            var percent = 1.0f;
+            float newHeight = image.CGImage.Height;
+            float newWidth = image.CGImage.Width;
+
             if (options.PhotoSize != PhotoSize.Full)
             {
                 try
                 {
-                    var percent = 1.0f;
                     switch (options.PhotoSize)
                     {
                         case PhotoSize.Large:
@@ -339,22 +317,23 @@ namespace Plugin.Media
                     if (options.PhotoSize == PhotoSize.MaxWidthHeight && options.MaxWidthHeight.HasValue)
                     {
                         var max = Math.Max(image.CGImage.Width, image.CGImage.Height);
-                        if (max > options.MaxWidthHeight)
+                        if (max > options.MaxWidthHeight.Value)
                         {
-                            percent = (float)options.MaxWidthHeight / (float)max;
+                            percent = (float)options.MaxWidthHeight.Value / (float)max;
                         }
                     }
 
-                    //calculate new size
-                    var width = (image.CGImage.Width * percent);
-                    var height = (image.CGImage.Height * percent);
 
-                    //begin resizing image
-                    image = image.ScaleImageWithOrientation(width, height);
-                    //update exif pixel dimiensions
-                    meta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSString(width.ToString()), ImageIO.CGImageProperties.ExifPixelXDimension);
-                    meta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSString(height.ToString()), ImageIO.CGImageProperties.ExifPixelYDimension);
+                    if (percent < 1.0f)
+                    {
+                        //calculate new size
+                        newWidth = (image.CGImage.Width * percent);
+                        newHeight = (image.CGImage.Height * percent);
 
+                        //begin resizing image
+                        image = image.ResizeImageWithAspectRatio(newWidth, newHeight);
+                    }
+                   
                 }
                 catch (Exception ex)
                 {
@@ -362,20 +341,55 @@ namespace Plugin.Media
                 }
             }
 
+
+			NSDictionary meta = null;
+            try
+            {
+                if (source == UIImagePickerControllerSourceType.Camera)
+                {
+                    meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
+                    if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+                    {
+                        var newMeta = new NSMutableDictionary();
+                        newMeta.SetValuesForKeysWithDictionary(meta);
+                        var newTiffDict = new NSMutableDictionary();
+                        newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+                        newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
+                        newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
+
+
+                        //update exif pixel dimiensions -> has issues here and throws
+						//newMeta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSNumber(newWidth), ImageIO.CGImageProperties.ExifPixelXDimension);
+						//newMeta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSNumber(newHeight), ImageIO.CGImageProperties.ExifPixelYDimension);
+
+						meta = newMeta;
+                    }
+                    var location = options.Location;
+                    if (meta != null && location != null)
+                    {
+                        meta = SetGpsLocation(meta, location);
+                    }
+                }
+                else
+                {
+                    meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(info[UIImagePickerController.ReferenceUrl] as NSUrl);
+                }
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Unable to get metadata: {ex}");
+			}
+
             //iOS quality is 0.0-1.0
             var quality = (options.CompressionQuality / 100f);
-            if (meta == null)
-            {
+            var savedImage = false;
+            if (meta != null)
+                savedImage = SaveImageWithMetadata(image, quality, meta, path);
+
+            if(!savedImage)
                 image.AsJPEG(quality).Save(path, true);
-            }
-            else
-            {
-                var success = SaveImageWithMetadata(image, quality, meta, path);
-                if (!success)
-                {
-                    image.AsJPEG(quality).Save(path, true);
-                }
-            }
+            
 
             string aPath = null;
             if (source != UIImagePickerControllerSourceType.Camera)
@@ -429,44 +443,55 @@ namespace Plugin.Media
 
         private bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)
         {
-            var imageData = image.AsJPEG(quality);
-            var dataProvider = new CGDataProvider(imageData);
-            var cgImageFromJpeg = CGImage.FromJPEG(dataProvider, null, false, CGColorRenderingIntent.Default);
-            var imageWithExif = new NSMutableData();
-            var destination = CGImageDestination.Create(imageWithExif, UTType.JPEG, 1);
-            var cgImageMetadata = new CGMutableImageMetadata();
-            var destinationOptions = new CGImageDestinationOptions();
-            if (meta.ContainsKey(ImageIO.CGImageProperties.ExifDictionary))
+            try
             {
-                destinationOptions.ExifDictionary =
-                    new CGImagePropertiesExif(meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary);
-            }
-            if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
-            {
-                destinationOptions.TiffDictionary = new CGImagePropertiesTiff(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
-            }
-            if (meta.ContainsKey(ImageIO.CGImageProperties.GPSDictionary))
-            {
-                destinationOptions.GpsDictionary =
-                    new CGImagePropertiesGps(meta[ImageIO.CGImageProperties.GPSDictionary] as NSDictionary);
-            }
-            if (meta.ContainsKey(ImageIO.CGImageProperties.JFIFDictionary))
-            {
-                destinationOptions.JfifDictionary =
-                    new CGImagePropertiesJfif(meta[ImageIO.CGImageProperties.JFIFDictionary] as NSDictionary);
-            }
-            if (meta.ContainsKey(ImageIO.CGImageProperties.IPTCDictionary))
-            {
-                destinationOptions.IptcDictionary =
-                    new CGImagePropertiesIptc(meta[ImageIO.CGImageProperties.IPTCDictionary] as NSDictionary);
-            }
-            destination.AddImageAndMetadata(cgImageFromJpeg, cgImageMetadata, destinationOptions);
-            var success = destination.Close();
-            if (success)
-            {
-                imageWithExif.Save(path, true);
-            }
-            return success;
+              
+	            var imageData = image.AsJPEG(quality);
+	            var dataProvider = new CGDataProvider(imageData);
+	            var cgImageFromJpeg = CGImage.FromJPEG(dataProvider, null, false, CGColorRenderingIntent.Default);
+	            var imageWithExif = new NSMutableData();
+	            var destination = CGImageDestination.Create(imageWithExif, UTType.JPEG, 1);
+	            var cgImageMetadata = new CGMutableImageMetadata();
+	            var destinationOptions = new CGImageDestinationOptions();
+	            if (meta.ContainsKey(ImageIO.CGImageProperties.ExifDictionary))
+	            {
+	                destinationOptions.ExifDictionary =
+	                    new CGImagePropertiesExif(meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary);
+	            }
+	            if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
+	            {
+	                destinationOptions.TiffDictionary = new CGImagePropertiesTiff(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+	            }
+	            if (meta.ContainsKey(ImageIO.CGImageProperties.GPSDictionary))
+	            {
+	                destinationOptions.GpsDictionary =
+	                    new CGImagePropertiesGps(meta[ImageIO.CGImageProperties.GPSDictionary] as NSDictionary);
+	            }
+	            if (meta.ContainsKey(ImageIO.CGImageProperties.JFIFDictionary))
+	            {
+	                destinationOptions.JfifDictionary =
+	                    new CGImagePropertiesJfif(meta[ImageIO.CGImageProperties.JFIFDictionary] as NSDictionary);
+	            }
+	            if (meta.ContainsKey(ImageIO.CGImageProperties.IPTCDictionary))
+	            {
+	                destinationOptions.IptcDictionary =
+	                    new CGImagePropertiesIptc(meta[ImageIO.CGImageProperties.IPTCDictionary] as NSDictionary);
+	            }
+	            destination.AddImageAndMetadata(cgImageFromJpeg, cgImageMetadata, destinationOptions);
+	            var success = destination.Close();
+	            if (success)
+	            {
+	                imageWithExif.Save(path, true);
+	            }
+                return success;
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Unable to save image with metadata: {ex}");
+			}
+
+            return false;
         }
 
 
