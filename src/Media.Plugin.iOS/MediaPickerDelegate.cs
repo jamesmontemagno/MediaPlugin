@@ -356,11 +356,6 @@ namespace Plugin.Media
                         newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
                         newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
 
-
-                        //update exif pixel dimiensions -> has issues here and throws
-						//newMeta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSNumber(newWidth), ImageIO.CGImageProperties.ExifPixelXDimension);
-						//newMeta[ImageIO.CGImageProperties.ExifDictionary].SetValueForKey(new NSNumber(newHeight), ImageIO.CGImageProperties.ExifPixelYDimension);
-
 						meta = newMeta;
                     }
                     var location = options.Location;
@@ -452,15 +447,31 @@ namespace Plugin.Media
 	            var destination = CGImageDestination.Create(imageWithExif, UTType.JPEG, 1);
 	            var cgImageMetadata = new CGMutableImageMetadata();
 	            var destinationOptions = new CGImageDestinationOptions();
-	            if (meta.ContainsKey(ImageIO.CGImageProperties.ExifDictionary))
+
+                if (meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+                    destinationOptions.Dictionary[ImageIO.CGImageProperties.Orientation] = meta[ImageIO.CGImageProperties.Orientation];
+				
+                if (meta.ContainsKey(ImageIO.CGImageProperties.DPIWidth))
+					destinationOptions.Dictionary[ImageIO.CGImageProperties.DPIWidth] = meta[ImageIO.CGImageProperties.DPIWidth];
+
+                if (meta.ContainsKey(ImageIO.CGImageProperties.DPIHeight))
+                    destinationOptions.Dictionary[ImageIO.CGImageProperties.DPIHeight] = meta[ImageIO.CGImageProperties.DPIHeight];
+
+
+				if (meta.ContainsKey(ImageIO.CGImageProperties.ExifDictionary))
 	            {
-	                destinationOptions.ExifDictionary =
-	                    new CGImagePropertiesExif(meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary);
-	            }
-	            if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
+
+					destinationOptions.ExifDictionary =
+                                          new CGImagePropertiesExif(meta[ImageIO.CGImageProperties.ExifDictionary] as NSDictionary);
+
+				}
+
+
+                if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
 	            {
 	                destinationOptions.TiffDictionary = new CGImagePropertiesTiff(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
-	            }
+	                
+                }
 	            if (meta.ContainsKey(ImageIO.CGImageProperties.GPSDictionary))
 	            {
 	                destinationOptions.GpsDictionary =
