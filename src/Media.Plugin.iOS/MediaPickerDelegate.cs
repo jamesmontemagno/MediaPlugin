@@ -323,6 +323,7 @@ namespace Plugin.Media
                         }
                     }
 
+
                     if (percent < 1.0f)
                     {
                         //calculate new size
@@ -330,7 +331,7 @@ namespace Plugin.Media
                         newHeight = (image.CGImage.Height * percent);
 
                         //begin resizing image
-                        image = image.ResizeImageWithAspectRatio(newWidth, newHeight);
+                        image = image.ScaleImageWithOrientation(newWidth, newHeight);
                     }
                    
                 }
