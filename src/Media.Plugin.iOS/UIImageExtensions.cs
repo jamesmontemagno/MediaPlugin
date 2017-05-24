@@ -2,6 +2,7 @@ using CoreGraphics;
 using System;
 using System.Drawing;
 using UIKit;
+using CoreImage;
 
 namespace Plugin.Media
 {
@@ -10,15 +11,42 @@ namespace Plugin.Media
     /// </summary>
     public static class UIImageExtensions
     {
+        public static UIImage ResizeImageWithAspectRatio(this UIImage imageSource, float scale)
+        {
+            if (scale > 1.0f)
+                return imageSource;
+			
+            using (CIContext c = CIContext.Create())
+            {
+                var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
+
+                var f = new CILanczosScaleTransform
+                {
+                    Scale = scale,
+                    Image = sourceImage,
+                    AspectRatio = 1.0f
+                };
+
+
+                var output = f.OutputImage;
+
+                var cgi = c.CreateCGImage(output, output.Extent);
+                return UIImage.FromImage(cgi, 1.0f, imageSource.Orientation);
+            }
+        }
+
         /// <summary>
         /// Resize image to maximum size
         /// keeping the aspect ratio
         /// </summary>
         public static UIImage ResizeImageWithAspectRatio(this UIImage sourceImage, float maxWidth, float maxHeight)
         {
+			
+
             var sourceSize = sourceImage.Size;
             var maxResizeFactor = Math.Max(maxWidth / sourceSize.Width, maxHeight / sourceSize.Height);
-            if (maxResizeFactor > 1) return sourceImage;
+            if (maxResizeFactor > 1) 
+                return sourceImage;
             var width = maxResizeFactor * sourceSize.Width;
             var height = maxResizeFactor * sourceSize.Height;
             UIGraphics.BeginImageContext(new CGSize(width, height));

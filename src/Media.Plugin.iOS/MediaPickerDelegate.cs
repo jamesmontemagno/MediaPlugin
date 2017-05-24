@@ -325,12 +325,8 @@ namespace Plugin.Media
 
                     if (percent < 1.0f)
                     {
-                        //calculate new size
-                        newWidth = (image.CGImage.Width * percent);
-                        newHeight = (image.CGImage.Height * percent);
-
                         //begin resizing image
-                        image = image.ResizeImageWithAspectRatio(newWidth, newHeight);
+                        image = image.ResizeImageWithAspectRatio(percent);
                     }
                    
                 }
