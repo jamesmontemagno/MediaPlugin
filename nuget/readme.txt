@@ -1,19 +1,5 @@
 Media Plugin for Xamarin & Windows
 
-Changelog:
-[2.6.0]
-* All: Ensure you call await CrossMedia.Current.Initialize(); before accessing any APIs
-* All: Resize when taking a photo
-* All: Save original album location when picking photo
-* iOS & Android: Ability to resize when picking photo
-* iOS & Android: Set Quality Level when taking photo
-* Android: Fix images that get rotated in the wrong direction
-* Android: Updates for Android N Strict Mode, see documentation if you target N+
-* iOS & Android: Fix for rotating device.
-* iOS: Added custom overlay method (Preview)
-* iOS: iOS 10 support for new permissions, please see documentations
-* Windows RT: Bug fixes & Video Support
-
 Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 
 ## Additional Required Setup (Please Read!)
@@ -76,28 +62,5 @@ Such as:
 <key>NSMicrophoneUsageDescription</key>
 <string>This app needs access to microphone.</string>
 
-### Windows Phone 8/8.1 Silverlight
-
-You must set the `IC_CAP_ISV_CAMERA` permission.
-
-WP 8/8.1 Silverlight only supports photo, not video.
-
-### Windows Phone 8.1 RT
-Set `Webcam` permission.
-
-In your App.xaml.cs you MUST place the following code inside of the `OnLaunched` method:
-
-```csharp
-protected override void OnActivated(IActivatedEventArgs args)
-{
-
-    Plugin.Media.MediaImplementation.OnFilesPicked(args);
-
-    base.OnActivated(args);
-}
-```
-
-
-
-### Windows Store:
+### UWP
 Set `Webcam` permission.

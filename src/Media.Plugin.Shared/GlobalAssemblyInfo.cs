@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Media Plugin for Xamarin and Windows")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Refractored LLC")]
-[assembly: AssemblyCopyright("Copyright ©  2016 Refractored LLC")]
+[assembly: AssemblyCopyright("Copyright ©  2017 Refractored LLC")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("en")]

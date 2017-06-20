@@ -109,18 +109,18 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Media.Plugin.WindowsStore\MediaImplementation.cs">
-      <Link>MediaImplementation.cs</Link>
-    </Compile>
     <Compile Include="..\Media.Plugin\CrossMedia.cs">
       <Link>CrossMedia.cs</Link>
     </Compile>
+    <Compile Include="MediaImplementation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="Properties\Plugin.Media.rd.xml" />
+    <EmbeddedResource Include="Properties\Plugin.Media.rd.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{6edb0588-ffc5-4ef5-8a99-9e241d0f878d}</Project>
+      <Project>{fd1b2bab-04da-4140-b616-75d1147c9c3d}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
   </ItemGroup>

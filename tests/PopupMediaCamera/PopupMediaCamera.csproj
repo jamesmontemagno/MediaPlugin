@@ -87,11 +87,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{6edb0588-ffc5-4ef5-8a99-9e241d0f878d}</Project>
+      <Project>{fd1b2bab-04da-4140-b616-75d1147c9c3d}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Media.Plugin\Media.Plugin.csproj">
-      <Project>{a6fcef44-d2ba-42c7-b3cb-13667bcd7b54}</Project>
+      <Project>{a21a0a8d-bd69-4228-b112-d8ae5563f507}</Project>
       <Name>Media.Plugin</Name>
     </ProjectReference>
   </ItemGroup>

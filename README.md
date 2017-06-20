@@ -15,16 +15,11 @@ Build Status:
 
 **Platform Support**
 
-|Platform|Supported|Version|
-| ------------------- | :-----------: | :------------------: |
-|Xamarin.iOS|Yes|iOS 7+|
-|Xamarin.iOS Unified|Yes|iOS 7+|
-|Xamarin.Android|Yes|API 14+|
-|Windows Phone Silverlight|Yes|8.0+|
-|Windows Phone RT|Yes|8.1+|
-|Windows Store RT|Yes|8.1+|
-|Windows 10 UWP|Yes|10+|
-|Xamarin.Mac|No||
+|Platform|Version|
+| ------------------- | :------------------: |
+|Xamarin.iOS|iOS 7+|
+|Xamarin.Android|API 14+|
+|Windows 10 UWP|10+|
 
 
 ### API Usage
@@ -320,36 +315,11 @@ Such as:
 
 If you want the dialogs to be translated you must support the specific languages in your app. Read the [iOS Localization Guide](https://developer.xamarin.com/guides/ios/advanced_topics/localization_and_internationalization/)
 
-**Windows Phone 8/8.1 Silverlight:**
-
-You must set the `IC_CAP_ISV_CAMERA` permission.
-
-WP 8/8.1 Silverlight only supports photo, not video.
-
-**Windows Phone 8.1 RT:**
-
-Set `Webcam` permission.
-
-In your App.xaml.cs you MUST place the following code inside of the `OnLaunched` method:
-
-```csharp
-protected override void OnActivated(IActivatedEventArgs args)
-{
-
-    Plugin.Media.MediaImplementation.OnFilesPicked(args);
-
-    base.OnActivated(args);
-}
-```
-**Windows Store:**
+#### UWP
 
 Set `Webcam` permission.
 
 
-#### Windows Phone 8.1 RT Photo Capture
-This feature was made possible by Daniel Meixner and his great open source project:  https://diycameracaptureui.codeplex.com/
-
-Made possible under Ms-PL license:  https://diycameracaptureui.codeplex.com/license
 
 ### Permission Recommendations
 By default, the Media Plugin will attempt to request multiple permissions, but each platform handles this a bit differently, such as iOS which will only pop up permissions once. I recommend adding the [Permissions Plugin](http://github.com/jamesmontemagno/PermissionsPlugin) into your application and before taking any photo or picking photos that you check permissions ahead of time. 

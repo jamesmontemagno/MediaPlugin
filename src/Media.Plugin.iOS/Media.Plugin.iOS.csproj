@@ -48,12 +48,6 @@
     <Compile Include="PhotoLibraryAccess.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{6edb0588-ffc5-4ef5-8a99-9e241d0f878d}</Project>
-      <Name>Media.Plugin.Abstractions</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -61,6 +55,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Media.Plugin.iOS.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
+      <Project>{fd1b2bab-04da-4140-b616-75d1147c9c3d}</Project>
+      <Name>Media.Plugin.Abstractions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\Media.Plugin.Shared\Media.Plugin.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
