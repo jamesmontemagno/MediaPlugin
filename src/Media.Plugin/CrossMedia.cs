@@ -28,7 +28,7 @@ namespace Plugin.Media
 
         static IMedia CreateMedia()
         {
-#if PORTABLE
+#if NETSTANDARD1_0
             return null;
 #else
             return new MediaImplementation();
