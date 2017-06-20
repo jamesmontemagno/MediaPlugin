@@ -14,4 +14,8 @@
     <DocumentationFile>bin\Release\netstandard1.0\Plugin.Media.xml</DocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>
