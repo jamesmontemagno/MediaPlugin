@@ -52,7 +52,7 @@
    <files>
      <file src="nuget\readme.txt" target="readme.txt" /> 
      <!--Standard/PCL-->
-     <file src="src\Media.Plugin\bin\Release\Plugin.Media.*" target="lib\netstandard1.0" />
+     <file src="src\Media.Plugin\bin\Release\netstandard1.0\Plugin.Media.*" target="lib\netstandard1.0" />
 
      <!--Xamarin.Android-->
      <file src="src\Media.Plugin.Android\bin\Release\Plugin.Media.*" target="lib\MonoAndroid10" />
