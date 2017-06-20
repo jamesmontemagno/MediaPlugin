@@ -132,16 +132,16 @@ namespace Plugin.Media
                     orientation = GetDeviceOrientation(this.viewController.InterfaceOrientation);
             }
 
-            nfloat x, y;
+            double x, y;
             if (orientation == UIDeviceOrientation.LandscapeLeft || orientation == UIDeviceOrientation.LandscapeRight)
             {
-                y = (swidth / 2) - (height / 2);
-                x = (sheight / 2) - (width / 2);
+                x = (Math.Max(swidth, sheight) - width) / 2;
+                y = (Math.Min(swidth, sheight) - height) / 2;
             }
             else
             {
-                x = (swidth / 2) - (width / 2);
-                y = (sheight / 2) - (height / 2);
+                x = (Math.Min(swidth, sheight) - width) / 2;
+                y = (Math.Max(swidth, sheight) - height) / 2;
             }
 
             if (hideFirst && Popover.PopoverVisible)
