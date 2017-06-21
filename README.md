@@ -145,7 +145,7 @@ Setting these properties are optional. Any illegal characters will be removed an
 When calling `TakePhotoAsync` or `PickPhotoAsync` you can specify multiple options to reduce the size and quality of the photo that is taken or picked. These are applied to the `StoreCameraMediaOptions` and `PickMediaOptions`.
 
 #### Resize Photo Size
- By default the photo that is taken/picked is the maxiumum size and quality available. For most applications this is not needed and can be Resized. This can be accomplished by adjusting the `PhotoSize` property on the options. The easiest is to adjust it to `Small, Medium, or Large`, which is 25%, 50%, or 75% or the original.
+ By default the photo that is taken/picked is the maxiumum size and quality available. For most applications this is not needed and can be Resized. This can be accomplished by adjusting the `PhotoSize` property on the options. The easiest is to adjust it to `Small, Medium, or Large`, which is 25%, 50%, or 75% or the original. This is only supported in Android & iOS. On UWP there is a different scale that is used based on these numbers to the respected resolutions UWP supports.
 
 ```csharp
 var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
@@ -165,7 +165,7 @@ var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 ```
 
 #### Photo Quality
-Set the `CompressionQuality`, which is a value from 0 the most compressed all the way to 100, which is no compression. A good setting from testing is around 92.
+Set the `CompressionQuality`, which is a value from 0 the most compressed all the way to 100, which is no compression. A good setting from testing is around 92. This is only supported in Android & iOS
 
 ```csharp
 var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
