@@ -14,6 +14,7 @@ namespace MediaAndroidTest
         {
             base.OnCreate(savedInstanceState);
             StartActivity(typeof(MainActivity2));
+			Finish();
         }
     }
     [Activity(Label = "MediaAndroidTest", Icon = "@drawable/icon", ConfigurationChanges = Android.Content.PM.ConfigChanges.Orientation | Android.Content.PM.ConfigChanges.ScreenSize)]
