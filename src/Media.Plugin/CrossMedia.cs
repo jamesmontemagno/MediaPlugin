@@ -8,16 +8,21 @@ namespace Plugin.Media
     /// </summary>
     public class CrossMedia
     {
-        static Lazy<IMedia> Implementation = new Lazy<IMedia>(() => CreateMedia(), System.Threading.LazyThreadSafetyMode.PublicationOnly);
+        static Lazy<IMedia> implementation = new Lazy<IMedia>(() => CreateMedia(), System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
         /// <summary>
-        /// Current settings to use
+		/// Gets if the plugin is supported on the current platform.
+		/// </summary>
+		public static bool IsSupported => implementation.Value == null ? false : true;
+
+        /// <summary>
+        /// Current plugin implementation to use
         /// </summary>
         public static IMedia Current
         {
             get
             {
-                var ret = Implementation.Value;
+                var ret = implementation.Value;
                 if (ret == null)
                 {
                     throw NotImplementedInReferenceAssembly();
@@ -35,9 +40,8 @@ namespace Plugin.Media
 #endif
         }
 
-        internal static Exception NotImplementedInReferenceAssembly()
-        {
-            return new NotImplementedException("This functionality is not implemented in the portable version of this assembly.  You should reference the NuGet package from your main application project in order to reference the platform-specific implementation.");
-        }
+        internal static Exception NotImplementedInReferenceAssembly() =>
+            new NotImplementedException("This functionality is not implemented in the portable version of this assembly.  You should reference the NuGet package from your main application project in order to reference the platform-specific implementation.");
+        
     }
 }

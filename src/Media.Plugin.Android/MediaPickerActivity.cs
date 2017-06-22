@@ -1,19 +1,3 @@
-//
-//  Copyright 2011-2013, Xamarin Inc.
-//
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//
-//        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//
-
 using System;
 using System.IO;
 using System.Threading;
@@ -27,17 +11,16 @@ using Environment = Android.OS.Environment;
 using Path = System.IO.Path;
 using Uri = Android.Net.Uri;
 using Plugin.Media.Abstractions;
-using Android.Net;
-using Android.Support.V4.Content;
 using Android.Content.PM;
 using System.Globalization;
+using Android.Support.V4.Content;
 
 namespace Plugin.Media
 {
-    /// <summary>
-    /// Picker
-    /// </summary>
-    [Activity(ConfigurationChanges=Android.Content.PM.ConfigChanges.Orientation | Android.Content.PM.ConfigChanges.ScreenSize)]
+	/// <summary>
+	/// Picker
+	/// </summary>
+	[Activity(ConfigurationChanges= ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
     public class MediaPickerActivity
         : Activity, Android.Media.MediaScannerConnection.IOnScanCompletedListener
     {
@@ -78,20 +61,20 @@ namespace Plugin.Media
         protected override void OnSaveInstanceState(Bundle outState)
         {
             outState.PutBoolean("ran", true);
-            outState.PutString(MediaStore.MediaColumns.Title, this.title);
-            outState.PutString(MediaStore.Images.ImageColumns.Description, this.description);
-            outState.PutInt(ExtraId, this.id);
-            outState.PutString(ExtraType, this.type);
-            outState.PutString(ExtraAction, this.action);
-            outState.PutInt(MediaStore.ExtraDurationLimit, this.seconds);
-            outState.PutLong(MediaStore.ExtraSizeLimit, this.size);
-            outState.PutInt(MediaStore.ExtraVideoQuality, (int)this.quality);
+            outState.PutString(MediaStore.MediaColumns.Title, title);
+            outState.PutString(MediaStore.Images.ImageColumns.Description, description);
+            outState.PutInt(ExtraId, id);
+            outState.PutString(ExtraType, type);
+            outState.PutString(ExtraAction, action);
+            outState.PutInt(MediaStore.ExtraDurationLimit, seconds);
+            outState.PutLong(MediaStore.ExtraSizeLimit, size);
+            outState.PutInt(MediaStore.ExtraVideoQuality, (int)quality);
             outState.PutBoolean(ExtraSaveToAlbum, saveToAlbum);
-            outState.PutBoolean(ExtraTasked, this.tasked);
-            outState.PutInt(ExtraFront, this.front);
+            outState.PutBoolean(ExtraTasked, tasked);
+            outState.PutInt(ExtraFront, front);
 
-            if (this.path != null)
-                outState.PutString(ExtraPath, this.path.Path);
+            if (path != null)
+                outState.PutString(ExtraPath, path.Path);
 
             base.OnSaveInstanceState(outState);
         }
@@ -106,53 +89,53 @@ namespace Plugin.Media
         {
             base.OnCreate(savedInstanceState);
 
-            Bundle b = (savedInstanceState ?? Intent.Extras);
+            var b = (savedInstanceState ?? Intent.Extras);
 
-            bool ran = b.GetBoolean("ran", defaultValue: false);
+            var ran = b.GetBoolean("ran", defaultValue: false);
 
-            this.title = b.GetString(MediaStore.MediaColumns.Title);
-            this.description = b.GetString(MediaStore.Images.ImageColumns.Description);
+            title = b.GetString(MediaStore.MediaColumns.Title);
+            description = b.GetString(MediaStore.Images.ImageColumns.Description);
 
-            this.tasked = b.GetBoolean(ExtraTasked);
-            this.id = b.GetInt(ExtraId, 0);
-            this.type = b.GetString(ExtraType);
-            this.front = b.GetInt(ExtraFront);
-            if (this.type == "image/*")
-                this.isPhoto = true;
+            tasked = b.GetBoolean(ExtraTasked);
+            id = b.GetInt(ExtraId, 0);
+            type = b.GetString(ExtraType);
+            front = b.GetInt(ExtraFront);
+            if (type == "image/*")
+                isPhoto = true;
 
-            this.action = b.GetString(ExtraAction);
+            action = b.GetString(ExtraAction);
             Intent pickIntent = null;
             try
             {
-                pickIntent = new Intent(this.action);
-                if (this.action == Intent.ActionPick)
+                pickIntent = new Intent(action);
+                if (action == Intent.ActionPick)
                     pickIntent.SetType(type);
                 else
                 {
-                    if (!this.isPhoto)
+                    if (!isPhoto)
                     {
-                        this.seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
-                        if (this.seconds != 0)
+                        seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
+                        if (seconds != 0)
                             pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
-                        this.size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
-                        if (this.size != 0)
+                        size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
+                        if (size != 0)
                         {
-                            pickIntent.PutExtra(MediaStore.ExtraSizeLimit, this.size);
+                            pickIntent.PutExtra(MediaStore.ExtraSizeLimit, size);
                         }
                     }
 
-                    this.saveToAlbum = b.GetBoolean(ExtraSaveToAlbum);
-                    pickIntent.PutExtra(ExtraSaveToAlbum, this.saveToAlbum);
+                    saveToAlbum = b.GetBoolean(ExtraSaveToAlbum);
+                    pickIntent.PutExtra(ExtraSaveToAlbum, saveToAlbum);
 
-                    this.quality = (VideoQuality)b.GetInt(MediaStore.ExtraVideoQuality, (int)VideoQuality.High);
-                    pickIntent.PutExtra(MediaStore.ExtraVideoQuality, GetVideoQuality(this.quality));
+                    quality = (VideoQuality)b.GetInt(MediaStore.ExtraVideoQuality, (int)VideoQuality.High);
+                    pickIntent.PutExtra(MediaStore.ExtraVideoQuality, GetVideoQuality(quality));
 
                     if (front != 0)
                         pickIntent.PutExtra(ExtraFront, (int)Android.Hardware.CameraFacing.Front);
 
                     if (!ran)
                     {
-                        this.path = GetOutputMediaFile(this, b.GetString(ExtraPath), this.title, this.isPhoto, false);
+                        path = GetOutputMediaFile(this, b.GetString(ExtraPath), title, isPhoto, false);
 
                         Touch();
 
@@ -174,32 +157,32 @@ namespace Plugin.Media
 							}
 						}
 
-						if (targetsNOrNewer && this.path.Scheme == "file")
+						if (targetsNOrNewer && path.Scheme == "file")
 						{
 							var photoURI = FileProvider.GetUriForFile(this,
 																	  Application.Context.PackageName + ".fileprovider",
-							                                          new Java.IO.File(this.path.Path));
+							                                          new Java.IO.File(path.Path));
 
 							GrantUriPermissionsForIntent(pickIntent, photoURI);
 							pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
 						}
 						else
 						{
-							pickIntent.PutExtra(MediaStore.ExtraOutput, this.path);
+							pickIntent.PutExtra(MediaStore.ExtraOutput, path);
 						}
                     }
                     else
-                        this.path = Uri.Parse(b.GetString(ExtraPath));
+                        path = Uri.Parse(b.GetString(ExtraPath));
                 }
 
 
 
                 if (!ran)
-                    StartActivityForResult(pickIntent, this.id);
+                    StartActivityForResult(pickIntent, id);
             }
             catch (Exception ex)
             {
-                OnMediaPicked(new MediaPickedEventArgs(this.id, ex));
+                OnMediaPicked(new MediaPickedEventArgs(id, ex));
                 //must finish here because an exception has occured else blank screen
                 Finish();
             }
@@ -212,10 +195,10 @@ namespace Plugin.Media
 
         private void Touch()
         {
-            if (this.path.Scheme != "file")
+            if (path.Scheme != "file")
                 return;
 
-            var newPath = GetLocalPath(this.path);
+            var newPath = GetLocalPath(path);
             try
             {
                 var stream = File.Create(newPath);
@@ -234,10 +217,10 @@ namespace Plugin.Media
         {
             try
             {
-                if (this.path?.Scheme != "file")
+                if (path?.Scheme != "file")
                     return;
 
-                var localPath = GetLocalPath(this.path);
+                var localPath = GetLocalPath(path);
 
                 if (File.Exists(localPath))
                 {
@@ -277,7 +260,7 @@ namespace Plugin.Media
                 if (data != null && data.Path != originalPath)
                 {
                     originalPath = data.ToString();
-                    string currentPath = path.Path;
+                    var currentPath = path.Path;
                     pathFuture = TryMoveFileAsync(context, data, path, isPhoto, false).ContinueWith(t =>
                         new Tuple<string, bool>(t.Result ? currentPath : null, false));
                 }
@@ -299,7 +282,7 @@ namespace Plugin.Media
             return pathFuture.ContinueWith(t =>
             {
                 
-                string resultPath = t.Result.Item1;
+                var resultPath = t.Result.Item1;
                 var aPath = originalPath;
                 if (resultPath != null && File.Exists(t.Result.Item1))
                 {
@@ -328,7 +311,7 @@ namespace Plugin.Media
 
 
 
-            if (this.tasked)
+            if (tasked)
             {
 
                
@@ -348,7 +331,7 @@ namespace Plugin.Media
                 else
                 {
                     
-                    var e = await GetMediaFileAsync(this, requestCode, this.action, this.isPhoto, ref this.path, (data != null) ? data.Data : null, false);
+                    var e = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, data?.Data, false);
                     Finish();
                     await Task.Delay(50);
                     OnMediaPicked(e);
@@ -367,11 +350,11 @@ namespace Plugin.Media
                 else
                 {
                     Intent resultData = new Intent();
-                    resultData.PutExtra("MediaFile", (data != null) ? data.Data : null);
-                    resultData.PutExtra("path", this.path);
-                    resultData.PutExtra("isPhoto", this.isPhoto);
-                    resultData.PutExtra("action", this.action);
-                    resultData.PutExtra(ExtraSaveToAlbum, this.saveToAlbum);
+                    resultData.PutExtra("MediaFile", data?.Data);
+                    resultData.PutExtra("path", path);
+                    resultData.PutExtra("isPhoto", isPhoto);
+                    resultData.PutExtra("action", action);
+                    resultData.PutExtra(ExtraSaveToAlbum, saveToAlbum);
                     SetResult(Result.Ok, resultData);
                 }
 
@@ -379,9 +362,9 @@ namespace Plugin.Media
             }
         }
 
-        public static Task<bool> TryMoveFileAsync(Context context, Uri url, Uri path, bool isPhoto, bool saveToAlbum)
+        static Task<bool> TryMoveFileAsync(Context context, Uri url, Uri path, bool isPhoto, bool saveToAlbum)
         {
-            string moveTo = GetLocalPath(path);
+            var moveTo = GetLocalPath(path);
             return GetFileForUriAsync(context, url, isPhoto, false).ContinueWith(t =>
             {
                 if (t.Result.Item1 == null)
@@ -434,25 +417,34 @@ namespace Plugin.Media
 
         private static string GetUniquePath(string folder, string name, bool isPhoto)
         {
-            string ext = Path.GetExtension(name);
-            if (ext == String.Empty)
+            var ext = Path.GetExtension(name);
+            if (ext == string.Empty)
                 ext = ((isPhoto) ? ".jpg" : ".mp4");
 
             name = Path.GetFileNameWithoutExtension(name);
 
-            string nname = name + ext;
-            int i = 1;
+            var nname = name + ext;
+            var i = 1;
             while (File.Exists(Path.Combine(folder, nname)))
                 nname = name + "_" + (i++) + ext;
 
             return Path.Combine(folder, nname);
         }
 
+		/// <summary>
+		/// Try go get output file
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="subdir"></param>
+		/// <param name="name"></param>
+		/// <param name="isPhoto"></param>
+		/// <param name="saveToAlbum"></param>
+		/// <returns></returns>
         public static Uri GetOutputMediaFile(Context context, string subdir, string name, bool isPhoto, bool saveToAlbum)
         {
-            subdir = subdir ?? String.Empty;
+            subdir = subdir ?? string.Empty;
 
-            if (String.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
                 if (isPhoto)
@@ -461,9 +453,9 @@ namespace Plugin.Media
                     name = "VID_" + timestamp + ".mp4";
             }
 
-            string mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
+            var mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
             var directory = saveToAlbum ? Environment.GetExternalStoragePublicDirectory(mediaType) : context.GetExternalFilesDir(mediaType);
-            using (Java.IO.File mediaStorageDir = new Java.IO.File(directory, subdir))
+            using (var mediaStorageDir = new Java.IO.File(directory, subdir))
             {
                 if (!mediaStorageDir.Exists())
                 {
@@ -473,7 +465,7 @@ namespace Plugin.Media
                     if (!saveToAlbum)
                     {
                         // Ensure this media doesn't show up in gallery apps
-                        using (Java.IO.File nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
+                        using (var nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
                             nomedia.CreateNewFile();
                     }
                 }
@@ -504,7 +496,7 @@ namespace Plugin.Media
                             tcs.SetResult(new Tuple<string, bool>(null, false));
                         else
                         {
-                            int column = cursor.GetColumnIndex(MediaStore.MediaColumns.Data);
+                            var column = cursor.GetColumnIndex(MediaStore.MediaColumns.Data);
                             string contentPath = null;
 
                             if (column != -1)
@@ -530,8 +522,8 @@ namespace Plugin.Media
 
 								try
                                 {
-                                    using (Stream input = context.ContentResolver.OpenInputStream(uri))
-                                        using (Stream output = File.Create(outputPath.Path))
+                                    using (var input = context.ContentResolver.OpenInputStream(uri))
+                                        using (var output = File.Create(outputPath.Path))
                                             input.CopyTo(output);
 
                                     contentPath = outputPath.Path;
@@ -564,10 +556,8 @@ namespace Plugin.Media
             return tcs.Task;
         }
 
-        private static string GetLocalPath(Uri uri)
-        {
-            return new System.Uri(uri.ToString()).LocalPath;
-        }
+        private static string GetLocalPath(Uri uri) =>  new System.Uri(uri.ToString()).LocalPath;
+        
 
         private static Task<T> TaskFromResult<T>(T result)
         {
@@ -576,16 +566,21 @@ namespace Plugin.Media
             return tcs.Task;
         }
 
-        private static void OnMediaPicked(MediaPickedEventArgs e)
-        {
-            MediaPicked?.Invoke(null, e);
-        }
+        private static void OnMediaPicked(MediaPickedEventArgs e) =>
+			MediaPicked?.Invoke(null, e);
+        
 
-        public void OnScanCompleted(string path, Uri uri)
-        {
-            Console.WriteLine("scan complete: " + path);
-        }
-
+		/// <summary>
+		/// Scan completed
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="uri"></param>
+        public void OnScanCompleted(string path, Uri uri) =>
+			Console.WriteLine("scan complete: " + path);
+        
+		/// <summary>
+		/// On Destroy
+		/// </summary>
         protected override void OnDestroy()
         {
             if(!completed)

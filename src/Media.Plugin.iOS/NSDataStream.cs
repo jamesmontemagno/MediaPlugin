@@ -1,18 +1,3 @@
-//
-//  Copyright 2012, Xamarin Inc.
-//
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//
-//        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-
 using System;
 using System.IO;
 using Foundation;
@@ -25,10 +10,9 @@ namespace Plugin.Media
         NSData theData;
         uint pos;
 
-        public NSDataStream(NSData data)
-        {
-            this.theData = data;
-        }
+        public NSDataStream(NSData data) =>
+			theData = data;
+        
 
         protected override void Dispose(bool disposing)
         {
@@ -58,20 +42,17 @@ namespace Plugin.Media
             }
         }
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException();
-        }
+        public override long Seek(long offset, SeekOrigin origin) =>
+			throw new NotSupportedException();
+        
 
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException();
-        }
+        public override void SetLength(long value) =>
+			throw new NotSupportedException();
+        
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
+        public override void Write(byte[] buffer, int offset, int count) =>
             throw new NotSupportedException();
-        }
+        
 
         public override bool CanRead => true;
 
@@ -81,15 +62,12 @@ namespace Plugin.Media
 
         public override long Length => (long) theData.Length;
 
-        public override long Position
-        {
-            get
-            {
-                return pos;
-            }
-            set
-            {
-            }
-        }
+		public override long Position
+		{
+			get => pos;
+			set
+			{
+			}
+		}
     }
 }

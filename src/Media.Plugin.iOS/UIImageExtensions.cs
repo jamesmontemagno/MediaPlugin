@@ -11,12 +11,18 @@ namespace Plugin.Media
     /// </summary>
     public static class UIImageExtensions
     {
+		/// <summary>
+		/// Resize image maintain aspect ratio
+		/// </summary>
+		/// <param name="imageSource"></param>
+		/// <param name="scale"></param>
+		/// <returns></returns>
         public static UIImage ResizeImageWithAspectRatio(this UIImage imageSource, float scale)
         {
             if (scale > 1.0f)
                 return imageSource;
 			
-            using (CIContext c = CIContext.Create())
+            using (var c = CIContext.Create())
             {
                 var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
 

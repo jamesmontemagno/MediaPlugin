@@ -30,8 +30,9 @@
          <group targetFramework="netstandard1.0">
            <dependency id="NETStandard.Library" version="1.6.1" />
          </group>
-         <group targetFramework="MonoAndroid10">
-           <dependency id="Plugin.Permissions" version="1.2.1"/>
+         <group targetFramework="MonoAndroid70">
+           <dependency id="Plugin.Permissions" version="2.0.0.28-beta"/>
+           <dependency id="Xamarin.Android.Support.Core.Utils" version="25.3.1"/>
          </group>
          <group targetFramework="Xamarin.iOS10">
          </group>
@@ -55,7 +56,7 @@
      <file src="src\Media.Plugin\bin\Release\netstandard1.0\Plugin.Media.*" target="lib\netstandard1.0" />
 
      <!--Xamarin.Android-->
-     <file src="src\Media.Plugin.Android\bin\Release\Plugin.Media.*" target="lib\MonoAndroid10" />
+     <file src="src\Media.Plugin.Android\bin\Release\Plugin.Media.*" target="lib\MonoAndroid70" />
   
      <!--Xamarin.iOS-->
      <file src="src\Media.Plugin.iOS\bin\iPhone\Release\Plugin.Media.*" target="lib\Xamarin.iOS10" />

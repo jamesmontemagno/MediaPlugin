@@ -3,6 +3,7 @@
 ### [3.0.0]
 * Upgrade to .NET Standard
 * Deprecate Windows Phone 8/8.1 and Windows Store
+* Update to 25.x Support Libraries on Android
 
 ### [2.6.3]
 * All: No longer delete files when picked. You are in control.
