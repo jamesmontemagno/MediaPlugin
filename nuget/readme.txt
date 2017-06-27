@@ -1,19 +1,5 @@
 Media Plugin for Xamarin & Windows
 
-Changelog:
-[2.6.0]
-* All: Ensure you call await CrossMedia.Current.Initialize(); before accessing any APIs
-* All: Resize when taking a photo
-* All: Save original album location when picking photo
-* iOS & Android: Ability to resize when picking photo
-* iOS & Android: Set Quality Level when taking photo
-* Android: Fix images that get rotated in the wrong direction
-* Android: Updates for Android N Strict Mode, see documentation if you target N+
-* iOS & Android: Fix for rotating device.
-* iOS: Added custom overlay method (Preview)
-* iOS: iOS 10 support for new permissions, please see documentations
-* Windows RT: Bug fixes & Video Support
-
 Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 
 ## Additional Required Setup (Please Read!)
