@@ -2,9 +2,16 @@ Media Plugin for Xamarin & Windows
 
 Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 
+## News
+- Plugins have moved to .NET Standard and have some important changes! Please read my blog:
+http://motzcod.es/post/162402194007/plugins-for-xamarin-go-dotnet-standard
+
+
 ## Additional Required Setup (Please Read!)
 
 ## Android 
+You must set your app to compile against API 25 or higher and be able to install the latest android support libraries.
+
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
 public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
