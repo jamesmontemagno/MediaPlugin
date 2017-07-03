@@ -5,8 +5,16 @@ using Photos;
 
 namespace Plugin.Media
 {
+	/// <summary>
+	/// Accesst library
+	/// </summary>
 	public static class PhotoLibraryAccess
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
 		public static NSDictionary GetPhotoLibraryMetadata(NSUrl url)
 		{
 			NSDictionary meta = null;
@@ -26,13 +34,15 @@ namespace Plugin.Media
 					var fullimage = CIImage.FromData(data);
 					if (fullimage?.Properties != null)
 					{
-						meta = new NSMutableDictionary();
-						meta[ImageIO.CGImageProperties.Orientation] = new NSString(fullimage.Properties.Orientation.ToString());
-						meta[ImageIO.CGImageProperties.ExifDictionary] = fullimage.Properties.Exif?.Dictionary ?? new NSDictionary();
-						meta[ImageIO.CGImageProperties.TIFFDictionary] = fullimage.Properties.Tiff?.Dictionary ?? new NSDictionary();
-						meta[ImageIO.CGImageProperties.GPSDictionary] = fullimage.Properties.Gps?.Dictionary ?? new NSDictionary();
-						meta[ImageIO.CGImageProperties.IPTCDictionary] = fullimage.Properties.Iptc?.Dictionary ?? new NSDictionary();
-						meta[ImageIO.CGImageProperties.JFIFDictionary] = fullimage.Properties.Jfif?.Dictionary ?? new NSDictionary();
+						meta = new NSMutableDictionary
+						{
+							[ImageIO.CGImageProperties.Orientation] = new NSString(fullimage.Properties.Orientation.ToString()),
+							[ImageIO.CGImageProperties.ExifDictionary] = fullimage.Properties.Exif?.Dictionary ?? new NSDictionary(),
+							[ImageIO.CGImageProperties.TIFFDictionary] = fullimage.Properties.Tiff?.Dictionary ?? new NSDictionary(),
+							[ImageIO.CGImageProperties.GPSDictionary] = fullimage.Properties.Gps?.Dictionary ?? new NSDictionary(),
+							[ImageIO.CGImageProperties.IPTCDictionary] = fullimage.Properties.Iptc?.Dictionary ?? new NSDictionary(),
+							[ImageIO.CGImageProperties.JFIFDictionary] = fullimage.Properties.Jfif?.Dictionary ?? new NSDictionary()
+						};
 					}
 				}
 				catch (Exception ex)

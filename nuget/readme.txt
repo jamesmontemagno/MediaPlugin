@@ -2,9 +2,16 @@ Media Plugin for Xamarin & Windows
 
 Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 
+## News
+- Plugins have moved to .NET Standard and have some important changes! Please read my blog:
+http://motzcod.es/post/162402194007/plugins-for-xamarin-go-dotnet-standard
+
+
 ## Additional Required Setup (Please Read!)
 
 ## Android 
+You must set your app to compile against API 25 or higher and be able to install the latest android support libraries.
+
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
 public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
@@ -41,8 +48,8 @@ Add the following code:
 
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Pictures" />
-    <external-path name="my_movies" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Movies" />
+    <external-files-path name="my_images" path="Pictures" />
+    <external-files-path name="my_movies" path="Movies" />
 </paths>
 
 YOUR_APP_PACKAGE_NAME must be set to your app package name!
@@ -62,28 +69,5 @@ Such as:
 <key>NSMicrophoneUsageDescription</key>
 <string>This app needs access to microphone.</string>
 
-### Windows Phone 8/8.1 Silverlight
-
-You must set the `IC_CAP_ISV_CAMERA` permission.
-
-WP 8/8.1 Silverlight only supports photo, not video.
-
-### Windows Phone 8.1 RT
-Set `Webcam` permission.
-
-In your App.xaml.cs you MUST place the following code inside of the `OnLaunched` method:
-
-```csharp
-protected override void OnActivated(IActivatedEventArgs args)
-{
-
-    Plugin.Media.MediaImplementation.OnFilesPicked(args);
-
-    base.OnActivated(args);
-}
-```
-
-
-
-### Windows Store:
+### UWP
 Set `Webcam` permission.

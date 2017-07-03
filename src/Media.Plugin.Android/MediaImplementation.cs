@@ -1,19 +1,3 @@
-//
-//  Copyright 2011-2013, Xamarin Inc.
-//
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//
-//        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//
-
 using System;
 using System.IO;
 using System.Threading;
@@ -418,11 +402,11 @@ namespace Plugin.Media
 
         private int GetRequestId()
         {
-            int id = this.requestId;
-            if (this.requestId == Int32.MaxValue)
-                this.requestId = 0;
+            var id = requestId;
+            if (requestId == int.MaxValue)
+                requestId = 0;
             else
-                this.requestId++;
+                requestId++;
 
             return id;
         }
@@ -432,10 +416,10 @@ namespace Plugin.Media
             int id = GetRequestId();
 
             var ntcs = new TaskCompletionSource<MediaFile>(id);
-            if (Interlocked.CompareExchange(ref this.completionSource, ntcs, null) != null)
+            if (Interlocked.CompareExchange(ref completionSource, ntcs, null) != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
 
-            this.context.StartActivity(CreateMediaIntent(id, type, action, options));
+			context.StartActivity(CreateMediaIntent(id, type, action, options));
 
             EventHandler<MediaPickedEventArgs> handler = null;
             handler = (s, e) =>
@@ -626,8 +610,7 @@ namespace Plugin.Media
 
         }
 
-        public int CalculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight)
+        int CalculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight)
         {
             // Raw height and width of image
             var height = options.OutHeight;
@@ -757,11 +740,11 @@ namespace Plugin.Media
 
         void SetMissingMetadata(ExifInterface exif, Location location)
         {
-            Single[] position = new Single[6];
+            var position = new float[6];
             if (!exif.GetLatLong(position) && location != null)
             {
-                exif.SetAttribute(ExifInterface.TagGpsLatitude, coordinateToRational(location.Latitude));
-                exif.SetAttribute(ExifInterface.TagGpsLongitude, coordinateToRational(location.Longitude));
+                exif.SetAttribute(ExifInterface.TagGpsLatitude, CoordinateToRational(location.Latitude));
+                exif.SetAttribute(ExifInterface.TagGpsLongitude, CoordinateToRational(location.Longitude));
                 exif.SetAttribute(ExifInterface.TagGpsLatitudeRef, location.Latitude > 0 ? "N" : "S");
                 exif.SetAttribute(ExifInterface.TagGpsLongitudeRef, location.Longitude > 0 ? "E" : "W");
             }
@@ -778,14 +761,14 @@ namespace Plugin.Media
             }
         }
 
-        private string coordinateToRational(double coord)
+        private string CoordinateToRational(double coord)
         {
             coord = coord > 0 ? coord : -coord;
-            int degrees = (int)coord;
+            var degrees = (int)coord;
             coord = (coord % 1) * 60;
-            int minutes = (int)coord;
+            var minutes = (int)coord;
             coord = (coord % 1) * 60000;
-            int sec = (int)coord;
+            var sec = (int)coord;
 
             return $"{degrees}/1,{minutes}/1,{sec}/1000";
         }

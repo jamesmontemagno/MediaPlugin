@@ -32,6 +32,10 @@ namespace Plugin.Media
         }
 
         bool initialized = false;
+		/// <summary>
+		/// Initialize camera
+		/// </summary>
+		/// <returns></returns>
         public async Task<bool> Initialize()
         {
             if (initialized)
@@ -53,7 +57,7 @@ namespace Plugin.Media
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Unable to detect cameras: " + ex);
+				Debug.WriteLine("Unable to detect cameras: " + ex);
             }
 
             initialized = true;
@@ -110,9 +114,9 @@ namespace Plugin.Media
             if (result == null)
                 return null;
 
-            StorageFolder folder = ApplicationData.Current.LocalFolder;
+            var folder = ApplicationData.Current.LocalFolder;
 
-            string path = options.GetFilePath(folder.Path);
+            var path = options.GetFilePath(folder.Path);
             var directoryFull = Path.GetDirectoryName(path);
             var newFolder = directoryFull.Replace(folder.Path, string.Empty);
             if (!string.IsNullOrWhiteSpace(newFolder))
@@ -120,14 +124,14 @@ namespace Plugin.Media
 
             folder = await StorageFolder.GetFolderFromPathAsync(directoryFull);
 
-            string filename = Path.GetFileName(path);
+            var filename = Path.GetFileName(path);
 
             string aPath = null;
             if (options?.SaveToAlbum ?? false)
             {
                 try
                 {
-                    string fileNameNoEx = Path.GetFileNameWithoutExtension(path);
+                    var fileNameNoEx = Path.GetFileNameWithoutExtension(path);
                     var copy = await result.CopyAsync(KnownFolders.PicturesLibrary, fileNameNoEx + result.FileType, NameCollisionOption.GenerateUniqueName);
                     aPath = copy.Path;
                 }
@@ -141,7 +145,8 @@ namespace Plugin.Media
             return new MediaFile(file.Path, () => file.OpenStreamForReadAsync().Result, albumPath: aPath);
         }
 
-        public CameraCaptureUIMaxPhotoResolution GetMaxResolution(PhotoSize photoSize, int customPhotoSize)
+
+        CameraCaptureUIMaxPhotoResolution GetMaxResolution(PhotoSize photoSize, int customPhotoSize)
         {
             if(photoSize == PhotoSize.Custom)
             {
@@ -191,8 +196,8 @@ namespace Plugin.Media
             if (result == null)
                 return null;
 
-            string aPath = result.Path;
-            string path = result.Path;
+            var aPath = result.Path;
+            var path = result.Path;
             StorageFile copy = null;
             //copy local
             try
@@ -250,7 +255,7 @@ namespace Plugin.Media
             {
                 try
                 {
-                    string fileNameNoEx = Path.GetFileNameWithoutExtension(result.Path);
+                    var fileNameNoEx = Path.GetFileNameWithoutExtension(result.Path);
                     var copy = await result.CopyAsync(KnownFolders.VideosLibrary, fileNameNoEx + result.FileType, NameCollisionOption.GenerateUniqueName);
                     aPath = copy.Path;
                 }
@@ -269,18 +274,21 @@ namespace Plugin.Media
         /// <returns>Media file of video or null if canceled</returns>
         public async Task<MediaFile> PickVideoAsync()
         {
-            var picker = new FileOpenPicker();
-            picker.SuggestedStartLocation = PickerLocationId.VideosLibrary;
-            picker.ViewMode = PickerViewMode.Thumbnail;
-            foreach (var filter in SupportedVideoFileTypes)
+			var picker = new FileOpenPicker()
+			{
+				SuggestedStartLocation = PickerLocationId.VideosLibrary,
+				ViewMode = PickerViewMode.Thumbnail
+			};
+
+			foreach (var filter in SupportedVideoFileTypes)
                 picker.FileTypeFilter.Add(filter);
 
             var result = await picker.PickSingleFileAsync();
             if (result == null)
                 return null;
 
-            string aPath = result.Path;
-            string path = result.Path;
+            var aPath = result.Path;
+            var path = result.Path;
             StorageFile copy = null;
             //copy local
             try
@@ -327,11 +335,10 @@ namespace Plugin.Media
 
         private void OnDeviceUpdated(DeviceWatcher sender, DeviceInformationUpdate update)
         {
-            object value;
-            if (!update.Properties.TryGetValue("System.Devices.InterfaceEnabled", out value))
-                return;
+			if (!update.Properties.TryGetValue("System.Devices.InterfaceEnabled", out object value))
+				return;
 
-            lock (devices)
+			lock (devices)
             {
                 if ((bool)value)
                     devices.Add(update.Id);

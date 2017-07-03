@@ -1,5 +1,14 @@
 ## Changelog
 
+### [3.0.0]
+* Upgrade to .NET Standard
+* Deprecate Windows Phone 8/8.1 and Windows Store
+* Update to 25.x Support Libraries on Android
+* iOS: Fix Pop-over position on iPad in landscape
+* Add Exif Information to iOS and Android
+* Optimize rotations on iOS and Android
+
+
 ### [2.6.3]
 * All: No longer delete files when picked. You are in control.
 * Windows Phone 8.1 RT: Handle button mashing on photo button better.
