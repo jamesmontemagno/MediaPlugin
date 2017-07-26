@@ -1,4 +1,6 @@
 ## Changelog
+### [3.0.2]
+* Fix Lat/Long saving on iOS
 
 ### [3.0.0]
 * Upgrade to .NET Standard
