@@ -386,9 +386,9 @@ namespace Plugin.Media
             var newMeta = new NSMutableDictionary();
             newMeta.SetValuesForKeysWithDictionary(meta);
             var newGpsDict = new NSMutableDictionary();
-            newGpsDict.SetValueForKey(new NSNumber(location.Latitude), ImageIO.CGImageProperties.GPSLatitude);
+            newGpsDict.SetValueForKey(new NSNumber(Math.Abs(location.Latitude)), ImageIO.CGImageProperties.GPSLatitude);
             newGpsDict.SetValueForKey(new NSString(location.Latitude > 0 ? "N" : "S"), ImageIO.CGImageProperties.GPSLatitudeRef);
-            newGpsDict.SetValueForKey(new NSNumber(location.Longitude), ImageIO.CGImageProperties.GPSLongitude);
+            newGpsDict.SetValueForKey(new NSNumber(Math.Abs(location.Longitude)), ImageIO.CGImageProperties.GPSLongitude);
             newGpsDict.SetValueForKey(new NSString(location.Longitude > 0 ? "E" : "W"), ImageIO.CGImageProperties.GPSLongitudeRef);
             newGpsDict.SetValueForKey(new NSNumber(location.Altitude), ImageIO.CGImageProperties.GPSAltitude);
             newGpsDict.SetValueForKey(new NSNumber(0), ImageIO.CGImageProperties.GPSAltitudeRef);
