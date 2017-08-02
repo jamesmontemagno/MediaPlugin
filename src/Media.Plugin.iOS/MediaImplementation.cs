@@ -106,15 +106,20 @@ namespace Plugin.Media
         /// Picks a video from the default gallery
         /// </summary>
         /// <returns>Media file of video or null if canceled</returns>
-        public Task<MediaFile> PickVideoAsync()
+        public async Task<MediaFile> PickVideoAsync()
         {
             if (!IsPickVideoSupported)
                 throw new NotSupportedException();
 
+            var backgroundTask = UIApplication.SharedApplication.BeginBackgroundTask(() => { });
 
             CheckPhotoUsageDescription();
 
-            return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie);
+            var media = await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie);
+
+            UIApplication.SharedApplication.EndBackgroundTask(backgroundTask);
+
+            return media;
         }
         
 
