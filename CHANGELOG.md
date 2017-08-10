@@ -1,6 +1,7 @@
 ## Changelog
 ### [3.0.2]
-* Fix Lat/Long saving on iOS
+* iOS: Fix Lat/Long saving
+* Android: Fixup issue with url sharing #300 especially with mobileiron
 
 ### [3.0.0]
 * Upgrade to .NET Standard
