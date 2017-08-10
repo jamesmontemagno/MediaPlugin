@@ -164,8 +164,8 @@ namespace Plugin.Media
 							                                          new Java.IO.File(path.Path));
 
 							GrantUriPermissionsForIntent(pickIntent, photoURI);
-							pickerIntent.AddFlags(ActivityFlags.GrantReadUriPermission); 
-							pickerIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+							pickIntent.AddFlags(ActivityFlags.GrantReadUriPermission); 
+							pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
 							pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
 						}
 						else
