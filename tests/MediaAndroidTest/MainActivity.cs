@@ -95,13 +95,15 @@ namespace MediaAndroidTest
               {
                   try
                   {
-                      var media = new Plugin.Media.MediaImplementation();
+					  var size = switchSize.Checked ? Plugin.Media.Abstractions.VideoQuality.Low : Plugin.Media.Abstractions.VideoQuality.Medium;
+					  var media = new Plugin.Media.MediaImplementation();
                       var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
                       {
                           Directory = "Sample",
-                          Name = "test.mp4",
-                          SaveToAlbum = true
-                      });
+                          Name = $"{DateTime.UtcNow}_{size}|\\?*<\":>/'.mp4".Replace(" ", string.Empty),
+						  SaveToAlbum = switchSaveToAlbum.Checked,
+						  Quality = size
+					  });
                       if (file == null)
                           return;
                       var path = file.Path;
