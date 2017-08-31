@@ -242,7 +242,7 @@ namespace Plugin.Media
 
             if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
             {
-                ndelegate.Popover = new UIPopoverController(picker);
+                ndelegate.Popover = popover = new UIPopoverController(picker);
                 ndelegate.Popover.Delegate = new MediaPickerPopoverDelegate(ndelegate, picker);
                 ndelegate.DisplayPopover();
             }
