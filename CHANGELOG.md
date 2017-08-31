@@ -2,6 +2,8 @@
 ### [3.0.2]
 * iOS: Fix Lat/Long saving
 * Android: Fixup issue with url sharing #300 especially with mobileiron
+* iOS: Ensure all properties are set when picking photo #305
+
 
 ### [3.0.0]
 * Upgrade to .NET Standard
