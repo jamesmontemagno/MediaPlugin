@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using Uri = Android.Net.Uri;
 using Plugin.Media.Abstractions;
 using Android.Content.PM;
 using System.Globalization;
+using System.Linq;
 using Android.Support.V4.Content;
 
 namespace Plugin.Media
@@ -30,12 +32,13 @@ namespace Plugin.Media
         internal const string ExtraId = "id";
         internal const string ExtraAction = "action";
         internal const string ExtraTasked = "tasked";
-        internal const string ExtraSaveToAlbum = "album_save";
+        internal const string ExtraMultiSelect = "multi_select";
+		internal const string ExtraSaveToAlbum = "album_save";
         internal const string ExtraFront = "android.intent.extras.CAMERA_FACING";
 
         internal static event EventHandler<MediaPickedEventArgs> MediaPicked;
 
-        private int id;
+		private int id;
         private int front;
         private string title;
         private string description;
@@ -48,6 +51,7 @@ namespace Plugin.Media
         private bool isPhoto;
         private bool saveToAlbum;
         private string action;
+	    private bool multiSelect;
 
         private int seconds;
         private long size;
@@ -72,8 +76,9 @@ namespace Plugin.Media
             outState.PutBoolean(ExtraSaveToAlbum, saveToAlbum);
             outState.PutBoolean(ExtraTasked, tasked);
             outState.PutInt(ExtraFront, front);
+            outState.PutBoolean(ExtraMultiSelect, multiSelect);
 
-            if (path != null)
+			if (path != null)
                 outState.PutString(ExtraPath, path.Path);
 
             base.OnSaveInstanceState(outState);
@@ -100,7 +105,9 @@ namespace Plugin.Media
             id = b.GetInt(ExtraId, 0);
             type = b.GetString(ExtraType);
             front = b.GetInt(ExtraFront);
-            if (type == "image/*")
+	        multiSelect = b.GetBoolean(ExtraMultiSelect);
+
+			if (type == "image/*")
                 isPhoto = true;
 
             action = b.GetString(ExtraAction);
@@ -108,78 +115,84 @@ namespace Plugin.Media
             try
             {
                 pickIntent = new Intent(action);
-                if (action == Intent.ActionPick)
-                    pickIntent.SetType(type);
-                else
-                {
-                    if (!isPhoto)
-                    {
-                        seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
-                        if (seconds != 0)
-                            pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
-                        size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
-                        if (size != 0)
-                        {
-                            pickIntent.PutExtra(MediaStore.ExtraSizeLimit, size);
-                        }
-                    }
+	            if (action == Intent.ActionPick)
+	            {
+		            if (multiSelect)
+			            pickIntent.PutExtra(Intent.ExtraAllowMultiple, true);
 
-                    saveToAlbum = b.GetBoolean(ExtraSaveToAlbum);
-                    pickIntent.PutExtra(ExtraSaveToAlbum, saveToAlbum);
+		            pickIntent.SetType(type);
+	            }
+	            else
+	            {
+		            if (!isPhoto)
+		            {
+			            seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
+			            if (seconds != 0)
+				            pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
+			            size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
+			            if (size != 0)
+			            {
+				            pickIntent.PutExtra(MediaStore.ExtraSizeLimit, size);
+			            }
+		            }
 
-                    quality = (VideoQuality)b.GetInt(MediaStore.ExtraVideoQuality, (int)VideoQuality.High);
-                    pickIntent.PutExtra(MediaStore.ExtraVideoQuality, GetVideoQuality(quality));
+		            saveToAlbum = b.GetBoolean(ExtraSaveToAlbum);
+		            pickIntent.PutExtra(ExtraSaveToAlbum, saveToAlbum);
 
-                    if (front != 0)
-                        pickIntent.PutExtra(ExtraFront, (int)Android.Hardware.CameraFacing.Front);
+		            quality = (VideoQuality) b.GetInt(MediaStore.ExtraVideoQuality, (int) VideoQuality.High);
+		            pickIntent.PutExtra(MediaStore.ExtraVideoQuality, GetVideoQuality(quality));
 
-                    if (!ran)
-                    {
-                        path = GetOutputMediaFile(this, b.GetString(ExtraPath), title, isPhoto, false);
+		            if (front != 0)
+			            pickIntent.PutExtra(ExtraFront, (int) Android.Hardware.CameraFacing.Front);
 
-                        Touch();
+		            if (!ran)
+		            {
+			            path = GetOutputMediaFile(this, b.GetString(ExtraPath), title, isPhoto, false);
 
-						var targetsNOrNewer = false;
+			            Touch();
 
-						try
-						{
-							targetsNOrNewer = (int)Application.Context.ApplicationInfo.TargetSdkVersion >= 24;
-						}
-						catch(Exception appInfoEx)
-						{
-							System.Diagnostics.Debug.WriteLine("Unable to get application info for targetSDK, trying to get from package manager: " + appInfoEx);
-							targetsNOrNewer = false;
+			            var targetsNOrNewer = false;
 
-							var appInfo = PackageManager.GetApplicationInfo(Application.Context.PackageName, 0);
-							if (appInfo != null)
-							{
-								targetsNOrNewer = (int)appInfo.TargetSdkVersion >= 24;
-							}
-						}
+			            try
+			            {
+				            targetsNOrNewer = (int) Application.Context.ApplicationInfo.TargetSdkVersion >= 24;
+			            }
+			            catch (Exception appInfoEx)
+			            {
+				            System.Diagnostics.Debug.WriteLine(
+					            "Unable to get application info for targetSDK, trying to get from package manager: " + appInfoEx);
+				            targetsNOrNewer = false;
 
-						if (targetsNOrNewer && path.Scheme == "file")
-						{
-							var photoURI = FileProvider.GetUriForFile(this,
-																	  Application.Context.PackageName + ".fileprovider",
-							                                          new Java.IO.File(path.Path));
+				            var appInfo = PackageManager.GetApplicationInfo(Application.Context.PackageName, 0);
+				            if (appInfo != null)
+				            {
+					            targetsNOrNewer = (int) appInfo.TargetSdkVersion >= 24;
+				            }
+			            }
 
-							GrantUriPermissionsForIntent(pickIntent, photoURI);
-							pickIntent.AddFlags(ActivityFlags.GrantReadUriPermission); 
-							pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
-							pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
-						}
-						else
-						{
-							pickIntent.PutExtra(MediaStore.ExtraOutput, path);
-						}
-                    }
-                    else
-                        path = Uri.Parse(b.GetString(ExtraPath));
-                }
+			            if (targetsNOrNewer && path.Scheme == "file")
+			            {
+				            var photoURI = FileProvider.GetUriForFile(this,
+					            Application.Context.PackageName + ".fileprovider",
+					            new Java.IO.File(path.Path));
+
+				            GrantUriPermissionsForIntent(pickIntent, photoURI);
+				            pickIntent.AddFlags(ActivityFlags.GrantReadUriPermission);
+				            pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+				            pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
+			            }
+			            else
+			            {
+				            pickIntent.PutExtra(MediaStore.ExtraOutput, path);
+			            }
+		            }
+		            else
+			            path = Uri.Parse(b.GetString(ExtraPath));
+	            }
 
 
 
-                if (!ran)
+	            if (!ran)
                     StartActivityForResult(pickIntent, id);
             }
             catch (Exception ex)
@@ -244,7 +257,7 @@ namespace Plugin.Media
 				GrantUriPermission(packageName, uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
 			}
 		}
-
+		
         internal static Task<MediaPickedEventArgs> GetMediaFileAsync(Context context, int requestCode, string action, bool isPhoto, ref Uri path, Uri data, bool saveToAlbum)
         {
             Task<Tuple<string, bool>> pathFuture;
@@ -315,6 +328,25 @@ namespace Plugin.Media
 
             if (tasked)
             {
+	            if (data?.ClipData != null)
+				{
+					ClipData clipData = data.ClipData;
+					var mediaFiles = new List<MediaFile>();
+					for (int i = 0; i < clipData.ItemCount; i++)
+		            {
+			            ClipData.Item item = clipData.GetItemAt(i);
+			            var media = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, item.Uri, false);
+
+						// TODO: This can be done better.
+			            mediaFiles.AddRange(media.Media);
+					}
+					
+					Finish();
+					await Task.Delay(50);
+					OnMediaPicked(new MediaPickedEventArgs(requestCode, resultCode == Result.Canceled, mediaFiles));
+
+					return;
+	            }
 
                
                 Task<MediaPickedEventArgs> future;
@@ -332,7 +364,6 @@ namespace Plugin.Media
                 }
                 else
                 {
-                    
                     var e = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, data?.Data, false);
                     Finish();
                     await Task.Delay(50);
@@ -566,18 +597,18 @@ namespace Plugin.Media
             var tcs = new TaskCompletionSource<T>();
             tcs.SetResult(result);
             return tcs.Task;
-        }
+		}
 
-        private static void OnMediaPicked(MediaPickedEventArgs e) =>
-			MediaPicked?.Invoke(null, e);
-        
+	    private static void OnMediaPicked(MediaPickedEventArgs e) =>
+		    MediaPicked?.Invoke(null, e);
+
 
 		/// <summary>
 		/// Scan completed
 		/// </summary>
 		/// <param name="path"></param>
 		/// <param name="uri"></param>
-        public void OnScanCompleted(string path, Uri uri) =>
+		public void OnScanCompleted(string path, Uri uri) =>
 			Console.WriteLine("scan complete: " + path);
         
 		/// <summary>
@@ -603,19 +634,30 @@ namespace Plugin.Media
 
             RequestId = id;
             Error = error;
-        }
+		}
 
-        public MediaPickedEventArgs(int id, bool isCanceled, MediaFile media = null)
-        {
-            RequestId = id;
-            IsCanceled = isCanceled;
-            if (!IsCanceled && media == null)
-                throw new ArgumentNullException("media");
+	    public MediaPickedEventArgs(int id, bool isCanceled, MediaFile media = null)
+	    {
+			// TODO: Remove this?
+		    RequestId = id;
+		    IsCanceled = isCanceled;
+		    if (!IsCanceled && media == null)
+			    throw new ArgumentNullException("media");
 
-            Media = media;
-        }
+		    Media = new List<MediaFile> { media };
+	    }
 
-        public int RequestId
+	    public MediaPickedEventArgs(int id, bool isCanceled, List<MediaFile> medias)
+	    {
+		    RequestId = id;
+		    IsCanceled = isCanceled;
+		    if (!IsCanceled && medias == null)
+			    throw new ArgumentNullException("medias");
+
+		    Media = medias;
+	    }
+
+		public int RequestId
         {
             get;
             private set;
@@ -633,13 +675,13 @@ namespace Plugin.Media
             private set;
         }
 
-        public MediaFile Media
+        public List<MediaFile> Media
         {
             get;
             private set;
-        }
+		}
 
-        public Task<MediaFile> ToTask()
+		public Task<MediaFile> ToTask()
         {
             var tcs = new TaskCompletionSource<MediaFile>();
 
@@ -648,11 +690,9 @@ namespace Plugin.Media
             else if (Error != null)
                 tcs.SetException(Error);
             else
-                tcs.SetResult(Media);
+                tcs.SetResult(Media?.FirstOrDefault());
 
             return tcs.Task;
         }
-
-       
-    }
+	}
 }

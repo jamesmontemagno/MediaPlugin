@@ -97,8 +97,49 @@ namespace Plugin.Media
             return media;
         }
 
+	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null)
+		{
+			if (!(await RequestStoragePermission()))
+			{
+				return null;
+			}
 
-        /// <summary>
+			var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true } );
+
+			if (options == null)
+				options = new PickMediaOptions();
+
+			foreach (var media in medias)
+			{
+				//check to see if we picked a file, and if so then try to fix orientation and resize
+				if (!string.IsNullOrWhiteSpace(media?.Path))
+				{
+					try
+					{
+						var originalMetadata = new ExifInterface(media.Path);
+
+						if (options.RotateImage)
+						{
+							await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
+						}
+						else
+						{
+							await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, originalMetadata);
+						}
+						originalMetadata.SaveAttributes();
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Unable to check orientation: " + ex);
+					}
+				}
+			}
+
+			return medias;
+		}
+
+
+	    /// <summary>
         /// Take a photo async with specified options
         /// </summary>
         /// <param name="options">Camera Media Options</param>
@@ -230,7 +271,8 @@ namespace Plugin.Media
 
         private readonly Context context;
         private int requestId;
-        private TaskCompletionSource<MediaFile> completionSource;
+	    private TaskCompletionSource<MediaFile> completionSource;
+	    private TaskCompletionSource<List<MediaFile>> completionSourceMulti;
 
 
 		async Task<bool> RequestCameraPermissions()
@@ -371,6 +413,11 @@ namespace Plugin.Media
                 pickerIntent.PutExtra(MediaPickerActivity.ExtraPath, options.Directory);
                 pickerIntent.PutExtra(MediaStore.Images.ImageColumns.Title, options.Name);
 
+	            var pickerOptions = (options as StorePickerMediaOptions);
+	            if (pickerOptions != null)
+				{
+					pickerIntent.PutExtra(MediaPickerActivity.ExtraMultiSelect, pickerOptions.MultiPicker);
+				}
                 var cameraOptions = (options as StoreCameraMediaOptions);
                 if (cameraOptions != null)
                 {
@@ -409,49 +456,82 @@ namespace Plugin.Media
                 requestId++;
 
             return id;
-        }
+		}
 
-        private Task<MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options)
-        {
-            int id = GetRequestId();
+	    private Task<MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options)
+	    {
+		    int id = GetRequestId();
 
-            var ntcs = new TaskCompletionSource<MediaFile>(id);
-            if (Interlocked.CompareExchange(ref completionSource, ntcs, null) != null)
-                throw new InvalidOperationException("Only one operation can be active at a time");
+		    var ntcs = new TaskCompletionSource<MediaFile>(id);
+		    if (Interlocked.CompareExchange(ref completionSource, ntcs, null) != null)
+			    throw new InvalidOperationException("Only one operation can be active at a time");
 
-			context.StartActivity(CreateMediaIntent(id, type, action, options));
+		    context.StartActivity(CreateMediaIntent(id, type, action, options));
 
-            EventHandler<MediaPickedEventArgs> handler = null;
-            handler = (s, e) =>
-            {
-                var tcs = Interlocked.Exchange(ref this.completionSource, null);
+		    EventHandler<MediaPickedEventArgs> handler = null;
+		    handler = (s, e) =>
+		    {
+			    var tcs = Interlocked.Exchange(ref this.completionSource, null);
 
-                MediaPickerActivity.MediaPicked -= handler;
+			    MediaPickerActivity.MediaPicked -= handler;
 
-                if (e.RequestId != id)
-                    return;
-                
-                if(e.IsCanceled)
-                    tcs.SetResult(null);
-                else if (e.Error != null)
-                    tcs.SetException(e.Error);
-                else
-                    tcs.SetResult(e.Media);
-            };
+			    if (e.RequestId != id)
+				    return;
 
-            MediaPickerActivity.MediaPicked += handler;
+			    if (e.IsCanceled)
+				    tcs.SetResult(null);
+			    else if (e.Error != null)
+				    tcs.SetException(e.Error);
+			    else
+				    tcs.SetResult(e.Media.FirstOrDefault());
+		    };
 
-            return completionSource.Task;
-        }
+		    MediaPickerActivity.MediaPicked += handler;
 
-        /// <summary>
-        ///  Rotate an image if required and saves it back to disk.
-        /// </summary>
-        /// <param name="filePath">The file image path</param>
-        /// <param name="mediaOptions">The options.</param>
-        /// <param name="exif">original metadata</param>
-        /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> FixOrientationAndResizeAsync(string filePath, PickMediaOptions mediaOptions, ExifInterface exif)
+		    return completionSource.Task;
+		}
+
+	    private Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options)
+	    {
+		    int id = GetRequestId();
+
+		    var ntcs = new TaskCompletionSource<List<MediaFile>>(id);
+		    if (Interlocked.CompareExchange(ref completionSourceMulti, ntcs, null) != null)
+			    throw new InvalidOperationException("Only one operation can be active at a time");
+
+		    context.StartActivity(CreateMediaIntent(id, type, action, options));
+
+		    EventHandler<MediaPickedEventArgs> handler = null;
+		    handler = (s, e) =>
+		    {
+			    var tcs = Interlocked.Exchange(ref this.completionSourceMulti, null);
+
+			    MediaPickerActivity.MediaPicked -= handler;
+
+			    if (e.RequestId != id)
+				    return;
+
+			    if (e.IsCanceled)
+				    tcs.SetResult(null);
+			    else if (e.Error != null)
+				    tcs.SetException(e.Error);
+			    else
+				    tcs.SetResult(e.Media);
+		    };
+
+		    MediaPickerActivity.MediaPicked += handler;
+
+		    return completionSourceMulti.Task;
+	    }
+
+		/// <summary>
+		///  Rotate an image if required and saves it back to disk.
+		/// </summary>
+		/// <param name="filePath">The file image path</param>
+		/// <param name="mediaOptions">The options.</param>
+		/// <param name="exif">original metadata</param>
+		/// <returns>True if rotation or compression occured, else false</returns>
+		public Task<bool> FixOrientationAndResizeAsync(string filePath, PickMediaOptions mediaOptions, ExifInterface exif)
         {
             return FixOrientationAndResizeAsync(
                 filePath,

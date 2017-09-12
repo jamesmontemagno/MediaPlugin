@@ -1,5 +1,6 @@
 using Plugin.Media.Abstractions;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
@@ -86,9 +87,14 @@ namespace Plugin.Media
 
             return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
         }
- 
 
-        /// <summary>
+	    public Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null)
+	    {
+		    throw new NotImplementedException();
+	    }
+
+
+	    /// <summary>
         /// Take a photo async with specified options
         /// </summary>
         /// <param name="options">Camera Media Options</param>

@@ -87,7 +87,12 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsPickVideoSupported => true;
 
-        /// <summary>
+	    public Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null)
+	    {
+		    throw new NotImplementedException();
+	    }
+
+	    /// <summary>
         /// Take a photo async with specified options
         /// </summary>
         /// <param name="options">Camera Media Options</param>
