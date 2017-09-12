@@ -19,6 +19,6 @@ Versions of other things you are using:
 
 ### Code snippet
 
-### Screenshotst
+### Screenshots
 
 
