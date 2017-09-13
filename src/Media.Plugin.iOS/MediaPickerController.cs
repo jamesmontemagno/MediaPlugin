@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Plugin.Media.Abstractions;
@@ -37,7 +38,7 @@ namespace Plugin.Media
         /// Gets result of picker
         /// </summary>
         /// <returns></returns>
-        public Task<MediaFile> GetResultAsync() =>
+        public Task<List<MediaFile>> GetResultAsync() =>
             ((MediaPickerDelegate)Delegate).Task;
     }
 }

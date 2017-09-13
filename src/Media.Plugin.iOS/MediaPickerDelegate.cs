@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -38,7 +39,7 @@ namespace Plugin.Media
 
         public UIView View => viewController.View; 
 
-        public Task<MediaFile> Task => tcs.Task; 
+        public Task<List<MediaFile>> Task => tcs.Task; 
 
         public override async void FinishedPickingMedia(UIImagePickerController picker, NSDictionary info)
         {
@@ -66,26 +67,41 @@ namespace Plugin.Media
 
             Dismiss(picker, () =>
             {
-                tcs.TrySetResult(mediaFile);
+                tcs.TrySetResult(new List<MediaFile> { mediaFile } );
             });
-        }
+		}
 
-        public override void Canceled(UIImagePickerController picker)
-        {
-            RemoveOrientationChangeObserverAndNotifications();
+	    public override void Canceled(UIImagePickerController picker)
+	    {
+		    RemoveOrientationChangeObserverAndNotifications();
 
-            if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
-            {
-                UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
-            }
+		    if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
+		    {
+			    UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
+		    }
 
-            Dismiss(picker, () =>
-            {
-				tcs.SetResult(null);
-            });
-        }
+		    Dismiss(picker, () =>
+		    {
+			    tcs.SetResult(null);
+		    });
+		}
 
-        public void DisplayPopover(bool hideFirst = false)
+	    public void Canceled(UINavigationController picker)
+	    {
+		    RemoveOrientationChangeObserverAndNotifications();
+
+		    if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
+		    {
+			    UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
+		    }
+
+		    Dismiss(picker, () =>
+		    {
+			    tcs.SetResult(null);
+		    });
+	    }
+
+		public void DisplayPopover(bool hideFirst = false)
         {
             if (Popover == null)
                 return;
@@ -127,18 +143,18 @@ namespace Plugin.Media
         private NSObject observer;
         private readonly UIViewController viewController;
         private readonly UIImagePickerControllerSourceType source;
-        private TaskCompletionSource<MediaFile> tcs = new TaskCompletionSource<MediaFile>();
+        private TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
         private readonly StoreCameraMediaOptions options;
 
         private bool IsCaptured =>
 			source == UIImagePickerControllerSourceType.Camera; 
 
-        private void Dismiss(UIImagePickerController picker, NSAction onDismiss)
+        private void Dismiss(UINavigationController picker, NSAction onDismiss)
         {
             if (viewController == null)
             {
                 onDismiss();
-                tcs = new TaskCompletionSource<MediaFile>();
+                tcs = new TaskCompletionSource<List<MediaFile>>();
             }
             else
             {
@@ -402,7 +418,7 @@ namespace Plugin.Media
             return newMeta;
         }
 
-        private bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)
+        internal static bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)
         {
             try
             {
@@ -526,7 +542,7 @@ namespace Plugin.Media
             return Path.Combine(path, nname);
         }
 
-        private static string GetOutputPath(string type, string path, string name)
+        internal static string GetOutputPath(string type, string path, string name)
         {
             path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), path);
             Directory.CreateDirectory(path);

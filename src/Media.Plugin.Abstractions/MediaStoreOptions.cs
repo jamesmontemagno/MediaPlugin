@@ -336,4 +336,25 @@ namespace Plugin.Media.Abstractions
             set;
         }
     }
+
+
+	public enum MultiPickerBarStyle
+	{
+		Default = 0,
+		Black = 1,
+		BlackOpaque = 1,
+		BlackTranslucent = 2
+	}
+
+	/// <summary>
+	/// UI customisations for iOS multi image picker
+	/// </summary>
+	public class MultiPickerCustomisations
+	{
+		// TODO: This only affects iOS since Android uses native
+
+		public int MaximumImagesCount { get; set; } = 10;
+
+		public MultiPickerBarStyle BarStyle { get; set; } = MultiPickerBarStyle.Default;
+	}
 }

@@ -89,8 +89,25 @@ namespace Plugin.Media
         }
 
 	    public Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null)
-	    {
-		    throw new NotImplementedException();
+		{
+			if (!IsPickPhotoSupported)
+				throw new NotSupportedException();
+
+			CheckPhotoUsageDescription();
+
+			var cameraOptions = new StoreCameraMediaOptions
+			{
+				PhotoSize = options?.PhotoSize ?? PhotoSize.Full,
+				CompressionQuality = options?.CompressionQuality ?? 100,
+				AllowCropping = false,
+				CustomPhotoSize = options?.CustomPhotoSize ?? 100,
+				MaxWidthHeight = options?.MaxWidthHeight,
+				RotateImage = options?.RotateImage ?? false,
+				SaveToAlbum = false,
+			};
+
+
+			return GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
 	    }
 
 
@@ -186,7 +203,7 @@ namespace Plugin.Media
             picker.MediaTypes = new[] { mediaType };
             picker.SourceType = sourceType;
 
-            if (sourceType == UIImagePickerControllerSourceType.Camera)
+	        if (sourceType == UIImagePickerControllerSourceType.Camera)
             {
                 picker.CameraDevice = GetUICameraDevice(options.DefaultCamera);
                 picker.AllowsEditing = options?.AllowCropping ?? false;
@@ -214,67 +231,142 @@ namespace Plugin.Media
             }
 
             return picker;
-        }
+		}
 
-        private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
-        {
-			
+		private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+		{
 			UIViewController viewController = null;
-            UIWindow window = UIApplication.SharedApplication.KeyWindow;
-            if (window == null)
-                throw new InvalidOperationException("There's no current active window");
+			UIWindow window = UIApplication.SharedApplication.KeyWindow;
+			if (window == null)
+				throw new InvalidOperationException("There's no current active window");
 
-            if(window.WindowLevel == UIWindowLevel.Normal)
-                viewController = window.RootViewController;
+			if (window.WindowLevel == UIWindowLevel.Normal)
+				viewController = window.RootViewController;
 
-            if (viewController == null)
-            {
-                window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null && w.WindowLevel == UIWindowLevel.Normal);
-                if (window == null)
-                    throw new InvalidOperationException("Could not find current view controller");
-                else
-                    viewController = window.RootViewController;
-            }
+			if (viewController == null)
+			{
+				window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null && w.WindowLevel == UIWindowLevel.Normal);
+				if (window == null)
+					throw new InvalidOperationException("Could not find current view controller");
+				else
+					viewController = window.RootViewController;
+			}
 
-            while (viewController.PresentedViewController != null)
-                viewController = viewController.PresentedViewController;
+			while (viewController.PresentedViewController != null)
+				viewController = viewController.PresentedViewController;
 
-            MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
-            var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
-            if (od != null)
-                throw new InvalidOperationException("Only one operation can be active at at time");
+			MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
+			var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
+			if (od != null)
+				throw new InvalidOperationException("Only one operation can be active at at time");
 
-            var picker = SetupController(ndelegate, sourceType, mediaType, options);
+			var picker = SetupController(ndelegate, sourceType, mediaType, options);
 
-            if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
-            {
-                ndelegate.Popover = popover = new UIPopoverController(picker);
-                ndelegate.Popover.Delegate = new MediaPickerPopoverDelegate(ndelegate, picker);
-                ndelegate.DisplayPopover();
-            }
-            else
-            {
-                if (UIDevice.CurrentDevice.CheckSystemVersion(9, 0))
-                {
-                    picker.ModalPresentationStyle = UIModalPresentationStyle.OverCurrentContext;
-                }
-                viewController.PresentViewController(picker, true, null);
-            }
+			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
+			{
+				ndelegate.Popover = popover = new UIPopoverController(picker);
+				ndelegate.Popover.Delegate = new MediaPickerPopoverDelegate(ndelegate, picker);
+				ndelegate.DisplayPopover();
+			}
+			else
+			{
+				if (UIDevice.CurrentDevice.CheckSystemVersion(9, 0))
+				{
+					picker.ModalPresentationStyle = UIModalPresentationStyle.OverCurrentContext;
+				}
+				viewController.PresentViewController(picker, true, null);
+			}
 
-            return ndelegate.Task.ContinueWith(t =>
-            {
-                if (popover != null)
-                {
-                    popover.Dispose();
-                    popover = null;
-                }
+			return ndelegate.Task.ContinueWith(t =>
+			{
+				if (popover != null)
+				{
+					popover.Dispose();
+					popover = null;
+				}
 
-                Interlocked.Exchange(ref pickerDelegate, null);
-                return t;
-            }).Unwrap();
-        }
+				Interlocked.Exchange(ref pickerDelegate, null);
+				return t.Result.FirstOrDefault();
+			});
+		}
 
-        private static UIImagePickerControllerCameraDevice GetUICameraDevice(CameraDevice device)
+		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+		{
+			UIViewController viewController = null;
+			UIWindow window = UIApplication.SharedApplication.KeyWindow;
+			if (window == null)
+				throw new InvalidOperationException("There's no current active window");
+
+			if (window.WindowLevel == UIWindowLevel.Normal)
+				viewController = window.RootViewController;
+
+			if (viewController == null)
+			{
+				window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null && w.WindowLevel == UIWindowLevel.Normal);
+				if (window == null)
+					throw new InvalidOperationException("Could not find current view controller");
+				else
+					viewController = window.RootViewController;
+			}
+
+			while (viewController.PresentedViewController != null)
+				viewController = viewController.PresentedViewController;
+
+			if (options == null)
+				options = new StoreCameraMediaOptions();
+
+			MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
+			var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
+			if (od != null)
+				throw new InvalidOperationException("Only one operation can be active at at time");
+
+			//var picker = SetupController(ndelegate, sourceType, mediaType, options, true);
+			var picker = ELCImagePickerViewController.NewInstance();
+			// TODO: Make this configurable?
+			picker.MaximumImagesCount = 10;
+
+			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
+			{
+				ndelegate.Popover = popover = new UIPopoverController(picker);
+				ndelegate.Popover.Delegate = new MediaPickerPopoverDelegate(ndelegate, picker);
+				ndelegate.DisplayPopover();
+			}
+			else
+			{
+				if (UIDevice.CurrentDevice.CheckSystemVersion(9, 0))
+				{
+					picker.ModalPresentationStyle = UIModalPresentationStyle.OverCurrentContext;
+				}
+				viewController.PresentViewController(picker, true, null);
+			}
+
+			// TODO: Make this use the existing Delegate?
+			return picker.Completion.ContinueWith(t =>
+			{
+				if (popover != null)
+				{
+					popover.Dispose();
+					popover = null;
+				}
+
+				picker.BeginInvokeOnMainThread(() =>
+				{
+					//dismiss the picker
+					picker.DismissViewController(true, null);
+				});
+
+				Interlocked.Exchange(ref pickerDelegate, null);
+
+				if (t.IsCanceled || t.Exception != null)
+				{
+					return Task.FromResult(new List<MediaFile>());
+				}
+
+				return t;
+			}).Unwrap();
+		}
+
+		private static UIImagePickerControllerCameraDevice GetUICameraDevice(CameraDevice device)
         {
             switch (device)
             {
