@@ -322,8 +322,6 @@ namespace Plugin.Media
 
 			//var picker = SetupController(ndelegate, sourceType, mediaType, options, true);
 			var picker = ELCImagePickerViewController.NewInstance(options, customisations);
-			// TODO: Make this configurable?
-			picker.MaximumImagesCount = 10;
 
 			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
 			{

@@ -356,5 +356,7 @@ namespace Plugin.Media.Abstractions
 		public int MaximumImagesCount { get; set; } = 10;
 
 		public MultiPickerBarStyle BarStyle { get; set; } = MultiPickerBarStyle.Default;
+
+		public string PathToOverlay { get; set; }
 	}
 }

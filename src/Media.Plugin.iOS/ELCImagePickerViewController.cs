@@ -14,7 +14,7 @@ namespace Plugin.Media
 
 	public class ELCImagePickerViewController : UINavigationController
 	{
-		public int MaximumImagesCount { get; set; }
+		private int _maxImagesCount;
 
 		private readonly StoreCameraMediaOptions options;
 
@@ -34,7 +34,8 @@ namespace Plugin.Media
 			var albumPicker = new ELCAlbumPickerController();
 			var picker = new ELCImagePickerViewController(albumPicker, options);
 			albumPicker.Parent = picker;
-			picker.MaximumImagesCount = customisations.MaximumImagesCount;
+			albumPicker.PathToOverlay = customisations.PathToOverlay;
+			picker._maxImagesCount = customisations.MaximumImagesCount;
 			picker.NavigationBar.BarStyle = GetUIBarStyle(customisations.BarStyle);
 			return picker;
 		}
@@ -88,11 +89,11 @@ namespace Plugin.Media
 
 		bool ShouldSelectAsset(ALAsset asset, int previousCount)
 		{
-			var shouldSelect = MaximumImagesCount <= 0 || previousCount < MaximumImagesCount;
+			var shouldSelect = _maxImagesCount <= 0 || previousCount < _maxImagesCount;
 			if (!shouldSelect)
 			{
-				string title = string.Format("Only {0} photos please!", MaximumImagesCount);
-				string message = string.Format("You can only send {0} photos at a time.", MaximumImagesCount);
+				string title = string.Format("Only {0} photos please!", _maxImagesCount);
+				string message = string.Format("You can only send {0} photos at a time.", _maxImagesCount);
 				var alert = new UIAlertView(title, message, null, null, "Okay");
 				alert.Show();
 			}
@@ -192,6 +193,8 @@ namespace Plugin.Media
 		{
 			static readonly NSObject _Dispatcher = new NSObject();
 			readonly List<ALAssetsGroup> AssetGroups = new List<ALAssetsGroup>();
+
+			public string PathToOverlay { get; set; }
 
 			ALAssetsLibrary Library;
 
@@ -320,6 +323,7 @@ namespace Plugin.Media
 				assetGroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 				var picker = new ELCAssetTablePicker(assetGroup);
 				picker.Parent = Parent;
+				picker.PathToOverlay = PathToOverlay;
 				NavigationController.PushViewController(picker, true);
 			}
 
@@ -337,6 +341,7 @@ namespace Plugin.Media
 			int Columns = 4;
 			public bool SingleSelection { get; set; }
 			public bool ImmediateReturn { get; set; }
+			public string PathToOverlay { get; set; }
 			readonly ALAssetsGroup AssetGroup;
 
 			readonly List<ELCAsset> ElcAssets = new List<ELCAsset>();
@@ -527,7 +532,7 @@ namespace Plugin.Media
 				var cell = TableView.DequeueReusableCell(cellIdentifier) as ELCAssetCell;
 				if (cell == null)
 				{
-					cell = new ELCAssetCell(UITableViewCellStyle.Default, cellIdentifier);
+					cell = new ELCAssetCell(UITableViewCellStyle.Default, cellIdentifier, PathToOverlay);
 				}
 				cell.SetAssets(AssetsForIndexPath(indexPath), Columns);
 				return cell;
@@ -590,11 +595,30 @@ namespace Plugin.Media
 				readonly List<UIImageView> ImageViewArray = new List<UIImageView>();
 				readonly List<UIImageView> OverlayViewArray = new List<UIImageView>();
 
-				public ELCAssetCell(UITableViewCellStyle style, string reuseIdentifier) : base(style, reuseIdentifier)
+				private string _pathToOverlay;
+
+				public ELCAssetCell(UITableViewCellStyle style, string reuseIdentifier, string pathToOverlay) : base(style, reuseIdentifier)
 				{
 					UITapGestureRecognizer tapRecognizer = new UITapGestureRecognizer(CellTapped);
 					AddGestureRecognizer(tapRecognizer);
+					_pathToOverlay = pathToOverlay;
+				}
 
+				private UIImage GetOverlayImage()
+				{
+					if (!string.IsNullOrEmpty(_pathToOverlay))
+					{
+						try
+						{
+							return new UIImage(_pathToOverlay);
+						}
+						catch
+						{
+							// Failed to load custom overlay image
+						}
+					}
+
+					return UIImage.FromBundle("Overlay.png");
 				}
 
 				public void SetAssets(List<ELCAsset> assets, int columns)
@@ -636,8 +660,7 @@ namespace Plugin.Media
 						{
 							if (overlayImage == null)
 							{
-								//overlayImage = new UIImage("Overlay.png");
-								overlayImage = UIImage.FromBundle("Overlay.png");
+								overlayImage = GetOverlayImage();
 							}
 							var overlayView = new UIImageView(overlayImage);
 							OverlayViewArray.Add(overlayView);
