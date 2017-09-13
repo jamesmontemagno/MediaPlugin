@@ -97,7 +97,7 @@ namespace Plugin.Media
             return media;
         }
 
-	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null)
+	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
 		{
 			if (!(await RequestStoragePermission()))
 			{

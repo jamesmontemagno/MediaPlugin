@@ -88,7 +88,7 @@ namespace Plugin.Media
             return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
         }
 
-	    public Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null)
+	    public Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
 		{
 			if (!IsPickPhotoSupported)
 				throw new NotSupportedException();
@@ -107,7 +107,7 @@ namespace Plugin.Media
 			};
 
 
-			return GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
+			return GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, customisations);
 	    }
 
 
@@ -290,7 +290,7 @@ namespace Plugin.Media
 			});
 		}
 
-		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerCustomisations customisations = null)
 		{
 			UIViewController viewController = null;
 			UIWindow window = UIApplication.SharedApplication.KeyWindow;
@@ -321,7 +321,7 @@ namespace Plugin.Media
 				throw new InvalidOperationException("Only one operation can be active at at time");
 
 			//var picker = SetupController(ndelegate, sourceType, mediaType, options, true);
-			var picker = ELCImagePickerViewController.NewInstance();
+			var picker = ELCImagePickerViewController.NewInstance(options, customisations);
 			// TODO: Make this configurable?
 			picker.MaximumImagesCount = 10;
 
