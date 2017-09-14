@@ -34,7 +34,7 @@ namespace Plugin.Media
 			var albumPicker = new ELCAlbumPickerController();
 			var picker = new ELCImagePickerViewController(albumPicker, options);
 			albumPicker.Parent = picker;
-			albumPicker.PathToOverlay = customisations.PathToOverlay;
+			albumPicker.Customisations = customisations;
 			picker._maxImagesCount = customisations.MaximumImagesCount;
 			picker.NavigationBar.BarStyle = GetUIBarStyle(customisations.BarStyle);
 			return picker;
@@ -194,7 +194,7 @@ namespace Plugin.Media
 			static readonly NSObject _Dispatcher = new NSObject();
 			readonly List<ALAssetsGroup> AssetGroups = new List<ALAssetsGroup>();
 
-			public string PathToOverlay { get; set; }
+			public MultiPickerCustomisations Customisations { get; set; }
 
 			ALAssetsLibrary Library;
 
@@ -276,7 +276,7 @@ namespace Plugin.Media
 			void ReloadTableView()
 			{
 				TableView.ReloadData();
-				NavigationItem.Title = "Select an Album";
+				NavigationItem.Title = Customisations.AlbumSelectTitle ?? "Select an Album";
 			}
 
 			public override nint NumberOfSections(UITableView tableView)
@@ -323,7 +323,8 @@ namespace Plugin.Media
 				assetGroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 				var picker = new ELCAssetTablePicker(assetGroup);
 				picker.Parent = Parent;
-				picker.PathToOverlay = PathToOverlay;
+				picker.PathToOverlay = Customisations.PathToOverlay;
+				picker.PhotoSelectTitle = Customisations.PhotoSelectTitle;
 				NavigationController.PushViewController(picker, true);
 			}
 
@@ -342,6 +343,7 @@ namespace Plugin.Media
 			public bool SingleSelection { get; set; }
 			public bool ImmediateReturn { get; set; }
 			public string PathToOverlay { get; set; }
+			public string PhotoSelectTitle { get; set; }
 			readonly ALAssetsGroup AssetGroup;
 
 			readonly List<ELCAsset> ElcAssets = new List<ELCAsset>();
@@ -420,7 +422,14 @@ namespace Plugin.Media
 						var ip = NSIndexPath.FromRowSection(row, section);
 						TableView.ScrollToRow(ip, UITableViewScrollPosition.Bottom, false);
 					}
-					NavigationItem.Title = SingleSelection ? "Pick Photo" : "Pick Photos";
+					if (PhotoSelectTitle != null)
+					{
+						NavigationItem.Title = PhotoSelectTitle;
+					}
+					else
+					{
+						NavigationItem.Title = SingleSelection ? "Pick Photo" : "Pick Photos";
+					}
 				});
 			}
 
