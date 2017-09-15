@@ -107,13 +107,12 @@ namespace Plugin.Media
 			if (rep == null)
 				return null;
 
-			var cgImage = rep.GetFullScreenImage();
-
-
+			var cgImage = rep.GetImage();
+			
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? "temp",
 				options.Name);
-			
+
 			var image = new UIImage(cgImage, 1.0f, UIImageOrientation.Up);
 
 			var percent = 1.0f;
@@ -164,7 +163,6 @@ namespace Plugin.Media
 			try
 			{
 				meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(asset.AssetUrl);
-
 			}
 			catch (Exception ex)
 			{
