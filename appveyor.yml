@@ -7,11 +7,11 @@ assembly_info:
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
 install: 
-  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u --force -a -t tools
-  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u --force -a -t platform-tools
-  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u --force -a -t build-tools-25.0.6
-  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u --force -a -t android-25
-  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u --force -a -t android-15
+  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u -a -t tools
+  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u -a -t platform-tools
+  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u -a -t build-tools-25.0.6
+  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u -a -t android-25
+  - echo y | "C:\Program Files (x86)\Android\android-sdk\tools\android.bat" update sdk -u -a -t android-15
 build_script:
 - cmd: >-
     powershell .\bootstrapper.ps1 -Target Default -Verbosity diagnostic
