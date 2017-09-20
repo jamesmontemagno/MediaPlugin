@@ -1,4 +1,9 @@
-#addin "Cake.FileHelpers"
+#addin nuget:?package=Cake.XCode&version=2.0.13
+#addin nuget:?package=Cake.Xamarin.Build&version=2.0.18
+#addin nuget:?package=Cake.Xamarin&version=1.3.0.15
+#addin nuget:?package=Cake.FileHelpers&version=1.0.4
+#addin nuget:?package=Cake.Yaml&version=1.0.3
+#addin nuget:?package=Cake.Json&version=1.0.2
 
 var TARGET = Argument ("target", Argument ("t", "Default"));
 var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.9999");
