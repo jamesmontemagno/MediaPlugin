@@ -113,7 +113,7 @@ namespace Plugin.Media
 				options.Directory ?? "temp",
 				options.Name);
 
-			var image = new UIImage(cgImage, 1.0f, UIImageOrientation.Up);
+			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
 
 			var percent = 1.0f;
 			if (options.PhotoSize != PhotoSize.Full)
@@ -162,7 +162,25 @@ namespace Plugin.Media
 			NSDictionary meta = null;
 			try
 			{
-				meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(asset.AssetUrl);
+				//meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(asset.AssetUrl);
+
+				//meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
+				if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+				{
+					var newMeta = new NSMutableDictionary();
+					newMeta.SetValuesForKeysWithDictionary(meta);
+					var newTiffDict = new NSMutableDictionary();
+					newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+					newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
+					newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
+
+					meta = newMeta;
+				}
+				var location = options.Location;
+				if (meta != null && location != null)
+				{
+					meta = MediaPickerDelegate.SetGpsLocation(meta, location);
+				}
 			}
 			catch (Exception ex)
 			{

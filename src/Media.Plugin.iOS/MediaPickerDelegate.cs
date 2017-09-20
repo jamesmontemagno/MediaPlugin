@@ -11,6 +11,7 @@ using Foundation;
 using UIKit;
 using NSAction = global::System.Action;
 using System.Globalization;
+using CoreImage;
 using ImageIO;
 using MobileCoreServices;
 
@@ -397,7 +398,7 @@ namespace Plugin.Media
             return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
         }
 
-        private static NSDictionary SetGpsLocation(NSDictionary meta, Location location)
+        internal static NSDictionary SetGpsLocation(NSDictionary meta, Location location)
         {
             var newMeta = new NSMutableDictionary();
             newMeta.SetValuesForKeysWithDictionary(meta);
@@ -431,10 +432,12 @@ namespace Plugin.Media
 	            var cgImageMetadata = new CGMutableImageMetadata();
 	            var destinationOptions = new CGImageDestinationOptions();
 
-                if (meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
-                    destinationOptions.Dictionary[ImageIO.CGImageProperties.Orientation] = meta[ImageIO.CGImageProperties.Orientation];
-				
-                if (meta.ContainsKey(ImageIO.CGImageProperties.DPIWidth))
+	            if (meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+	            {
+		            destinationOptions.Dictionary[ImageIO.CGImageProperties.Orientation] = meta[ImageIO.CGImageProperties.Orientation];
+	            }
+
+	            if (meta.ContainsKey(ImageIO.CGImageProperties.DPIWidth))
 					destinationOptions.Dictionary[ImageIO.CGImageProperties.DPIWidth] = meta[ImageIO.CGImageProperties.DPIWidth];
 
                 if (meta.ContainsKey(ImageIO.CGImageProperties.DPIHeight))
@@ -451,9 +454,13 @@ namespace Plugin.Media
 
 
                 if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
-	            {
-	                destinationOptions.TiffDictionary = new CGImagePropertiesTiff(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
-	                
+                {
+	                var newTiffDict = meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary;
+	                if (newTiffDict != null)
+	                {
+						newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
+		                destinationOptions.TiffDictionary = new CGImagePropertiesTiff(newTiffDict);
+	                }
                 }
 	            if (meta.ContainsKey(ImageIO.CGImageProperties.GPSDictionary))
 	            {
