@@ -6,7 +6,10 @@ var SLN = "./src/Media.sln";
 Task("Libraries").Does(()=>
 {
 	NuGetRestore (SLN);
-	MSBuild (SLN, c => c.Configuration = CONFIG);
+	MSBuild (SLN, c => {
+		c.Configuration = CONFIG;
+		c.MSBuildPlatform = Cake.Common.Tools.MSBuild.MSBuildPlatform.x86;
+	});
 });
 
 Task ("NuGet")
