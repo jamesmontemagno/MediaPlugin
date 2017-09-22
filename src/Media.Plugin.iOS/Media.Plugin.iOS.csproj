@@ -52,15 +52,24 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
+    <Reference Include="Plugin.Permissions.Abstractions">
+      <HintPath>..\packages\Plugin.Permissions.2.0.1\lib\Xamarin.iOS10\Plugin.Permissions.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Plugin.Permissions">
+      <HintPath>..\packages\Plugin.Permissions.2.0.1\lib\Xamarin.iOS10\Plugin.Permissions.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Media.Plugin.iOS.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{fbef1e96-bbb6-43b8-9c56-2c01088c4d48}</Project>
+      <Project>{0E3EFBDE-5210-47D7-9CBF-D5130091A361}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\Media.Plugin.Shared\Media.Plugin.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />

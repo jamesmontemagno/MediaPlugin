@@ -8,6 +8,9 @@ using System.Linq;
 using UIKit;
 using Foundation;
 
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
+
 namespace Plugin.Media
 {
     /// <summary>
@@ -86,27 +89,37 @@ namespace Plugin.Media
 
             return GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
         }
- 
+
 
         /// <summary>
         /// Take a photo async with specified options
         /// </summary>
         /// <param name="options">Camera Media Options</param>
         /// <returns>Media file of photo or null if canceled</returns>
-        public Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
+        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
         {
             if (!IsTakePhotoSupported)
                 throw new NotSupportedException();
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
+            var permission = await GetCameraPermission();
+
+            if (permission == PermissionStatus.Denied || permission == PermissionStatus.Disabled)
+                throw new
+                    InvalidOperationException($"You do not have permission to use camer. Permission status {permission}" +
+                                              "\n Please verifiy permission before launching camera");
+
+            if (permission != PermissionStatus.Granted)
+                return null;
+
             CheckCameraUsageDescription();
 
             VerifyCameraOptions(options);
 
-            return GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeImage, options);
+            return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeImage, options);
         }
-     
+
 
         /// <summary>
         /// Picks a video from the default gallery
@@ -294,6 +307,17 @@ namespace Plugin.Media
             }
         }
 
+		async Task<PermissionStatus> GetCameraPermission()
+		{
+			var permission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Camera);
+			if (permission != PermissionStatus.Granted)
+			{
+				var result = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Camera);
+				permission = result[Permission.Camera];
+			}
+
+			return permission;
+		}
 
         void CheckCameraUsageDescription()
         {
