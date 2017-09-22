@@ -1,66 +1,13 @@
-#addin nuget:?package=Cake.XCode&version=2.0.13
-#addin nuget:?package=Cake.Xamarin.Build&version=2.0.18
-#addin nuget:?package=Cake.Xamarin&version=1.3.0.15
-#addin nuget:?package=Cake.FileHelpers&version=1.0.4
-#addin nuget:?package=Cake.Yaml&version=1.0.3
-#addin nuget:?package=Cake.Json&version=1.0.2
-
 var TARGET = Argument ("target", Argument ("t", "Default"));
-var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.9999");
-
-var libraries = new Dictionary<string, string> {
- 	{ "./src/Media.sln", "Any" },
-};
-
-
-var BuildAction = new Action<Dictionary<string, string>> (solutions =>
-{
-
-	foreach (var sln in solutions) 
-    {
-
-		// If the platform is Any build regardless
-		//  If the platform is Win and we are running on windows build
-		//  If the platform is Mac and we are running on Mac, build
-		if ((sln.Value == "Any")
-				|| (sln.Value == "Win" && IsRunningOnWindows ())
-				|| (sln.Value == "Mac" && IsRunningOnUnix ())) 
-        {
-			
-			// Bit of a hack to use nuget3 to restore packages for project.json
-			if (IsRunningOnWindows ()) 
-            {
-				
-				Information ("RunningOn: {0}", "Windows");
-
-				NuGetRestore (sln.Key, new NuGetRestoreSettings
-                {
-					ToolPath = "./tools/nuget3.exe"
-				});
-
-				// Windows Phone / Universal projects require not using the amd64 msbuild
-				MSBuild (sln.Key, c => 
-                { 
-					c.Configuration = "Release";
-					c.MSBuildPlatform = Cake.Common.Tools.MSBuild.MSBuildPlatform.x86;
-				});
-			} 
-            else 
-            {
-                // Mac is easy ;)
-				NuGetRestore (sln.Key);
-
-				DotNetBuild (sln.Key, c => c.Configuration = "Release");
-			}
-		}
-	}
-});
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.9999");
+var CONFIG = Argument("configuration", EnvironmentVariable ("CONFIGURATION") ?? "Release");
+var SLN = "./src/Media.sln";
 
 Task("Libraries").Does(()=>
 {
-    BuildAction(libraries);
+	NuGetRestore (SLN);
+	MSBuild (SLN, c => c.Configuration = CONFIG);
 });
-
 
 Task ("NuGet")
 	.IsDependentOn ("Libraries")
@@ -70,28 +17,21 @@ Task ("NuGet")
         CreateDirectory("./Build/nuget");
         
 	NuGetPack ("./nuget/Plugin.nuspec", new NuGetPackSettings { 
-		Version = version,
-		Verbosity = NuGetVerbosity.Detailed,
+		Version = VERSION,
 		OutputDirectory = "./Build/nuget/",
-		BasePath = "./",
-		ToolPath = "./tools/nuget3.exe"
+		BasePath = "./"
 	});	
 });
-
 
 //Build the component, which build samples, nugets, and libraries
 Task ("Default").IsDependentOn("NuGet");
 
-
 Task ("Clean").Does (() => 
 {
 	CleanDirectory ("./component/tools/");
-
 	CleanDirectories ("./Build/");
-
 	CleanDirectories ("./**/bin");
 	CleanDirectories ("./**/obj");
 });
-
 
 RunTarget (TARGET);
