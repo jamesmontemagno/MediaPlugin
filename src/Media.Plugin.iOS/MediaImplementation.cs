@@ -103,19 +103,24 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            var permission = await GetCameraPermission();
-
-            if (permission == PermissionStatus.Denied || permission == PermissionStatus.Disabled)
-                throw new
-                    InvalidOperationException($"You do not have permission to use camer. Permission status {permission}" +
-                                              "\n Please verifiy permission before launching camera");
-
-            if (permission != PermissionStatus.Granted)
-                return null;
-
             CheckCameraUsageDescription();
 
             VerifyCameraOptions(options);
+
+            var cameraPermission = await ShouldShowPermissionPrompt(Permission.Camera);
+
+            if (cameraPermission == PermissionStatus.Denied || cameraPermission == PermissionStatus.Disabled)
+                throw new
+                    InvalidOperationException($"You do not have permission to use camera. Permission status {cameraPermission}" +
+                                              "\n Please verifiy permission before launching camera");
+
+            if (options.SaveToAlbum)
+            {
+                var savePermission = await ShouldShowPermissionPrompt(Permission.Photos);
+                if (savePermission == PermissionStatus.Denied || savePermission == PermissionStatus.Disabled)
+                    throw new InvalidOperationException($"You do not have permission to save images. Permission status {savePermission}" +
+                    "\n Please verifiy permission before saving image to the gallary");
+            }
 
             return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeImage, options);
         }
@@ -307,17 +312,18 @@ namespace Plugin.Media
             }
         }
 
-		async Task<PermissionStatus> GetCameraPermission()
-		{
-			var permission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Camera);
-			if (permission != PermissionStatus.Granted)
-			{
-				var result = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Camera);
-				permission = result[Permission.Camera];
-			}
+        static async Task<PermissionStatus> ShouldShowPermissionPrompt(Permission permission)
+        {
+            var permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(permission);
 
-			return permission;
-		}
+            if (permissionStatus != PermissionStatus.Granted)
+            {
+                var permissions = await CrossPermissions.Current.RequestPermissionsAsync(permission);
+                permissionStatus = permissions[permission];
+            }
+
+            return permissionStatus;
+        }
 
         void CheckCameraUsageDescription()
         {
