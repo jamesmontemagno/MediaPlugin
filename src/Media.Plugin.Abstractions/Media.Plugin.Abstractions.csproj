@@ -17,4 +17,8 @@
     <DocumentationFile>bin\Release\netstandard1.0\Plugin.Media.Abstractions.xml</DocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Plugin.Permissions" Version="2.0.1" />
+  </ItemGroup>
+
 </Project>

@@ -64,7 +64,7 @@ namespace Plugin.Media
         {
             if (!(await RequestStoragePermission()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Storage);
             }
             var media = await TakeMediaAsync("image/*", Intent.ActionPick, null);
 
@@ -110,7 +110,7 @@ namespace Plugin.Media
 
             if (!(await RequestCameraPermissions()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Camera);
             }
 
 
@@ -202,7 +202,7 @@ namespace Plugin.Media
 
             if (!(await RequestStoragePermission()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Storage);
             }
 
             return await TakeMediaAsync("video/*", Intent.ActionPick, null);
@@ -220,7 +220,7 @@ namespace Plugin.Media
 
             if (!(await RequestCameraPermissions()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Camera);
             }
 
             VerifyOptions(options);

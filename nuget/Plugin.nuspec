@@ -29,6 +29,7 @@
          </group>
          <group targetFramework="netstandard1.0">
            <dependency id="NETStandard.Library" version="1.6.1" />
+          <dependency id="Plugin.Permissions" version="2.0.1"/>
          </group>
          <group targetFramework="MonoAndroid10">
            <dependency id="Plugin.Permissions" version="2.0.1"/>
@@ -42,6 +43,7 @@
          <group targetFramework="portable-net45+win+wpa81+wp80">
          </group>
          <group targetFramework="uap">
+          <dependency id="Plugin.Permissions" version="2.0.1"/>
          </group>
          <group targetFramework="dotnet">
          </group>
