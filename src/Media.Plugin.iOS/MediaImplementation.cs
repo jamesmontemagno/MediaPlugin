@@ -73,7 +73,6 @@ namespace Plugin.Media
         {
             if (!IsPickPhotoSupported)
                 throw new NotSupportedException();
-
 			
             CheckUsageDescription(photoDescription);
 
@@ -148,7 +147,7 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="options">Video Media Options</param>
         /// <returns>Media file of new video or null if canceled</returns>
-        public Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
         {
             if (!IsTakeVideoSupported)
                 throw new NotSupportedException();
@@ -157,13 +156,15 @@ namespace Plugin.Media
 
             CheckUsageDescription(cameraDescription, microphoneDescription);
 
+            VerifyCameraOptions(options);
+
 			var permissionsToCheck = new List<Permission> { Permission.Camera, Permission.Microphone };
 			if (options.SaveToAlbum)
 				permissionsToCheck.Add(Permission.Photos);
 
-			VerifyCameraOptions(options);
+			await CheckPermissions(permissionsToCheck.ToArray());
 
-            return GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeMovie, options);
+            return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeMovie, options);
         }
 
         private UIPopoverController popover;
@@ -318,8 +319,6 @@ namespace Plugin.Media
 			var permissionsToRequest = new List<Permission>();
 			foreach(var permission in permissions)
 			{
-
-			
 				var permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(permission);
 
 				if (permissionStatus != PermissionStatus.Granted)
