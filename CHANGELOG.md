@@ -3,6 +3,7 @@
 * iOS: Fix Lat/Long saving
 * Android: Fixup issue with url sharing #300 especially with mobileiron
 * iOS: Ensure all properties are set when picking photo #305
+* Android/iOS check for permissions before performing actions. Will now throw a MediaPermissionException if invalid permissions.
 
 
 ### [3.0.0]
