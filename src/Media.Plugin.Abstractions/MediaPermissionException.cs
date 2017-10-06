@@ -19,9 +19,22 @@ namespace Plugin.Media.Abstractions
 		/// </summary>
 		/// <param name="permissions"></param>
 		public MediaPermissionException(params Permission[] permissions)
-			: base($"{permissions} permission(s) are required.")
-		{
-			Permissions = permissions;
+			: base()
+		{	
+            Permissions = permissions;
 		}
+
+        /// <summary>
+        /// Gets a message that describes current exception
+        /// </summary>
+        /// <value>The message.</value>
+        public override string Message
+        {
+            get
+            {
+                string missingPermissions = string.Join(", ", Permissions);
+                return $"{missingPermissions} permission(s) are required.";
+            }
+        }
     }
 }
