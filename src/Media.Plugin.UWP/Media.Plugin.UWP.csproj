@@ -120,7 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{fbef1e96-bbb6-43b8-9c56-2c01088c4d48}</Project>
+      <Project>{0e3efbde-5210-47d7-9cbf-d5130091a361}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
   </ItemGroup>
