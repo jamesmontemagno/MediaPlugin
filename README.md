@@ -311,6 +311,8 @@ Such as:
 <string>This app needs access to photos.</string>
 <key>NSMicrophoneUsageDescription</key>
 <string>This app needs access to microphone.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>This app needs access to the photo gallery.</string>
 ```
 
 If you want the dialogs to be translated you must support the specific languages in your app. Read the [iOS Localization Guide](https://developer.xamarin.com/guides/ios/advanced_topics/localization_and_internationalization/)
