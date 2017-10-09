@@ -106,6 +106,8 @@ namespace Plugin.Media
                 throw new NotSupportedException();
 
             CheckUsageDescription(cameraDescription);
+			if (options.SaveToAlbum)
+				CheckUsageDescription(photoAddDescription);
 
             VerifyCameraOptions(options);
 
@@ -156,7 +158,10 @@ namespace Plugin.Media
 
             CheckUsageDescription(cameraDescription, microphoneDescription);
 
-            VerifyCameraOptions(options);
+			if (options.SaveToAlbum)
+				CheckUsageDescription(photoAddDescription);
+
+			VerifyCameraOptions(options);
 
 			var permissionsToCheck = new List<Permission> { Permission.Camera, Permission.Microphone };
 			if (options.SaveToAlbum)
@@ -344,6 +349,7 @@ namespace Plugin.Media
 
 		const string cameraDescription = "NSCameraUsageDescription";
 		const string photoDescription = "NSPhotoLibraryUsageDescription";
+		const string photoAddDescription = "NSPhotoLibraryAddUsageDescription";
 		const string microphoneDescription = "NSMicrophoneUsageDescription";
 		void CheckUsageDescription(params string[] descriptionNames)
         {
