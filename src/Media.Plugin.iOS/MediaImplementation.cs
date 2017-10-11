@@ -274,7 +274,7 @@ namespace Plugin.Media
             {
                 if (UIDevice.CurrentDevice.CheckSystemVersion(9, 0))
                 {
-                    picker.ModalPresentationStyle = UIModalPresentationStyle.Fullscreen;
+                    picker.ModalPresentationStyle = UIModalPresentationStyle.FullScreen;
                 }
                 viewController.PresentViewController(picker, true, null);
             }
