@@ -68,6 +68,8 @@ Such as:
 <string>This app needs access to photos.</string>
 <key>NSMicrophoneUsageDescription</key>
 <string>This app needs access to microphone.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>This app needs access to the photo gallery.</string>
 
 ### UWP
 Set `Webcam` permission.
