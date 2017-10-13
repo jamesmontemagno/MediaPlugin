@@ -85,7 +85,7 @@ namespace Plugin.Media
 				AllowCropping = false,
 				CustomPhotoSize = options?.CustomPhotoSize ?? 100,
 				MaxWidthHeight = options?.MaxWidthHeight,
-				RotateImage = options?.RotateImage ?? false,
+				RotateImage = options?.RotateImage ?? true,
 				SaveToAlbum = false,
             };
 

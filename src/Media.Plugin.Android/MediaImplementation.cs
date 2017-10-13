@@ -461,7 +461,8 @@ namespace Plugin.Media
                     PhotoSize = mediaOptions.PhotoSize,
                     CompressionQuality = mediaOptions.CompressionQuality,
                     CustomPhotoSize = mediaOptions.CustomPhotoSize,
-                    MaxWidthHeight = mediaOptions.MaxWidthHeight
+                    MaxWidthHeight = mediaOptions.MaxWidthHeight,
+                    RotateImage = mediaOptions.RotateImage,
                 },
                 exif);
         }
