@@ -1,6 +1,6 @@
 // WARNING
 //
-// This file has been generated automatically by Xamarin Studio from the outlets and
+// This file has been generated automatically by Visual Studio from the outlets and
 // actions declared in your storyboard file.
 // Manual changes to this file will not be maintained.
 //
@@ -49,6 +49,10 @@ namespace MediaTest.iOS
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UISlider SliderQuality { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISwitch SwitchRotate { get; set; }
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
@@ -103,6 +107,11 @@ namespace MediaTest.iOS
             if (SliderQuality != null) {
                 SliderQuality.Dispose ();
                 SliderQuality = null;
+            }
+
+            if (SwitchRotate != null) {
+                SwitchRotate.Dispose ();
+                SwitchRotate = null;
             }
 
             if (TakePhoto != null) {

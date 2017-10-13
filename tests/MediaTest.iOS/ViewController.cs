@@ -36,16 +36,23 @@ namespace MediaTest.iOS
                     AllowCropping = CroppingSwitch.On,
                     CompressionQuality = (int)SliderQuality.Value,
                     Directory = "Sample",
-                    DefaultCamera = FrontSwitch.On ? Plugin.Media.Abstractions.CameraDevice.Front : Plugin.Media.Abstractions.CameraDevice.Rear
+                    DefaultCamera = FrontSwitch.On ? Plugin.Media.Abstractions.CameraDevice.Front : Plugin.Media.Abstractions.CameraDevice.Rear,
+                    RotateImage = SwitchRotate.On
                 });
 
                 if (test == null)
                     return;
-                
 
                 var stream = test.GetStream();
+
+                //NSData* pngdata = UIImagePNGRepresentation(self.workingImage); //PNG wrap 
+                // UIImage* img = [self rotateImageAppropriately:[UIImage imageWithData: pngdata]];
+                // UIImageWriteToSavedPhotosAlbum(img, nil, nil, nil);
+
                 using (var data = NSData.FromStream(stream))
+                {
                     MainImage.Image = UIImage.LoadFromData(data);
+                }
 
                 test.Dispose();
             };
@@ -56,7 +63,8 @@ namespace MediaTest.iOS
                     new Plugin.Media.Abstractions.PickMediaOptions
                     {
                         PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
-                        CompressionQuality = (int)SliderQuality.Value
+                        CompressionQuality = (int)SliderQuality.Value,
+                        RotateImage = SwitchRotate.On
                     });
                 if (test == null)
                     return;

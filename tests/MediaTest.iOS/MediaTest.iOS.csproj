@@ -46,6 +46,7 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>true</MtouchDebug>
+    <MtouchProfiling>true</MtouchProfiling>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>
@@ -91,6 +92,7 @@
       <SubType>Designer</SubType>
     </None>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ViewController.designer.cs">
@@ -105,6 +107,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
+    <Reference Include="SDWebImage">
+      <HintPath>..\packages\Xamarin.SDWebImage.3.7.5\lib\Xamarin.iOS\SDWebImage.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Entitlements.plist" />

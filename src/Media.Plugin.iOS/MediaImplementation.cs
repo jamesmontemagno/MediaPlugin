@@ -288,6 +288,8 @@ namespace Plugin.Media
                 }
 
                 Interlocked.Exchange(ref pickerDelegate, null);
+
+                picker.Dispose();
                 return t;
             }).Unwrap();
         }
