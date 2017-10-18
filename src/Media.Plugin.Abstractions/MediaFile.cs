@@ -62,16 +62,27 @@ namespace Plugin.Media.Abstractions
         /// Get stream if available
         /// </summary>
         /// <returns></returns>
-        public Stream GetStream(bool forExternalStorage = false)
+        public Stream GetStream()
         {
             if (isDisposed)
                 throw new ObjectDisposedException(null);
 
-						if (forExternalStorage && streamGetterForExternalStorage != null)
-								return streamGetterForExternalStorage();
-						else
-            		return streamGetter();
+						return streamGetter();
         }
+
+				/// <summary>
+				/// Get stream with image orientation rotated if available. If not, then just GetStream()
+				/// </summary>
+				/// <returns></returns>
+				public Stream GetStreamWithImageRotatedForExternalStorage() {
+					if (isDisposed)
+						throw new ObjectDisposedException(null);
+
+					if (streamGetterForExternalStorage != null)
+						return streamGetterForExternalStorage();
+					else
+						return GetStream();
+				}
 
         /// <summary>
         /// 
