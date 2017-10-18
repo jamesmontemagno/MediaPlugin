@@ -256,13 +256,6 @@ namespace Plugin.Media
         {
             var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
 
-            // If rotate image option, then rotate the image to the original orientation it was taken
-            // instead of the orientation apple saves it to storage as with the orientation as metadata.
-            if (options.RotateImage)
-            {
-                image = RotateImage(image);
-            }
-
             var path = GetOutputPath(MediaImplementation.TypeImage,
                 options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
                 options.Name);
@@ -386,7 +379,15 @@ namespace Plugin.Media
 
             }
 
-            return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
+						Func<Stream> getStreamForExternalStorage = () => 
+						{
+								if (options.RotateImage)
+										return RotateImage(image);
+								else
+										return File.OpenRead(path);
+						};
+						
+						return new MediaFile(path, () => File.OpenRead(path), streamGetterForExternalStorage: () => getStreamForExternalStorage(), albumPath: aPath);
         }
 
         private static NSDictionary SetGpsLocation(NSDictionary meta, Location location)
@@ -585,9 +586,9 @@ namespace Plugin.Media
             }
         }
 
-        private UIImage RotateImage(UIImage image)
+        public static Stream RotateImage(UIImage image)
         {
-            UIImage imageToReturn = null;
+						UIImage imageToReturn = null;
             if (image.Orientation == UIImageOrientation.Up)
             {
                 imageToReturn = image;
@@ -669,7 +670,7 @@ namespace Plugin.Media
                 }
             }
 
-            return imageToReturn;
+            return imageToReturn.AsJPEG().AsStream();
         }
     }
 }
