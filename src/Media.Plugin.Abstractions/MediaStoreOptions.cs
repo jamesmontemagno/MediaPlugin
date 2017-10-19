@@ -117,7 +117,17 @@ namespace Plugin.Media.Abstractions
             get { return rotateImage; } 
             set { rotateImage = value;} 
         }
-    }
+
+		bool saveMetaData = true;
+		/// <summary>
+		/// Saves metadate/exif data from the original file.
+		/// </summary>
+		public bool SaveMetaData
+		{
+			get { return saveMetaData; }
+			set { saveMetaData = value; }
+		}
+	}
 
     
 
@@ -228,8 +238,22 @@ namespace Plugin.Media.Abstractions
         /// Should the library rotate image according to received exif orientation.
         /// Set to true by default.
         /// </summary>
-        public bool RotateImage { get { return rotateImage; } set { rotateImage = value; } }
-}
+        public bool RotateImage
+		{
+			get { return rotateImage; }
+			set { rotateImage = value; }
+		}
+
+		bool saveMetaData = true;
+		/// <summary>
+		/// Saves metadate/exif data from the original file.
+		/// </summary>
+		public bool SaveMetaData
+		{
+			get { return saveMetaData; }
+			set { saveMetaData = value; }
+		}
+	}
 
     /// <summary>
     /// Photo size enum.

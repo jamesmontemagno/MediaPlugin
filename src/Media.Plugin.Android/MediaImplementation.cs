@@ -87,7 +87,12 @@ namespace Plugin.Media
                     {
                         await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, originalMetadata);
                     }
-                    originalMetadata?.SaveAttributes();
+					if (options.SaveMetaData)
+					{
+						originalMetadata?.SaveAttributes();
+					}
+
+					originalMetadata?.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -183,10 +188,16 @@ namespace Plugin.Media
                 {
                     await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, exif);
                 }
-                if(exif != null)
-                    SetMissingMetadata(exif, options.Location);
-                
-                exif?.SaveAttributes();
+
+				if (options.SaveMetaData)
+				{
+					if (exif != null)
+						SetMissingMetadata(exif, options.Location);
+
+					exif?.SaveAttributes();
+				}
+
+				exif?.Dispose();
             }
             catch(Exception ex)
             {
@@ -465,6 +476,7 @@ namespace Plugin.Media
                     CustomPhotoSize = mediaOptions.CustomPhotoSize,
                     MaxWidthHeight = mediaOptions.MaxWidthHeight,
                     RotateImage = mediaOptions.RotateImage,
+					SaveMetaData = mediaOptions.SaveMetaData
                 },
                 exif);
         }

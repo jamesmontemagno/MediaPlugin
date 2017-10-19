@@ -312,30 +312,33 @@ namespace Plugin.Media
             NSDictionary meta = null;
             try
             {
-                if (source == UIImagePickerControllerSourceType.Camera)
-                {
-                    meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
-                    if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
-                    {
-                        var newMeta = new NSMutableDictionary();
-                        newMeta.SetValuesForKeysWithDictionary(meta);
-                        var newTiffDict = new NSMutableDictionary();
-                        newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
-                        newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
-                        newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
+				if (options.SaveMetaData)
+				{
+					if (source == UIImagePickerControllerSourceType.Camera)
+					{
+						meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
+						if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+						{
+							var newMeta = new NSMutableDictionary();
+							newMeta.SetValuesForKeysWithDictionary(meta);
+							var newTiffDict = new NSMutableDictionary();
+							newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+							newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
+							newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
 
-                        meta = newMeta;
-                    }
-                    var location = options.Location;
-                    if (meta != null && location != null)
-                    {
-                        meta = SetGpsLocation(meta, location);
-                    }
-                }
-                else
-                {
-                    meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(info[UIImagePickerController.ReferenceUrl] as NSUrl);
-                }
+							meta = newMeta;
+						}
+						var location = options.Location;
+						if (meta != null && location != null)
+						{
+							meta = SetGpsLocation(meta, location);
+						}
+					}
+					else
+					{
+						meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(info[UIImagePickerController.ReferenceUrl] as NSUrl);
+					}
+				}
 
             }
             catch (Exception ex)

@@ -78,14 +78,15 @@ namespace Plugin.Media
 
 			await CheckPermissions(Permission.Photos);
 
-            var cameraOptions = new StoreCameraMediaOptions
-            {
-                PhotoSize = options?.PhotoSize ?? PhotoSize.Full,
-                CompressionQuality = options?.CompressionQuality ?? 100,
+			var cameraOptions = new StoreCameraMediaOptions
+			{
+				PhotoSize = options?.PhotoSize ?? PhotoSize.Full,
+				CompressionQuality = options?.CompressionQuality ?? 100,
 				AllowCropping = false,
 				CustomPhotoSize = options?.CustomPhotoSize ?? 100,
 				MaxWidthHeight = options?.MaxWidthHeight,
 				RotateImage = options?.RotateImage ?? true,
+				SaveMetaData = options?.SaveMetaData ?? true,
 				SaveToAlbum = false,
             };
 
