@@ -54,5 +54,7 @@
 	<string>This app needs access to photos.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs microphone for video</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>This app needs access to the photo gallery.</string>
   </dict>
 </plist>
