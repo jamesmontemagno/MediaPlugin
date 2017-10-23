@@ -14,6 +14,13 @@ You must set your app to compile against API 25 or higher and be able to install
 
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
+Add usings:
+
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
+
+Then add to Activity:
+
 public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
 {
     PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
