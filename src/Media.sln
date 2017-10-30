@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Media.Plugin.iOS", "Media.Plugin.iOS\Media.Plugin.iOS.csproj", "{2882AEEB-D4CD-4EB9-8A6C-6653B33681F0}"
 EndProject
@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		..\appveyor.yml = ..\appveyor.yml
 		..\build.cake = ..\build.cake
+		..\build.ps1 = ..\build.ps1
 		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\nuget\Plugin.nuspec = ..\nuget\Plugin.nuspec
 		..\README.md = ..\README.md
@@ -318,5 +319,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9CE161B4-DA68-43C2-97C8-AA097BA2FF40}
 	EndGlobalSection
 EndGlobal
