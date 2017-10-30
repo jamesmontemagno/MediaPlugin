@@ -1,13 +1,4 @@
-#tool nuget:?package=XamarinComponent
-
 #addin nuget:?package=Cake.Android.SdkManager
-#addin nuget:?package=Cake.XCode
-#addin nuget:?package=Cake.Xamarin
-#addin nuget:?package=Cake.Xamarin.Build
-#addin nuget:?package=Cake.SemVer
-#addin nuget:?package=Cake.FileHelpers
-#addin nuget:?package=Cake.MonoApiTools
-
 
 var TARGET = Argument ("target", Argument ("t", "Default"));
 var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.9999");
