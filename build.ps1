@@ -80,6 +80,17 @@ function MD5HashFile([string] $filePath)
     }
 }
 
+function GetProxyEnabledWebClient
+{
+	[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+    $wc = New-Object System.Net.WebClient
+    $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
+    $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials        
+    $wc.Proxy = $proxy
+    return $wc
+}
+
+
 Write-Host "Preparing to run build script..."
 
 if(!$PSScriptRoot){
@@ -90,7 +101,7 @@ $TOOLS_DIR = Join-Path $PSScriptRoot "tools"
 $NUGET_EXE = Join-Path $TOOLS_DIR "nuget.exe"
 $CAKE_EXE = Join-Path $TOOLS_DIR "Cake/Cake.exe"
 $NUGET_URL = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
-$PACKAGES_CONFIG = "https://raw.githubusercontent.com/cake-build/resources/master/packages.config" #Join-Path $TOOLS_DIR "packages.config"
+$PACKAGES_CONFIG =  Join-Path $TOOLS_DIR "packages.config"
 $PACKAGES_CONFIG_MD5 = Join-Path $TOOLS_DIR "packages.config.md5sum"
 
 # Should we use mono?
@@ -121,8 +132,10 @@ if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
 
 # Make sure that packages.config exist.
 if (!(Test-Path $PACKAGES_CONFIG)) {
-    Write-Verbose -Message "Downloading packages.config..."
-    try { (New-Object System.Net.WebClient).DownloadFile("http://cakebuild.net/download/bootstrapper/packages", $PACKAGES_CONFIG) } catch {
+    Write-Verbose -Message "Downloading packages.config..."    
+    try {        
+        $wc = GetProxyEnabledWebClient
+        $wc.DownloadFile("https://raw.githubusercontent.com/cake-build/resources/master/packages.config", $PACKAGES_CONFIG) } catch {
         Throw "Could not download packages.config."
     }
 }
