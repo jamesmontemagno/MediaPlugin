@@ -12,7 +12,28 @@ Task("Libraries").Does(()=>
 	});
 });
 
+Task ("AndroidSDK")
+	.Does (() =>
+{
+	Information ("ANDROID_HOME: {0}", ANDROID_HOME);
+
+	var androidSdkSettings = new AndroidSdkManagerToolSettings { 
+		SdkRoot = ANDROID_HOME,
+		SkipVersionCheck = true
+	};
+
+	try { AcceptLicenses (androidSdkSettings); } catch { }
+
+	AndroidSdkManagerInstall (new [] { 
+			"platforms;android-15",
+			"platforms;android-23",
+			"platforms;android-25",
+			"platforms;android-26"
+		}, androidSdkSettings);
+});
+
 Task ("NuGet")
+	.IsDependentOn("AndroidSDK")
 	.IsDependentOn ("Libraries")
 	.Does (() =>
 {
