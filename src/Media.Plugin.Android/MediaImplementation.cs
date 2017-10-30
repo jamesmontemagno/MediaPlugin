@@ -89,7 +89,14 @@ namespace Plugin.Media
                     }
 					if (options.SaveMetaData)
 					{
-						originalMetadata?.SaveAttributes();
+						try
+						{
+							originalMetadata?.SaveAttributes();
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine($"Unable to save exif {ex}");
+						}
 					}
 
 					originalMetadata?.Dispose();
@@ -194,7 +201,14 @@ namespace Plugin.Media
 					if (exif != null)
 						SetMissingMetadata(exif, options.Location);
 
-					exif?.SaveAttributes();
+					try
+					{
+						exif?.SaveAttributes();
+					}
+					catch(Exception ex)
+					{
+						Console.WriteLine($"Unable to save exif {ex}");
+					}
 				}
 
 				exif?.Dispose();
@@ -778,6 +792,8 @@ namespace Plugin.Media
             {
                 exif.SetAttribute(ExifInterface.TagModel, Build.Model);
             }
+			
+			
         }
 
         private string CoordinateToRational(double coord)
