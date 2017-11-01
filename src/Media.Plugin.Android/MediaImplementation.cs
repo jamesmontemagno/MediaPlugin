@@ -57,6 +57,19 @@ namespace Plugin.Media
         public bool IsPickVideoSupported => true;
 
 
+        bool IsValidExif(ExifInterface exif)
+        {
+            //if null, then not falid
+            if (exif == null)
+                return false;
+
+            //if has thumb, but is <= 0, then not valid
+            if (exif.HasThumbnail && exif.GetThumbnail()?.Length <= 0)
+                return false;
+
+            return true;
+        }
+
         /// <summary>
         /// Picks a photo from the default gallery
         /// </summary>
@@ -87,11 +100,11 @@ namespace Plugin.Media
                     {
                         await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, originalMetadata);
                     }
-					if (options.SaveMetaData)
+                    if (options.SaveMetaData && IsValidExif(originalMetadata))
 					{
 						try
 						{
-							originalMetadata?.SaveAttributes();
+                            originalMetadata?.SaveAttributes();
 						}
 						catch (Exception ex)
 						{
@@ -196,10 +209,9 @@ namespace Plugin.Media
                     await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, exif);
                 }
 
-				if (options.SaveMetaData)
+                if (options.SaveMetaData && IsValidExif(exif))
 				{
-					if (exif != null)
-						SetMissingMetadata(exif, options.Location);
+					SetMissingMetadata(exif, options.Location);
 
 					try
 					{
