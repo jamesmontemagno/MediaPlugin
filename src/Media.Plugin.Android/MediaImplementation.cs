@@ -64,7 +64,7 @@ namespace Plugin.Media
                 return false;
 
             //if has thumb, but is <= 0, then not valid
-            if (exif.HasThumbnail && exif.GetThumbnail()?.Length <= 0)
+            if (exif.HasThumbnail && (exif.GetThumbnail()?.Length ?? 0) <= 0)
                 return false;
 
             return true;
