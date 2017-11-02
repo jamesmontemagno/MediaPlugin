@@ -4,6 +4,9 @@
 * Android: Fixup issue with url sharing #300 especially with mobileiron
 * iOS: Ensure all properties are set when picking photo #305
 * Android/iOS check for permissions before performing actions. Will now throw a MediaPermissionException if invalid permissions.
+* Android: Fix potential corrupt metadata: #367
+* iOS: Handle memory better when taking photos #336
+* iOS: Fix issues when using TabController that may get pushed down
 
 
 ### [3.0.0]
