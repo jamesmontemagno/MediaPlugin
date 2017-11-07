@@ -80,3 +80,12 @@ Such as:
 
 ### UWP
 Set `Webcam` permission.
+
+### Tizen
+Please add the following Privileges in tizen-manifest.xml file
+
+http://tizen.org/privilege/appmanager.launch
+http://tizen.org/privilege/mediastorage
+
+See below for additional instructions.
+https://developer.tizen.org/development/visual-studio-tools-tizen/tools/tizen-manifest-editor#privileges

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Property Group for Tizen40 Project -->
+  <PropertyGroup>
+	<TargetFramework>tizen40</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TizenCreateTpkOnBuild>false</TizenCreateTpkOnBuild>
+    <AssemblyName>Plugin.Media</AssemblyName>
+    <RootNamespace>Plugin.Media</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Media.Plugin\CrossMedia.cs" Link="CrossMedia.cs" />
+  </ItemGroup>
+  <!-- Include Nuget Package for Tizen Project building -->
+  <ItemGroup>
+    <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Tizen.NET" Version="4.0.0" />
+    <PackageReference Include="Tizen.NET.Sdk" Version="1.0.0" />
+  </ItemGroup>
+  
+  <Import Project="..\Media.Plugin.Shared\Media.Plugin.Shared.projitems" Label="Shared" />
+	  
+</Project>
