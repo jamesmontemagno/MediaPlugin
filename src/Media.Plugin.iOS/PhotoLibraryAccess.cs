@@ -36,7 +36,7 @@ namespace Plugin.Media
 					{
 						meta = new NSMutableDictionary
 						{
-							[ImageIO.CGImageProperties.Orientation] = new NSString(fullimage.Properties.Orientation.ToString()),
+							[ImageIO.CGImageProperties.Orientation] = NSNumber.FromNInt ((int)(fullimage.Properties.Orientation ?? CIImageOrientation.TopLeft)),
 							[ImageIO.CGImageProperties.ExifDictionary] = fullimage.Properties.Exif?.Dictionary ?? new NSDictionary(),
 							[ImageIO.CGImageProperties.TIFFDictionary] = fullimage.Properties.Tiff?.Dictionary ?? new NSDictionary(),
 							[ImageIO.CGImageProperties.GPSDictionary] = fullimage.Properties.Gps?.Dictionary ?? new NSDictionary(),
