@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tizen;
 using Tizen.Applications;
+using Tizen.Multimedia;
 
 namespace Plugin.Media
 {
@@ -36,19 +37,34 @@ namespace Plugin.Media
 		/// </summary>
 		public MediaImplementation()
 		{
-			IsCameraAvailable = true;
+			try
+			{
+				Camera camera = new Camera(Tizen.Multimedia.CameraDevice.Rear);
+				if (camera.CameraCount > 0)
+					IsCameraAvailable = true;
+				else
+					IsCameraAvailable = false;
+			}
+			catch (NotSupportedException)
+			{
+				IsCameraAvailable = false;
+			}
+			IsTakePhotoSupported = CheckSupportOperation(OPERATION_CREATE_CONTENT, "image/jpg");
+			IsPickPhotoSupported = CheckSupportOperation(OPERATION_PICK, "image/*");
+			IsTakeVideoSupported = CheckSupportOperation(OPERATION_CREATE_CONTENT, "video/3gp");
+			IsPickVideoSupported = CheckSupportOperation(OPERATION_PICK, "video/*");
 		}
 
 		/// <inheritdoc/>
 		public bool IsCameraAvailable { get; }
 		/// <inheritdoc/>
-		public bool IsTakePhotoSupported => true;
+		public bool IsTakePhotoSupported { get; }
 		/// <inheritdoc/>
-		public bool IsPickPhotoSupported => true;
+		public bool IsPickPhotoSupported { get; }
 		/// <inheritdoc/>
-		public bool IsTakeVideoSupported => true;
+		public bool IsTakeVideoSupported { get; }
 		/// <inheritdoc/>
-		public bool IsPickVideoSupported => true;
+		public bool IsPickVideoSupported { get; }
 
 		/// <inheritdoc/>
 		public Task<bool> Initialize() => Task.FromResult(true);
@@ -60,9 +76,11 @@ namespace Plugin.Media
 		/// <returns>Media file of photo or null if canceled</returns>
 		public Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
 		{
-			if (!IsCameraAvailable)
+			if (!IsCameraAvailable || !IsTakePhotoSupported)
+			{
+				Log.Error(LOG_TAG, "TakePhoto is not supported");
 				throw new NotSupportedException();
-
+			}
 			AppControl appControl = new AppControl();
 			appControl.LaunchMode = AppControlLaunchMode.Group;
 			appControl.Operation = OPERATION_CREATE_CONTENT;
@@ -81,8 +99,10 @@ namespace Plugin.Media
 		/// <returns>Media file of new video or null if canceled</returns>
 		public Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
 		{
-			if (!IsCameraAvailable)
+			if (!IsCameraAvailable || !IsTakeVideoSupported) {
+				Log.Error(LOG_TAG, "TakeVideo is not supported");
 				throw new NotSupportedException();
+			}
 			AppControl appControl= new AppControl();
 			appControl.Operation = OPERATION_CREATE_CONTENT;
 			appControl.Mime = "video/3gp";
@@ -100,10 +120,13 @@ namespace Plugin.Media
 		/// <returns>Media file of video or null if canceled</returns>
 		public Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
 		{
+			if (!IsPickPhotoSupported)
+			{
+				Log.Error(LOG_TAG, "PickPhoto is not supported");
+				throw new NotSupportedException();
+			}
 			AppControl appControl= new AppControl();
 			appControl.LaunchMode = AppControlLaunchMode.Group;
-			if (!IsPickPhotoSupported)
-				throw new NotSupportedException();
 			SetOptions(options, ref appControl);
 			var ntcs = new TaskCompletionSource<MediaFile>();
 			Interlocked.CompareExchange(ref completionSource, ntcs, null);
@@ -119,16 +142,36 @@ namespace Plugin.Media
 		/// <returns>Media file of video or null if canceled</returns>
 		public Task<MediaFile> PickVideoAsync()
 		{
+			if (!IsPickVideoSupported)
+			{
+				Log.Error(LOG_TAG, "PickVideo is not supported");
+				throw new NotSupportedException();
+			}
 			AppControl appControl = new AppControl();
 			appControl.LaunchMode = AppControlLaunchMode.Group;
-			if (!IsPickPhotoSupported)
-				throw new NotSupportedException();
 			var ntcs = new TaskCompletionSource<MediaFile>();
 			Interlocked.CompareExchange(ref completionSource, ntcs, null);
 			appControl.Operation = OPERATION_PICK;
 			appControl.Mime = "video/*";
 			AppControl.SendLaunchRequest(appControl, AppControlReplyReceivedCallback);
 			return completionSource.Task;
+		}
+
+
+		/// <summary>
+		/// Check that it is an operation of usable Appcontrol.
+		/// </summary>
+		/// <param name="operation">Appcontrol operation</param>
+		/// <param name="mime">Appcontrol mime</param>
+		/// <returns>Allow operation of appcontrol or not</returns>
+		private bool CheckSupportOperation(string operation, string mime)
+		{
+			AppControl appControl = new AppControl();
+			appControl.Operation = operation;
+			appControl.Mime = mime;
+			IEnumerable<string> applicationIds = AppControl.GetMatchedApplicationIds(appControl);
+			if (applicationIds.Count() == 0) return false;
+			else return true;
 		}
 
 		/// <summary>
@@ -165,7 +208,6 @@ namespace Plugin.Media
 		{
 			if (appControl == null)
 				throw new ObjectDisposedException("AppControl");
-
 			options.VerifyOptions();
 			appControl.ExtraData.Add(EX_KEY_ALLOW_SWITCH, EX_VAL_FALSE);
 			appControl.ExtraData.Add(EX_KEY_REQ_DESTORY, EX_VAL_TRUE);
@@ -232,7 +274,6 @@ namespace Plugin.Media
 		{
 			if (appControl == null)
 				throw new ObjectDisposedException("AppControl");
-
 			/// In Tizen, no options are available.
 			Log.Info(LOG_TAG, "There is no option to supported");
 		}
