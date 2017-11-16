@@ -1,14 +1,15 @@
-﻿using Tizen.Applications;
+using Tizen.Applications;
 using ElmSharp;
 using System.Diagnostics;
+using System;
 
 namespace MediaTizenTest
 {
     class App : CoreUIApplication
     {
 		private Image image;
-
-        protected override void OnCreate()
+		private ToastMessage toast;
+		protected override void OnCreate()
         {
             base.OnCreate();
             Initialize();
@@ -16,7 +17,8 @@ namespace MediaTizenTest
 
         void Initialize()
         {
-            Window window = new Window("MediaTizenTest")
+			toast = new ToastMessage();
+			Window window = new Window("MediaTizenTest")
             {
                 AvailableRotations = DisplayRotation.Degree_0 | DisplayRotation.Degree_180 | DisplayRotation.Degree_270 | DisplayRotation.Degree_90
             };
@@ -24,7 +26,7 @@ namespace MediaTizenTest
             {
                 Exit();
             };
-            window.Show();			
+            window.Show();
 
             var box = new Box(window)
             {
@@ -32,19 +34,20 @@ namespace MediaTizenTest
                 AlignmentY = -1,
                 WeightX = 1,
                 WeightY = 1,
-            };
+				BackgroundColor = Color.Black
+			};
 			box.SetPadding(5, 5);
 			box.Show();
-			
-            var bg = new Background(window)
-            {
-                Color = Color.White
+
+			var bg = new Background(window)
+			{
+				Color = Color.White
             };
             bg.SetContent(box);
 
             var conformant = new Conformant(window);
             conformant.Show();
-            conformant.SetContent(bg);			
+            conformant.SetContent(bg);
 
 			var takePhoto = new Button(window)
 			{
@@ -54,7 +57,7 @@ namespace MediaTizenTest
 				WeightX = 1,
 			};
 			takePhoto.Clicked += TakePhoto_ClickedAsync;
-			takePhoto.Show();			
+			takePhoto.Show();
 			box.PackEnd(takePhoto);
 
 			var pickPhoto = new Button(window)
@@ -95,53 +98,81 @@ namespace MediaTizenTest
 				AlignmentX = -1,
 				AlignmentY = -1,
 				WeightX = 1,
-				WeightY = 1,				
+				WeightY = 1,
 			};
 			image.Show();
 			box.PackEnd(image);
 		}
 
+		private void PostToastMessage(string message)
+		{
+			toast.Message = message;
+			toast.Post();
+			Debug.WriteLine(message);
+		}
 
 		private async void TakePhoto_ClickedAsync(object sender, System.EventArgs e)
 		{
-			var media = new Plugin.Media.MediaImplementation();
-			if (!media.IsCameraAvailable || !media.IsTakePhotoSupported)
-				throw new System.NotSupportedException();
-			var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+			try {
+				var media = new Plugin.Media.MediaImplementation();
+				var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+				{
+					DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Rear
+				});
+				var path = file.Path;
+				image.Load(path);
+				PostToastMessage(path);
+			}
+			catch (Exception ex)
 			{
-				DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Rear
-			});
-			var path = file.Path;
-			image.Load(path);
+				PostToastMessage(ex.Message);
+			}
 		}
 		private async void PickPhoto_ClickedAsync(object sender, System.EventArgs e)
 		{
-			var media = new Plugin.Media.MediaImplementation();
-			if (!media.IsCameraAvailable || !media.IsPickPhotoSupported)
-				throw new System.NotSupportedException();
-			var file = await  Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions{ });
-			if (file == null) return;
-			var path = file.Path;
-			image.Load(path);
+			try {
+				var media = new Plugin.Media.MediaImplementation();
+				var file = await  Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions{ });
+				if (file == null) return;
+				var path = file.Path;
+				image.Load(path);
+				PostToastMessage(path);
+			}
+			catch (Exception ex)
+			{
+				PostToastMessage(ex.Message);
+			}
 		}
 		private async void TakeVideo_ClickedAsync(object sender, System.EventArgs e)
 		{
-			var media = new Plugin.Media.MediaImplementation();
-			if (!media.IsCameraAvailable || !media.IsTakePhotoSupported)
-				throw new System.NotSupportedException();
-			var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
+			try {
+				var media = new Plugin.Media.MediaImplementation();
+				var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
+				{
+					DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Rear
+				});
+				var path = file.Path;
+				PostToastMessage(path);
+			}
+			catch (Exception ex)
 			{
-				DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Rear
-			});
-			var path = file.Path;
+				PostToastMessage(ex.Message);
+			}
 		}
 		private async void PickVideo_ClickedAsync(object sender, System.EventArgs e)
 		{
-			var media = new Plugin.Media.MediaImplementation();
-			var file = await Plugin.Media.CrossMedia.Current.PickVideoAsync();
-			if (file == null)
-				return;
-			var path = file.Path;
+			try {
+				var media = new Plugin.Media.MediaImplementation();
+				var file = await Plugin.Media.CrossMedia.Current.PickVideoAsync();
+				if (file == null)
+					return;
+				var path = file.Path;
+				PostToastMessage(path);
+			}
+			catch (Exception ex)
+			{
+				PostToastMessage(ex.Message);
+			}
 		}
 		static void Main(string[] args)
         {
