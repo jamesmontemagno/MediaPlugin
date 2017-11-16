@@ -47,8 +47,11 @@ namespace Plugin.Media
             if(disposing && !disposed)
             {
                 disposed = true;
-	            InvokeOnMainThread(() => Delegate?.Dispose());
-                Delegate = null;
+                InvokeOnMainThread(() =>
+                {
+                    Delegate?.Dispose();
+                    Delegate = null;
+                });
             }
         }
     }
