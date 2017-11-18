@@ -29,6 +29,8 @@ namespace Plugin.Media
                 }
                 return ret;
             }
+
+            set => new Lazy<IMedia>(() => value);
         }
 
         static IMedia CreateMedia()
