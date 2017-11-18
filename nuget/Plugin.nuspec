@@ -51,8 +51,8 @@
          </group>
          <group targetFramework="xamarinwatchos">
          </group>
-         <group targetFramework="tizen40">
-         </group>
+         <!--<group targetFramework="tizen40">
+         </group>-->
        </dependencies>
    </metadata>
    <files>
@@ -67,9 +67,9 @@
      <file src="src\Media.Plugin.iOS\bin\iPhone\Release\Plugin.Media.*" target="lib\Xamarin.iOS10" />
      
      <!--UWP-->
-     <file src="src\Media.Plugin.UWP\bin\Release\Plugin.Media.*" target="lib\UAP10" />
+     <!--<file src="src\Media.Plugin.UWP\bin\Release\Plugin.Media.*" target="lib\UAP10" />-->
      
      <!--Tizen-->
-     <file src="src\Media.Plugin.Tizen\bin\Release\tizen40\Plugin.Media.*" target="lib\tizen40" />
+     <!--<file src="src\Media.Plugin.Tizen\bin\Release\tizen40\Plugin.Media.*" target="lib\tizen40" />-->
    </files>
 </package>
