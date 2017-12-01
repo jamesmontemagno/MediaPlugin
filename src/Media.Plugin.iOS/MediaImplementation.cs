@@ -282,15 +282,27 @@ namespace Plugin.Media
 
             return ndelegate.Task.ContinueWith(t =>
             {
-                if (popover != null)
-                {
-                    popover.Dispose();
-                    popover = null;
-                }
+				try
+				{
+					popover?.Dispose();
+				}
+				catch
+				{
+
+				}
+                popover = null;
+                
 
                 Interlocked.Exchange(ref pickerDelegate, null);
 
-                picker.Dispose();
+				try
+				{
+					picker?.Dispose();
+				}
+				catch
+				{
+
+				}
                 return t;
             }).Unwrap();
         }

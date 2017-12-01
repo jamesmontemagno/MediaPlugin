@@ -146,7 +146,14 @@ namespace Plugin.Media
                 if (Popover != null)
                 {
                     Popover.Dismiss(animated: true);
-                    Popover.Dispose();
+					try
+					{
+						Popover.Dispose();
+					}
+					catch
+					{
+
+					}
                     Popover = null;
 
                     onDismiss();
@@ -154,7 +161,14 @@ namespace Plugin.Media
                 else
                 {
                     picker.DismissViewController(true, onDismiss);
-                    picker.Dispose();
+					try
+					{
+						picker.Dispose();
+					}
+					catch
+					{
+
+					}
                 }
             }
         }
