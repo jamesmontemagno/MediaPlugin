@@ -73,10 +73,15 @@ namespace Plugin.Media
         {
             if (!IsPickPhotoSupported)
                 throw new NotSupportedException();
-			
-            CheckUsageDescription(photoDescription);
 
-			await CheckPermissions(Permission.Photos);
+
+			//Does not need permission on iOS 11
+			if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+			{
+				CheckUsageDescription(photoDescription);
+
+				await CheckPermissions(Permission.Photos);
+			}
 
 			var cameraOptions = new StoreCameraMediaOptions
 			{
@@ -133,9 +138,13 @@ namespace Plugin.Media
 
             var backgroundTask = UIApplication.SharedApplication.BeginBackgroundTask(() => { });
 
-            CheckUsageDescription(photoDescription);
-
-			await CheckPermissions(Permission.Photos);
+            
+			//Not needed on iOS 11 since it runs in different process
+			if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+			{
+				CheckUsageDescription(photoDescription);
+				await CheckPermissions(Permission.Photos);
+			}
 
 			var media = await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie);
 
