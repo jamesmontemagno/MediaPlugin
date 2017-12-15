@@ -4,6 +4,8 @@ using Android.OS;
 using Android.Graphics;
 using Android.Content.PM;
 using System;
+using Plugin.Media;
+using Plugin.Media.Abstractions;
 
 namespace MediaAndroidTest
 {
@@ -43,7 +45,7 @@ namespace MediaAndroidTest
                 {
                     var size = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full;
                     var media = new Plugin.Media.MediaImplementation();
-                    var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+					var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
                     {
                         Directory = "Sample",
                         Name = $"{DateTime.Now}_{size}|\\?*<\":>/'.jpg".Replace(" ", string.Empty),
@@ -51,7 +53,8 @@ namespace MediaAndroidTest
                         PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Small : Plugin.Media.Abstractions.PhotoSize.Full,
                         DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Front
                     });
-                    if (file == null)
+
+					if (file == null)
                         return;
                     var path = file.Path;
                     Toast.MakeText(this, path, ToastLength.Long).Show();
