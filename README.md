@@ -272,9 +272,7 @@ By adding these permissions [Google Play will automatically filter out devices](
 ```
 
 
-#### ANDROID N
-
-If your application targets Android N (API 24) or newer, you must use version 2.6.0+.
+#### Android File Provider
 
 You must also add a few additional configuration files to adhere to the new strict mode:
 
@@ -289,7 +287,7 @@ You must also add a few additional configuration files to adhere to the new stri
 </provider>
 ```
 
-**YOUR_APP_PACKAGE_NAME** must be set to your app package name!
+**YOUR_APP_PACKAGE_NAME** must be set to your app package name! Ensure that your package name is set to something such as "com.company.app". It must have at least 2 parts to it.
 
 2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`
 
@@ -301,8 +299,6 @@ Add the following code:
     <external-files-path name="my_movies" path="Movies" />
 </paths>
 ```
-
-**YOUR_APP_PACKAGE_NAME** must be set to your app package name!
 
 You can read more at: https://developer.android.com/training/camera/photobasics.html
 
