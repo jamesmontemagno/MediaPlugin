@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{0E3EFBDE-5210-47D7-9CBF-D5130091A361}</Project>
+      <Project>{FBEF1E96-BBB6-43B8-9C56-2C01088C4D48}</Project>
       <Name>Media.Plugin.Abstractions</Name>
     </ProjectReference>
   </ItemGroup>
