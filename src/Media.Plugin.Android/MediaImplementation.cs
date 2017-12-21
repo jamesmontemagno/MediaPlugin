@@ -63,9 +63,17 @@ namespace Plugin.Media
             if (exif == null)
                 return false;
 
-            //if has thumb, but is <= 0, then not valid
-            if (exif.HasThumbnail && (exif.GetThumbnail()?.Length ?? 0) <= 0)
-                return false;
+			try
+			{
+				//if has thumb, but is <= 0, then not valid
+				if (exif.HasThumbnail && (exif.GetThumbnail()?.Length ?? 0) <= 0)
+					return false;
+			}
+			catch(Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine("Unable to get thumbnail exif: " + ex);
+				return false;
+			}
 
             return true;
         }
