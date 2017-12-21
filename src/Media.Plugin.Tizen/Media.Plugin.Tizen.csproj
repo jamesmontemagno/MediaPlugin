@@ -2,7 +2,7 @@
 
   <!-- Property Group for Tizen40 Project -->
   <PropertyGroup>
-	<TargetFramework>tizen4.0</TargetFramework>
+	<TargetFramework>tizen40</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
