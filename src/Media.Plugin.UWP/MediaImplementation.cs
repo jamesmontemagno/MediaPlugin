@@ -114,35 +114,7 @@ namespace Plugin.Media
             if (result == null)
                 return null;
 
-            var folder = ApplicationData.Current.LocalFolder;
-
-            var path = options.GetFilePath(folder.Path);
-            var directoryFull = Path.GetDirectoryName(path);
-            var newFolder = directoryFull.Replace(folder.Path, string.Empty);
-            if (!string.IsNullOrWhiteSpace(newFolder))
-                await folder.CreateFolderAsync(newFolder, CreationCollisionOption.OpenIfExists);
-
-            folder = await StorageFolder.GetFolderFromPathAsync(directoryFull);
-
-            var filename = Path.GetFileName(path);
-
-            string aPath = null;
-            if (options?.SaveToAlbum ?? false)
-            {
-                try
-                {
-                    var fileNameNoEx = Path.GetFileNameWithoutExtension(path);
-                    var copy = await result.CopyAsync(KnownFolders.PicturesLibrary, fileNameNoEx + result.FileType, NameCollisionOption.GenerateUniqueName);
-                    aPath = copy.Path;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("unable to save to album:" + ex);
-                }
-            }
-
-            var file = await result.CopyAsync(folder, filename, NameCollisionOption.GenerateUniqueName).AsTask();
-            return new MediaFile(file.Path, () => file.OpenStreamForReadAsync().Result, albumPath: aPath);
+            return await SaveMediaFileWithOptions(result, options);
         }
 
 
@@ -250,22 +222,7 @@ namespace Plugin.Media
             if (result == null)
                 return null;
 
-            string aPath = null;
-            if (options?.SaveToAlbum ?? false)
-            {
-                try
-                {
-                    var fileNameNoEx = Path.GetFileNameWithoutExtension(result.Path);
-                    var copy = await result.CopyAsync(KnownFolders.VideosLibrary, fileNameNoEx + result.FileType, NameCollisionOption.GenerateUniqueName);
-                    aPath = copy.Path;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("unable to save to album:" + ex);
-                }
-            }
-
-            return new MediaFile(result.Path, () => result.OpenStreamForReadAsync().Result, albumPath: aPath);
+	        return await SaveMediaFileWithOptions(result, options);
         }
 
         /// <summary>
@@ -316,6 +273,41 @@ namespace Plugin.Media
         private readonly HashSet<string> devices = new HashSet<string>();
         private readonly DeviceWatcher watcher;
         private bool isCameraAvailable;
+
+	    private static async Task<MediaFile> SaveMediaFileWithOptions(IStorageFile result, StoreCameraMediaOptions options)
+	    {
+		    var folder = ApplicationData.Current.LocalFolder;
+
+		    var path = options.GetFilePath(folder.Path);
+		    var directoryFull = Path.GetDirectoryName(path);
+		    var newFolder = directoryFull.Replace(folder.Path, string.Empty);
+		    if (!string.IsNullOrWhiteSpace(newFolder))
+			    await folder.CreateFolderAsync(newFolder, CreationCollisionOption.OpenIfExists);
+
+		    folder = await StorageFolder.GetFolderFromPathAsync(directoryFull);
+
+		    var filename = Path.GetFileName(path);
+
+		    string aPath = null;
+		    if (options?.SaveToAlbum ?? false)
+		    {
+			    try
+			    {
+				    var fileNameNoEx = Path.GetFileNameWithoutExtension(path);
+				    var copy = await result.CopyAsync(KnownFolders.PicturesLibrary, fileNameNoEx + result.FileType,
+					    NameCollisionOption.GenerateUniqueName);
+				    aPath = copy.Path;
+			    }
+			    catch (Exception ex)
+			    {
+				    Debug.WriteLine("unable to save to album:" + ex);
+			    }
+		    }
+
+		    var file = await result.CopyAsync(folder, filename, NameCollisionOption.GenerateUniqueName).AsTask();
+		    return new MediaFile(file.Path, () => file.OpenStreamForReadAsync().Result, albumPath: aPath);
+	    }
+
 
 
         private CameraCaptureUIMaxVideoResolution GetResolutionFromQuality(VideoQuality quality)
