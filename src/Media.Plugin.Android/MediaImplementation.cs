@@ -586,6 +586,9 @@ namespace Plugin.Media
 
                         //this now will return the requested width/height from file, so no longer need to scale
                         var originalImage = BitmapFactory.DecodeFile(filePath, options);
+
+						if (originalImage == null)
+							return false;
                         
                         if (finalWidth != originalImage.Width || finalHeight != originalImage.Height)
                         {
