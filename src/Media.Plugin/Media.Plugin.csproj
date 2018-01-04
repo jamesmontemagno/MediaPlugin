@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Plugin.Permissions" Version="2.0.1" />
+    <PackageReference Include="Plugin.Permissions" Version="2.2.1" />
   </ItemGroup>
 
   <ItemGroup>
