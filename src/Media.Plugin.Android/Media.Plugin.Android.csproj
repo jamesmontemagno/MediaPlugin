@@ -70,6 +70,7 @@
     <Compile Include="..\Media.Plugin\CrossMedia.cs">
       <Link>CrossMedia.cs</Link>
     </Compile>
+    <Compile Include="IntentExtraExtensions.cs" />
     <Compile Include="MainApplication.cs" />
     <Compile Include="MediaFile.cs" />
     <Compile Include="MediaImplementation.cs" />

@@ -131,7 +131,13 @@ namespace Plugin.Media
                     pickIntent.PutExtra(MediaStore.ExtraVideoQuality, GetVideoQuality(quality));
 
                     if (front != 0)
-                        pickIntent.PutExtra(ExtraFront, (int)Android.Hardware.CameraFacing.Front);
+                    {
+                        pickIntent.UseFrontCamera();
+                    }
+                    else
+                    {
+                        pickIntent.UseBackCamera();
+                    }
 
                     if (!ran)
                     {
