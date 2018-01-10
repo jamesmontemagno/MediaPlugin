@@ -123,13 +123,8 @@ takePhoto.Clicked += async (sender, args) =>
     image.Source = ImageSource.FromStream(() =>
     {
         var stream = file.GetStream();
-        file.Dispose();
         return stream;
     }); 
-    
-    //or:
-    //image.Source = ImageSource.FromFile(file.Path);
-    //image.Dispose();
 };
 ```
 
@@ -262,7 +257,21 @@ public override void OnRequestPermissionsResult(int requestCode, string[] permis
 }
 ```
 
+## Android Compile and Target SDK
+
 **You MUST manually set your Target version to API 25+ and Compile against API 25+**
+
+## Android Current Activity Setup
+
+This plugin uses the [Current Activity Plugin](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. Please fully read through the [Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md). At an absolute minimum you must set the following in your Activity's OnCreate method:
+
+```csharp
+Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
+```
+
+It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md)
+
+## Android Misc
 
 By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardware. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
 
