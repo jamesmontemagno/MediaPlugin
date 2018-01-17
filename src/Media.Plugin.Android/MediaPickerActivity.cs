@@ -165,14 +165,23 @@ namespace Plugin.Media
 
 						if (targetsNOrNewer && path.Scheme == "file")
 						{
-							var photoURI = FileProvider.GetUriForFile(this,
-																	  Application.Context.PackageName + ".fileprovider",
-							                                          new Java.IO.File(path.Path));
+							try
+							{
+								var photoURI = FileProvider.GetUriForFile(this,
+																		  Application.Context.PackageName + ".fileprovider",
+																		  new Java.IO.File(path.Path));
 
-							GrantUriPermissionsForIntent(pickIntent, photoURI);
-							pickIntent.AddFlags(ActivityFlags.GrantReadUriPermission); 
-							pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
-							pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
+								GrantUriPermissionsForIntent(pickIntent, photoURI);
+								pickIntent.AddFlags(ActivityFlags.GrantReadUriPermission);
+								pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+								pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
+							}
+							catch(Exception ex)
+							{
+								System.Diagnostics.Debug.WriteLine($"Unable to get file location, check and set manifest with file provider. Exception: {ex}");
+
+								throw new ArgumentException("Unable to get file location. This most likely means that the file provider information is not set in your Android Manifest file. Please check documentation on how to set this up in your project.", ex);
+							}
 						}
 						else
 						{
