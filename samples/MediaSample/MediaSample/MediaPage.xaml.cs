@@ -31,7 +31,8 @@ namespace MediaSample
 			CompressionQuality = 75,
 			CustomPhotoSize = 50,
 			PhotoSize = PhotoSize.MaxWidthHeight,
-			MaxWidthHeight = 2000
+			MaxWidthHeight = 2000,
+            DefaultCamera = CameraDevice.Front
 		});
 
         if (file == null)
@@ -56,7 +57,8 @@ namespace MediaSample
         }
          var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
                       {
-                          PhotoSize =  Plugin.Media.Abstractions.PhotoSize.Medium
+                          PhotoSize =  Plugin.Media.Abstractions.PhotoSize.Medium,
+                    
                       });
 
 

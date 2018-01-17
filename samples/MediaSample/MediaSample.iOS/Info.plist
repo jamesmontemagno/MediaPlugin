@@ -56,5 +56,7 @@
 	<string>This app needs microphone for video</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs access to the photo gallery.</string>
+	<key>CFBundleName</key>
+	<string>MediaSample</string>
 </dict>
 </plist>
