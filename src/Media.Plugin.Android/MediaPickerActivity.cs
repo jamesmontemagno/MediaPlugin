@@ -145,25 +145,7 @@ namespace Plugin.Media
 
                         Touch();
 
-						var targetsNOrNewer = false;
-
-						try
-						{
-							targetsNOrNewer = (int)Application.Context.ApplicationInfo.TargetSdkVersion >= 24;
-						}
-						catch(Exception appInfoEx)
-						{
-							System.Diagnostics.Debug.WriteLine("Unable to get application info for targetSDK, trying to get from package manager: " + appInfoEx);
-							targetsNOrNewer = false;
-
-							var appInfo = PackageManager.GetApplicationInfo(Application.Context.PackageName, 0);
-							if (appInfo != null)
-							{
-								targetsNOrNewer = (int)appInfo.TargetSdkVersion >= 24;
-							}
-						}
-
-						if (targetsNOrNewer && path.Scheme == "file")
+						if (path.Scheme == "file")
 						{
 							try
 							{
