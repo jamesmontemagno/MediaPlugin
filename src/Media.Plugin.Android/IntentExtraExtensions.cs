@@ -23,7 +23,7 @@ namespace Plugin.Media
 		public static void UseBackCamera(this Intent intent)
 		{
 			// Android before API 25 (7.1)
-			intent.PutExtra(extraFrontPre25, (int)CameraFacing.Front);
+			intent.PutExtra(extraFrontPre25, (int)CameraFacing.Back);
 
 			// Android API 25 and up
 			intent.PutExtra(extraBackPost25, 1);
