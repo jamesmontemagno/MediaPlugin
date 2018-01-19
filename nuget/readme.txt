@@ -10,8 +10,6 @@ http://motzcod.es/post/162402194007/plugins-for-xamarin-go-dotnet-standard
 ## Additional Required Setup (Please Read!)
 
 ## Android 
-You must set your app to compile against API 25 or higher and be able to install the latest android support libraries.
-
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
 Add usings:

@@ -1,4 +1,10 @@
 ## Changelog
+
+### [3.1.3]
+* Remove need for Android Target versions (always use File Provider via #442 and @ddobrev)
+* Enhancments to Android picking front or rare camera (via @WebDucer)
+
+
 ### [3.1.0]
 * Fixes for rotations on iOS (return proper exif)
 * Remove permission pop up on pick video/photo on iOS 11+

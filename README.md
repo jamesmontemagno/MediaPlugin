@@ -257,10 +257,6 @@ public override void OnRequestPermissionsResult(int requestCode, string[] permis
 }
 ```
 
-## Android Compile and Target SDK
-
-**You MUST manually set your Target version to API 25+ and Compile against API 25+**
-
 ## Android Current Activity Setup
 
 This plugin uses the [Current Activity Plugin](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. Please fully read through the [Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md). At an absolute minimum you must set the following in your Activity's OnCreate method:

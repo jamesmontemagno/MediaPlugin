@@ -37,21 +37,22 @@ namespace MediaAndroidTest
             var image = FindViewById<ImageView>(Resource.Id.imageView1);
 
             var switchSize = FindViewById<Switch>(Resource.Id.switch_size);
-            var switchSaveToAlbum = FindViewById<Switch>(Resource.Id.switch_save_album);
+			var switchSaveToAlbum = FindViewById<Switch>(Resource.Id.switch_save_album);
+			var switchCamera = FindViewById<Switch>(Resource.Id.switch_front);
 
-            button.Click += async delegate
+			button.Click += async delegate
             {
                 try
                 {
                     var size = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full;
                     var media = new Plugin.Media.MediaImplementation();
 					var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
-                    {
-                        Directory = "Sample",
-                        Name = $"{DateTime.Now}_{size}|\\?*<\":>/'.jpg".Replace(" ", string.Empty),
-                        SaveToAlbum = switchSaveToAlbum.Checked,
-                        PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Small : Plugin.Media.Abstractions.PhotoSize.Full,
-                        DefaultCamera = Plugin.Media.Abstractions.CameraDevice.Front
+					{
+						Directory = "Sample",
+						Name = $"{DateTime.Now}_{size}|\\?*<\":>/'.jpg".Replace(" ", string.Empty),
+						SaveToAlbum = switchSaveToAlbum.Checked,
+						PhotoSize = switchSize.Checked ? Plugin.Media.Abstractions.PhotoSize.Small : Plugin.Media.Abstractions.PhotoSize.Full,
+						DefaultCamera = switchCamera.Checked ? Plugin.Media.Abstractions.CameraDevice.Front : CameraDevice.Rear
                     });
 
 					if (file == null)
@@ -105,7 +106,8 @@ namespace MediaAndroidTest
                           Directory = "Sample",
                           Name = $"{DateTime.UtcNow}_{size}|\\?*<\":>/'.mp4".Replace(" ", string.Empty),
 						  SaveToAlbum = switchSaveToAlbum.Checked,
-						  Quality = size
+						  Quality = size,
+						  DefaultCamera = switchCamera.Checked ? Plugin.Media.Abstractions.CameraDevice.Front : CameraDevice.Rear
 					  });
                       if (file == null)
                           return;
