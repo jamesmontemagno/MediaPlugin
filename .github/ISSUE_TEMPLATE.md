@@ -1,3 +1,6 @@
+Make sure you follow all of the setup directions before posting an issue: https://github.com/jamesmontemagno/MediaPlugin#important-permission-information
+
+
 If you are creating an issue for a BUG please fill out this information. If you are asking a question or requesting a feature you can delete the sections below. 
 
 **Failure to fill out this information will result in this issue being closed.** If you post a full stack trace in a bug it will be closed, please post it to http://gist.github.com and then post the link here.
