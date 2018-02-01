@@ -2,6 +2,8 @@
 
 Simple cross platform plugin to take photos and video or pick them from a gallery from shared code.
 
+Please read through all of the setup directions below: https://github.com/jamesmontemagno/MediaPlugin#important-permission-information
+
 Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a cross platform API.
 
 ### Setup
@@ -267,7 +269,7 @@ Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
 
 It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md)
 
-## Android Misc
+## Android Misc Setup
 
 By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardware. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
 
@@ -277,7 +279,7 @@ By adding these permissions [Google Play will automatically filter out devices](
 ```
 
 
-#### Android File Provider
+#### Android File Provider Setup
 
 You must also add a few additional configuration files to adhere to the new strict mode:
 
