@@ -1,4 +1,6 @@
 ## Changelog
+### [3.1.4]
+* Fix for #452: Large images on iPhone X don't save sometimes at 100% (thanks @christophedelanghe)
 
 ### [3.1.3]
 * Remove need for Android Target versions (always use File Provider via #442 and @ddobrev)
