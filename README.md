@@ -284,13 +284,14 @@ By adding these permissions [Google Play will automatically filter out devices](
 You must also add a few additional configuration files to adhere to the new strict mode:
 
 1.) Add the following to your AndroidManifest.xml inside the `<application>` tags:
-```
+```xml
 <provider android:name="android.support.v4.content.FileProvider" 
-				android:authorities="YOUR_APP_PACKAGE_NAME.fileprovider" 
-				android:exported="false" 
-				android:grantUriPermissions="true">
-			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
-				android:resource="@xml/file_paths"></meta-data>
+          android:authorities="YOUR_APP_PACKAGE_NAME.fileprovider" 
+          android:exported="false" 
+          android:grantUriPermissions="true">
+          
+	  <meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
+                     android:resource="@xml/file_paths"></meta-data>
 </provider>
 ```
 
@@ -299,7 +300,7 @@ You must also add a few additional configuration files to adhere to the new stri
 2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`
 
 Add the following code:
-```
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <external-files-path name="my_images" path="Pictures" />
@@ -315,7 +316,7 @@ You can read more at: https://developer.android.com/training/camera/photobasics.
 Your app is required to have keys in your Info.plist for `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` in order to access the device's camera and photo/video library. If you are using the Video capabilities of the library then you must also add `NSMicrophoneUsageDescription`.  If you want to "SaveToGallery" then you must add the `NSPhotoLibraryAddUsageDescription` key into your info.plist. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features. You can read me here: https://blog.xamarin.com/new-ios-10-privacy-permission-settings/
 
 Such as:
-```
+```xml
 <key>NSCameraUsageDescription</key>
 <string>This app needs access to the camera to take photos.</string>
 <key>NSPhotoLibraryUsageDescription</key>
@@ -367,7 +368,9 @@ else
 
 
 #### License
+
 Licensed under MIT, see license file. This is a derivative to [Xamarin.Mobile's Media](http://github.com/xamarin/xamarin.mobile) with a cross platform API and other enhancements.
+```
 //
 //  Copyright 2011-2013, Xamarin Inc.
 //
@@ -383,7 +386,7 @@ Licensed under MIT, see license file. This is a derivative to [Xamarin.Mobile's 
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-
+```
 
 ### Want To Support This Project?
 All I have ever asked is to be active by submitting bugs, features, and sending those pull requests down! Want to go further? Make sure to subscribe to my weekly development podcast [Merge Conflict](http://mergeconflict.fm), where I talk all about awesome Xamarin goodies and you can optionally support the show by becoming a [supporter on Patreon](https://www.patreon.com/mergeconflictfm).
