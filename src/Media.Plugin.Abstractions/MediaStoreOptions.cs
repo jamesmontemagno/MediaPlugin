@@ -253,6 +253,11 @@ namespace Plugin.Media.Abstractions
 			get { return saveMetaData; }
 			set { saveMetaData = value; }
 		}
+
+		/// <summary>
+		/// The name of the Album in the Gallery.
+		/// </summary>
+		public string Album { get; set; }
 	}
 
     /// <summary>

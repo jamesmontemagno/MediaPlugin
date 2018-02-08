@@ -13,6 +13,7 @@ using System.Globalization;
 using ImageIO;
 using MobileCoreServices;
 using System.Drawing;
+using Photos;
 
 namespace Plugin.Media
 {
@@ -397,6 +398,88 @@ namespace Plugin.Media
 			}
 			else
 			{
+				if (!String.IsNullOrWhiteSpace(options.Album))
+				{
+					try
+					{
+						PHAssetCollection assetCollection = null;
+
+						// Opens the assetCollectio / album by name.
+						// Returns null if the given albumName couldn't found
+						Func<PHAssetCollection> fetchAssetCollectionForAlbum = () =>
+						{
+							var fetchOptions = new PHFetchOptions();
+							//string predicateFormat = ;
+
+							fetchOptions.Predicate = NSPredicate.FromFormat($"title = %@", FromObject(options.Album));
+							var collection = PHAssetCollection.FetchAssetCollections(PHAssetCollectionType.Album, PHAssetCollectionSubtype.Any, fetchOptions);
+
+							if (collection.firstObject != null)
+							{
+								return collection.firstObject as PHAssetCollection;
+							}
+							return null;
+						};
+
+						// Saves the image to the sellected assetCollection / album.
+						Action saveImage = () =>
+						{
+							if (assetCollection == null)
+							{
+								throw new Exception("Unable to create album");
+							}
+
+							PHPhotoLibrary.SharedPhotoLibrary.PerformChanges(() =>
+							{
+								var assetChangeRequest = PHAssetChangeRequest.FromImage(image);
+								var assetPlaceholder = assetChangeRequest.PlaceholderForCreatedAsset;
+								var albumChangeRequest = PHAssetCollectionChangeRequest.ChangeRequest(assetCollection);
+								albumChangeRequest.AddAssets(new PHObject[] { assetPlaceholder });
+							}, (success, ex) =>
+							{
+								if (success)
+								{
+
+								}
+								else
+								{
+
+								}
+							});
+						};
+
+						var tempCollection = fetchAssetCollectionForAlbum();
+						// If the album already exist save image...
+						if (tempCollection != null)
+						{
+							assetCollection = tempCollection;
+							saveImage();
+						}
+						// ...if not create album.
+						else
+						{
+							PHPhotoLibrary.SharedPhotoLibrary.PerformChanges(() =>
+							{
+								PHAssetCollectionChangeRequest.CreateAssetCollection(options.Album);
+							}, (success, ex) =>
+							{
+								// If success save image.
+								if (success)
+								{
+									assetCollection = fetchAssetCollectionForAlbum();
+
+									saveImage();
+								}
+							});
+						}
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("unable to save into album:" + ex);
+					}
+				}
+
+
 				if (options.SaveToAlbum)
 				{
 					try
