@@ -173,12 +173,20 @@ namespace Plugin.Media.Abstractions
         }
 
         /// <summary>
-        // Get or set if the image should be stored public
+        /// Get or set if the image should be stored public
         /// </summary>
         public bool SaveToAlbum
         {
             get; set;
         }
+
+		/// <summary>
+		/// Get or set the name of the album u wish to save your picture in.
+		/// </summary>
+		public string AlbumName
+		{
+			get; set;
+		}
 
         /// <summary>
         /// Gets or sets the size of the photo.
@@ -253,11 +261,6 @@ namespace Plugin.Media.Abstractions
 			get { return saveMetaData; }
 			set { saveMetaData = value; }
 		}
-
-		/// <summary>
-		/// The name of the Album in the Gallery.
-		/// </summary>
-		public string Album { get; set; }
 	}
 
     /// <summary>
