@@ -12,16 +12,13 @@ http://motzcod.es/post/162402194007/plugins-for-xamarin-go-dotnet-standard
 ## Android 
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
-Add usings:
 
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
 
-Then add to Activity:
+Add to Activity:
 
-public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 {
-    PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 }
 
 The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions.
