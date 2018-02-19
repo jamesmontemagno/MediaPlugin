@@ -243,19 +243,12 @@ Please read these as they must be implemented for all platforms.
 #### Android 
 The `WRITE_EXTERNAL_STORAGE` & `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add the Permission Plugin code into your Main or Base Activities:
 
-Add usings:
+Add to Activity:
 
 ```csharp
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
-```
-
-Then add to Activity:
-
-```csharp
-public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 {
-    PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 }
 ```
 
