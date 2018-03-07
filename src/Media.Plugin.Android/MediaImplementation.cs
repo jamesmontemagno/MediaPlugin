@@ -861,7 +861,31 @@ namespace Plugin.Media
             }
         }
 
-    }
+		/// <summary>
+		/// Capture a screenshot of the current view
+		/// </summary>
+		/// <returns>
+		/// Screenshot image
+		/// </returns>
+		public Task<byte[]> CaptureScreenshotAsync()
+		{
+			var view = CrossCurrentActivity.Current.Activity.Window.DecorView;
+
+			view.DrawingCacheEnabled = true;
+
+			var bitmap = view.GetDrawingCache(true);
+
+			byte[] bitmapData;
+
+			using (var stream = new MemoryStream())
+			{
+				bitmap.Compress(Bitmap.CompressFormat.Png, 0, stream);
+				bitmapData = stream.ToArray();
+			}
+
+			return Task.FromResult(bitmapData);
+		}
+	}
 
 
 }

@@ -38,6 +38,7 @@
     <Compile Include="..\Media.Plugin\CrossMedia.cs">
       <Link>CrossMedia.cs</Link>
     </Compile>
+    <Compile Include="Helpers.cs" />
     <Compile Include="MediaImplementation.cs" />
     <Compile Include="MediaPickerController.cs" />
     <Compile Include="MediaPickerDelegate.cs" />
