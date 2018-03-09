@@ -279,7 +279,7 @@ You must also add a few additional configuration files to adhere to the new stri
 1.) Add the following to your AndroidManifest.xml inside the `<application>` tags:
 ```xml
 <provider android:name="android.support.v4.content.FileProvider" 
-          android:authorities="YOUR_APP_PACKAGE_NAME.fileprovider" 
+          android:authorities="${applicationId}.fileprovider" 
           android:exported="false" 
           android:grantUriPermissions="true">
           
@@ -287,8 +287,6 @@ You must also add a few additional configuration files to adhere to the new stri
                      android:resource="@xml/file_paths"></meta-data>
 </provider>
 ```
-
-**YOUR_APP_PACKAGE_NAME** must be set to your app package name! Ensure that your package name is set to something such as "com.company.app". It must have at least 2 parts to it.
 
 2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`
 
