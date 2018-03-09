@@ -1,29 +1,24 @@
 Media Plugin for Xamarin & Windows
 
-Changelog:
-[2.6.0]
-* All: Ensure you call await CrossMedia.Current.Initialize(); before accessing any APIs
-* All: Resize when taking a photo
-* All: Save original album location when picking photo
-* iOS & Android: Ability to resize when picking photo
-* iOS & Android: Set Quality Level when taking photo
-* Android: Fix images that get rotated in the wrong direction
-* Android: Updates for Android N Strict Mode, see documentation if you target N+
-* iOS & Android: Fix for rotating device.
-* iOS: Added custom overlay method (Preview)
-* iOS: iOS 10 support for new permissions, please see documentations
-* Windows RT: Bug fixes & Video Support
-
 Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
+
+## News
+- Plugins have moved to .NET Standard and have some important changes! Please read my blog:
+http://motzcod.es/post/162402194007/plugins-for-xamarin-go-dotnet-standard
+
 
 ## Additional Required Setup (Please Read!)
 
 ## Android 
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
-public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+
+
+Add to Activity:
+
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 {
-    PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 }
 
 The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions.
@@ -55,14 +50,23 @@ Add the following code:
 
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Pictures" />
-    <external-path name="my_movies" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Movies" />
+    <external-files-path name="my_images" path="Pictures" />
+    <external-files-path name="my_movies" path="Movies" />
 </paths>
 
 YOUR_APP_PACKAGE_NAME must be set to your app package name!
 
 You can read more at: https://developer.android.com/training/camera/photobasics.html
 
+## Android Current Activity Setup
+
+This plugin uses the [Current Activity Plugin](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. Please fully read through the [Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md). At an absolute minimum you must set the following in your Activity's OnCreate method:
+
+```csharp
+Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
+```
+
+It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md)
 
 ### iOS
 
@@ -75,29 +79,17 @@ Such as:
 <string>This app needs access to photos.</string>
 <key>NSMicrophoneUsageDescription</key>
 <string>This app needs access to microphone.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>This app needs access to the photo gallery.</string>
 
-### Windows Phone 8/8.1 Silverlight
-
-You must set the `IC_CAP_ISV_CAMERA` permission.
-
-WP 8/8.1 Silverlight only supports photo, not video.
-
-### Windows Phone 8.1 RT
+### UWP
 Set `Webcam` permission.
 
-In your App.xaml.cs you MUST place the following code inside of the `OnLaunched` method:
+### Tizen
+Please add the following Privileges in tizen-manifest.xml file
 
-```csharp
-protected override void OnActivated(IActivatedEventArgs args)
-{
+http://tizen.org/privilege/appmanager.launch
+http://tizen.org/privilege/mediastorage
 
-    Plugin.Media.MediaImplementation.OnFilesPicked(args);
-
-    base.OnActivated(args);
-}
-```
-
-
-
-### Windows Store:
-Set `Webcam` permission.
+See below for additional instructions.
+https://developer.tizen.org/development/visual-studio-tools-tizen/tools/tizen-manifest-editor#privileges

@@ -1,109 +1,65 @@
-#addin nuget:https://nuget.org/api/v2/?package=Cake.FileHelpers&version=1.0.3.2
-#addin nuget:https://nuget.org/api/v2/?package=Cake.Xamarin&version=1.2.3
+#addin nuget:?package=Cake.Android.SdkManager
 
 var TARGET = Argument ("target", Argument ("t", "Default"));
-var version = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.9999");
+var VERSION = EnvironmentVariable ("APPVEYOR_BUILD_VERSION") ?? Argument("version", "0.0.9999");
+var CONFIG = Argument("configuration", EnvironmentVariable ("CONFIGURATION") ?? "Release");
+var SLN = "./src/Media.sln";
 
-var libraries = new Dictionary<string, string> {
- 	{ "./src/Media.sln", "Any" },
-};
-
-var samples = new Dictionary<string, string> {
-	{ "./samples/MediaSample.sln", "Win" },
-};
-
-var BuildAction = new Action<Dictionary<string, string>> (solutions =>
-{
-
-	foreach (var sln in solutions) 
-    {
-
-		// If the platform is Any build regardless
-		//  If the platform is Win and we are running on windows build
-		//  If the platform is Mac and we are running on Mac, build
-		if ((sln.Value == "Any")
-				|| (sln.Value == "Win" && IsRunningOnWindows ())
-				|| (sln.Value == "Mac" && IsRunningOnUnix ())) 
-        {
-			
-			// Bit of a hack to use nuget3 to restore packages for project.json
-			if (IsRunningOnWindows ()) 
-            {
-				
-				Information ("RunningOn: {0}", "Windows");
-
-				NuGetRestore (sln.Key, new NuGetRestoreSettings
-                {
-					ToolPath = "./tools/nuget3.exe"
-				});
-
-				// Windows Phone / Universal projects require not using the amd64 msbuild
-				MSBuild (sln.Key, c => 
-                { 
-					c.Configuration = "Release";
-					c.MSBuildPlatform = Cake.Common.Tools.MSBuild.MSBuildPlatform.x86;
-				});
-			} 
-            else 
-            {
-                // Mac is easy ;)
-				NuGetRestore (sln.Key);
-
-				DotNetBuild (sln.Key, c => c.Configuration = "Release");
-			}
-		}
-	}
-});
+var ANDROID_HOME = EnvironmentVariable ("ANDROID_HOME") ?? Argument ("android_home", "");
 
 Task("Libraries").Does(()=>
 {
-    BuildAction(libraries);
+	NuGetRestore (SLN);
+	MSBuild (SLN, c => {
+		c.Configuration = CONFIG;
+		c.MSBuildPlatform = Cake.Common.Tools.MSBuild.MSBuildPlatform.x86;
+	});
 });
 
-Task("Samples")
-    .IsDependentOn("Libraries")
-    .Does(()=>
+Task ("AndroidSDK")
+	.Does (() =>
 {
-    //BuildAction(samples);
+	Information ("ANDROID_HOME: {0}", ANDROID_HOME);
+
+	var androidSdkSettings = new AndroidSdkManagerToolSettings { 
+		SdkRoot = ANDROID_HOME,
+		SkipVersionCheck = true
+	};
+
+	try { AcceptLicenses (androidSdkSettings); } catch { }
+
+	AndroidSdkManagerInstall (new [] { 
+			"platforms;android-15",
+			"platforms;android-23",
+			"platforms;android-25",
+			"platforms;android-26"
+		}, androidSdkSettings);
 });
 
 Task ("NuGet")
-	.IsDependentOn ("Samples")
+	.IsDependentOn("AndroidSDK")
+	.IsDependentOn ("Libraries")
 	.Does (() =>
 {
     if(!DirectoryExists("./Build/nuget/"))
         CreateDirectory("./Build/nuget");
         
 	NuGetPack ("./nuget/Plugin.nuspec", new NuGetPackSettings { 
-		Version = version,
-		Verbosity = NuGetVerbosity.Detailed,
+		Version = VERSION,
 		OutputDirectory = "./Build/nuget/",
-		BasePath = "./",
-		ToolPath = "./tools/nuget3.exe"
+		BasePath = "./"
 	});	
 });
 
-Task("Component")
-    .IsDependentOn("Samples")
-    .IsDependentOn("NuGet")
-    .Does(()=>
-{
-
-});
-
 //Build the component, which build samples, nugets, and libraries
-Task ("Default").IsDependentOn("Component");
-
+Task ("Default").IsDependentOn("NuGet");
 
 Task ("Clean").Does (() => 
 {
 	CleanDirectory ("./component/tools/");
-
 	CleanDirectories ("./Build/");
-
 	CleanDirectories ("./**/bin");
 	CleanDirectories ("./**/obj");
 });
-
 
 RunTarget (TARGET);

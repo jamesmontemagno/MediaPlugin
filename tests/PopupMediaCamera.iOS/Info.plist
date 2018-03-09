@@ -21,7 +21,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MinimumOSVersion</key>
-	<string>6.0</string>
+	<string>10.0</string>
 	<key>CFBundleDisplayName</key>
 	<string>PopupMediaCamera</string>
 	<key>CFBundleIdentifier</key>
@@ -63,5 +63,7 @@
 	<string>Can we use your camera</string>
 	<key>CFBundleShortVersionString</key>
 	<string></string>
+	<key>CFBundleName</key>
+	<string>PopupMediaCamera</string>
 </dict>
 </plist>

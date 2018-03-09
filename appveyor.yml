@@ -1,4 +1,9 @@
-version: 2.6.3.{build}-beta
+version: 3.1.3.{build}-beta
+image: Visual Studio 2017
+configuration: Release
+environment:
+  CAKE_SETTINGS_SKIPVERIFICATION: true
+  ANDROID_HOME: 'C:\Program Files (x86)\Android\android-sdk\'
 assembly_info:
   patch: true
   file: '**\AssemblyInfo.*'
@@ -7,11 +12,7 @@ assembly_info:
   assembly_informational_version: '{version}'
 build_script:
 - cmd: >-
-    powershell .\install-android-sdk.ps1
-
-    powershell .\bootstrapper.ps1 -Target Default -Verbosity diagnostic
+    powershell .\build.ps1 -Target Default -Verbosity diagnostic
 artifacts:
 - path: ./Build/nuget/*.nupkg
   name: NuGet
-- path: ./component/*.xam
-  name: Component

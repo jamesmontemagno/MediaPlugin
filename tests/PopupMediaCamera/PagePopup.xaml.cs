@@ -14,11 +14,32 @@ namespace PopupMediaCamera
 
         private async void TapGestureRecognizer_StartCameraTapped(object sender, EventArgs e)
         {
-            if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
+            /*if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
             {
                 Debug.WriteLine("No Camera", "No camera avaialble.", "OK");
                 return;
-            }
+            }*/
+			/*var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+            {
+                Directory = "InventoryManagement",
+                Name = "item.jpg",
+                PhotoSize = PhotoSize.Medium,
+                CompressionQuality = 42,
+                SaveToAlbum = false,
+                DefaultCamera = CameraDevice.Rear,
+
+            });*/
+
+			var file = await CrossMedia.Current.PickPhotoAsync();
+
+            if (file == null)
+                return;
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+
             var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
             {
                 Directory = "InventoryManagement",
@@ -29,8 +50,6 @@ namespace PopupMediaCamera
                 DefaultCamera = CameraDevice.Rear,
 
             });
-            if (file == null)
-                return;
         }
     }
 }

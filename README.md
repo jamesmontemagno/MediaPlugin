@@ -2,11 +2,13 @@
 
 Simple cross platform plugin to take photos and video or pick them from a gallery from shared code.
 
+Please read through all of the setup directions below: https://github.com/jamesmontemagno/MediaPlugin#important-permission-information
+
 Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a cross platform API.
 
 ### Setup
 * Available on NuGet: http://www.nuget.org/packages/Xam.Plugin.Media [![NuGet](https://img.shields.io/nuget/v/Xam.Plugin.Media.svg?label=NuGet)](https://www.nuget.org/packages/Xam.Plugin.Media/)
-* Install into your PCL project and Client projects.
+* Install into your PCL/.NET Standard project and Client projects.
 * Please see the additional setup for each platforms permissions.
 
 Build Status: 
@@ -15,16 +17,11 @@ Build Status:
 
 **Platform Support**
 
-|Platform|Supported|Version|
-| ------------------- | :-----------: | :------------------: |
-|Xamarin.iOS|Yes|iOS 7+|
-|Xamarin.iOS Unified|Yes|iOS 7+|
-|Xamarin.Android|Yes|API 14+|
-|Windows Phone Silverlight|Yes|8.0+|
-|Windows Phone RT|Yes|8.1+|
-|Windows Store RT|Yes|8.1+|
-|Windows 10 UWP|Yes|10+|
-|Xamarin.Mac|No||
+|Platform|Version|
+| ------------------- | :------------------: |
+|Xamarin.iOS|iOS 7+|
+|Xamarin.Android|API 14+|
+|Windows 10 UWP|10+|
 
 
 ### API Usage
@@ -128,13 +125,8 @@ takePhoto.Clicked += async (sender, args) =>
     image.Source = ImageSource.FromStream(() =>
     {
         var stream = file.GetStream();
-        file.Dispose();
         return stream;
     }); 
-    
-    //or:
-    //image.Source = ImageSource.FromFile(file.Path);
-    //image.Dispose();
 };
 ```
 
@@ -150,7 +142,7 @@ Setting these properties are optional. Any illegal characters will be removed an
 When calling `TakePhotoAsync` or `PickPhotoAsync` you can specify multiple options to reduce the size and quality of the photo that is taken or picked. These are applied to the `StoreCameraMediaOptions` and `PickMediaOptions`.
 
 #### Resize Photo Size
- By default the photo that is taken/picked is the maxiumum size and quality available. For most applications this is not needed and can be Resized. This can be accomplished by adjusting the `PhotoSize` property on the options. The easiest is to adjust it to `Small, Medium, or Large`, which is 25%, 50%, or 75% or the original.
+ By default the photo that is taken/picked is the maxiumum size and quality available. For most applications this is not needed and can be Resized. This can be accomplished by adjusting the `PhotoSize` property on the options. The easiest is to adjust it to `Small, Medium, or Large`, which is 25%, 50%, or 75% or the original. This is only supported in Android & iOS. On UWP there is a different scale that is used based on these numbers to the respected resolutions UWP supports.
 
 ```csharp
 var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
@@ -170,7 +162,7 @@ var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 ```
 
 #### Photo Quality
-Set the `CompressionQuality`, which is a value from 0 the most compressed all the way to 100, which is no compression. A good setting from testing is around 92.
+Set the `CompressionQuality`, which is a value from 0 the most compressed all the way to 100, which is no compression. A good setting from testing is around 92. This is only supported in Android & iOS
 
 ```csharp
 var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
@@ -240,7 +232,7 @@ Func<object> func = () =>
 //Take Photo, could be in iOS Project, or in shared code where there function is passed up via Dependency Services.
 var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 {
-    OverlayViewProvider = fund
+    OverlayViewProvider = func
 });
 ```
 
@@ -251,17 +243,28 @@ Please read these as they must be implemented for all platforms.
 #### Android 
 The `WRITE_EXTERNAL_STORAGE` & `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add the Permission Plugin code into your Main or Base Activities:
 
+Add to Activity:
+
 ```csharp
-public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 {
-    PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 }
 ```
 
-You MUST set your Target version to API 23+ and Compile against API 23+:
-![image](https://cloud.githubusercontent.com/assets/1676321/17110560/7279341c-5252-11e6-89be-8c10b38c0ea6.png)
+## Android Current Activity Setup
 
-By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardward. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
+This plugin uses the [Current Activity Plugin](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. Please fully read through the [Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md). At an absolute minimum you must set the following in your Activity's OnCreate method:
+
+```csharp
+Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
+```
+
+It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md)
+
+## Android Misc Setup
+
+By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardware. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
 
 ```
 [assembly: UsesFeature("android.hardware.camera", Required = false)]
@@ -269,86 +272,61 @@ By adding these permissions [Google Play will automatically filter out devices](
 ```
 
 
-#### ANDROID N
-
-If your application targets Android N (API 24) or newer, you must use version 2.6.0+.
+#### Android File Provider Setup
 
 You must also add a few additional configuration files to adhere to the new strict mode:
 
 1.) Add the following to your AndroidManifest.xml inside the `<application>` tags:
-```
+```xml
 <provider android:name="android.support.v4.content.FileProvider" 
-				android:authorities="YOUR_APP_PACKAGE_NAME.fileprovider" 
-				android:exported="false" 
-				android:grantUriPermissions="true">
-			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
-				android:resource="@xml/file_paths"></meta-data>
+          android:authorities="YOUR_APP_PACKAGE_NAME.fileprovider" 
+          android:exported="false" 
+          android:grantUriPermissions="true">
+          
+	  <meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
+                     android:resource="@xml/file_paths"></meta-data>
 </provider>
 ```
 
-**YOUR_APP_PACKAGE_NAME** must be set to your app package name!
+**YOUR_APP_PACKAGE_NAME** must be set to your app package name! Ensure that your package name is set to something such as "com.company.app". It must have at least 2 parts to it.
 
 2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`
 
 Add the following code:
-```
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Pictures" />
-    <external-path name="my_movies" path="Android/data/YOUR_APP_PACKAGE_NAME/files/Movies" />
+    <external-files-path name="my_images" path="Pictures" />
+    <external-files-path name="my_movies" path="Movies" />
 </paths>
 ```
-
-**YOUR_APP_PACKAGE_NAME** must be set to your app package name!
 
 You can read more at: https://developer.android.com/training/camera/photobasics.html
 
 
 #### iOS
 
-Your app is required to have keys in your Info.plist for `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` in order to access the device's camera and photo/video library. If you are using the Video capabilities of the library then you must also add `NSMicrophoneUsageDescription`.  The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features. You can read me here: https://blog.xamarin.com/new-ios-10-privacy-permission-settings/
+Your app is required to have keys in your Info.plist for `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` in order to access the device's camera and photo/video library. If you are using the Video capabilities of the library then you must also add `NSMicrophoneUsageDescription`.  If you want to "SaveToGallery" then you must add the `NSPhotoLibraryAddUsageDescription` key into your info.plist. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features. You can read me here: https://blog.xamarin.com/new-ios-10-privacy-permission-settings/
 
 Such as:
-```
+```xml
 <key>NSCameraUsageDescription</key>
 <string>This app needs access to the camera to take photos.</string>
 <key>NSPhotoLibraryUsageDescription</key>
 <string>This app needs access to photos.</string>
 <key>NSMicrophoneUsageDescription</key>
 <string>This app needs access to microphone.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>This app needs access to the photo gallery.</string>
 ```
 
+If you want the dialogs to be translated you must support the specific languages in your app. Read the [iOS Localization Guide](https://developer.xamarin.com/guides/ios/advanced_topics/localization_and_internationalization/)
 
-**Windows Phone 8/8.1 Silverlight:**
-
-You must set the `IC_CAP_ISV_CAMERA` permission.
-
-WP 8/8.1 Silverlight only supports photo, not video.
-
-**Windows Phone 8.1 RT:**
-
-Set `Webcam` permission.
-
-In your App.xaml.cs you MUST place the following code inside of the `OnLaunched` method:
-
-```csharp
-protected override void OnActivated(IActivatedEventArgs args)
-{
-
-    Plugin.Media.MediaImplementation.OnFilesPicked(args);
-
-    base.OnActivated(args);
-}
-```
-**Windows Store:**
+#### UWP
 
 Set `Webcam` permission.
 
 
-#### Windows Phone 8.1 RT Photo Capture
-This feature was made possible by Daniel Meixner and his great open source project:  https://diycameracaptureui.codeplex.com/
-
-Made possible under Ms-PL license:  https://diycameracaptureui.codeplex.com/license
 
 ### Permission Recommendations
 By default, the Media Plugin will attempt to request multiple permissions, but each platform handles this a bit differently, such as iOS which will only pop up permissions once. I recommend adding the [Permissions Plugin](http://github.com/jamesmontemagno/PermissionsPlugin) into your application and before taking any photo or picking photos that you check permissions ahead of time. 
@@ -381,9 +359,17 @@ else
 }
 ```
 
+#### FAQ
+Here are some common answers to questions:
+
+#### On iOS how do I translate the text on the buttons on the camera?
+You need CFBundleLocalizations in your Info.plist.
+
 
 #### License
+
 Licensed under MIT, see license file. This is a derivative to [Xamarin.Mobile's Media](http://github.com/xamarin/xamarin.mobile) with a cross platform API and other enhancements.
+```
 //
 //  Copyright 2011-2013, Xamarin Inc.
 //
@@ -399,3 +385,7 @@ Licensed under MIT, see license file. This is a derivative to [Xamarin.Mobile's 
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
+```
+
+### Want To Support This Project?
+All I have ever asked is to be active by submitting bugs, features, and sending those pull requests down! Want to go further? Make sure to subscribe to my weekly development podcast [Merge Conflict](http://mergeconflict.fm), where I talk all about awesome Xamarin goodies and you can optionally support the show by becoming a [supporter on Patreon](https://www.patreon.com/mergeconflictfm).

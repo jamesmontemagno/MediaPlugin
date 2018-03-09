@@ -6,13 +6,18 @@
     <Switch
         android:id="@+id/switch_size"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
-        android:text="Make Smaller"/>
-    <Switch
-      android:id="@+id/switch_save_album"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:text="Save to Album"/>
+        android:layout_height="wrap_content"
+        android:text="Make Smaller" />
+	<Switch
+			android:id="@+id/switch_save_album"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="Save to Album" />
+	<Switch
+			android:id="@+id/switch_front"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="Use Front Camera" />
     <Button
         android:id="@+id/MyButton"
         android:layout_width="fill_parent"

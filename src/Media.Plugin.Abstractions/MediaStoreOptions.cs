@@ -1,20 +1,4 @@
-﻿//
-//  Copyright 2011-2013, Xamarin Inc.
-//
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//
-//        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//
-
-using System;
+﻿using System;
 
 namespace Plugin.Media.Abstractions
 {
@@ -69,6 +53,13 @@ namespace Plugin.Media.Abstractions
     /// </summary>
     public class PickMediaOptions
     {
+        /// <summary>
+        /// Gets or sets the the max width or height of the image.
+        /// The image will aspect resize to the MaxWidthHeight as the max size of the image height or width. 
+        /// This value is only used if PhotoSize is PhotoSize.MaxWidthHeight 
+        /// </summary>
+        /// <value>The max width or height of the image.</value>
+        public int? MaxWidthHeight { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the photo.
@@ -115,7 +106,28 @@ namespace Plugin.Media.Abstractions
                     quality = value;
             }
         }
-    }
+
+        bool rotateImage = true;
+        /// <summary>
+        /// Should the library rotate image according to received exif orientation.
+        /// Set to true by default.
+        /// </summary>
+        public bool RotateImage 
+        {
+            get { return rotateImage; } 
+            set { rotateImage = value;} 
+        }
+
+		bool saveMetaData = true;
+		/// <summary>
+		/// Saves metadate/exif data from the original file.
+		/// </summary>
+		public bool SaveMetaData
+		{
+			get { return saveMetaData; }
+			set { saveMetaData = value; }
+		}
+	}
 
     
 
@@ -142,6 +154,14 @@ namespace Plugin.Media.Abstractions
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets the the max width or height of the image.
+        /// The image will aspect resize to the MaxWidthHeight as the max size of the image height or width. 
+        /// This value is only used if PhotoSize is PhotoSize.MaxWidthHeight 
+        /// </summary>
+        /// <value>The max width or height of the image.</value>
+        public int? MaxWidthHeight { get; set; }
 
         /// <summary>
         /// Get or set for an OverlayViewProvider
@@ -208,7 +228,32 @@ namespace Plugin.Media.Abstractions
             }
         }
 
-    }
+        /// <summary>
+        /// Store provided location
+        /// </summary>
+        public Location Location { get; set; }
+
+        bool rotateImage = true;
+        /// <summary>
+        /// Should the library rotate image according to received exif orientation.
+        /// Set to true by default.
+        /// </summary>
+        public bool RotateImage
+		{
+			get { return rotateImage; }
+			set { rotateImage = value; }
+		}
+
+		bool saveMetaData = true;
+		/// <summary>
+		/// Saves metadate/exif data from the original file.
+		/// </summary>
+		public bool SaveMetaData
+		{
+			get { return saveMetaData; }
+			set { saveMetaData = value; }
+		}
+	}
 
     /// <summary>
     /// Photo size enum.
@@ -237,7 +282,14 @@ namespace Plugin.Media.Abstractions
         /// Only applies to iOS and Android
         /// Windows will auto configure back to small, medium, large, and full
         /// </summary>
-        Custom
+        Custom,
+        /// <summary>
+        /// Use the Max Width or Height photo size.
+        /// The property ManualSize must be set to a value. The MaxWidthHeight will be the max width or height of the image
+        /// Currently this works on iOS and Android only.
+        /// On Windows the PhotoSize will fall back to Full
+        /// </summary>
+        MaxWidthHeight
     }
 
     /// <summary>
@@ -287,6 +339,17 @@ namespace Plugin.Media.Abstractions
         /// Desired Quality
         /// </summary>
         public VideoQuality Quality
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Desired Video Size
+        /// Only available on Android - Set the desired file size in bytes.
+        /// Eg. 1000000 = 1MB
+        /// </summary>
+        public long DesiredSize
         {
             get;
             set;

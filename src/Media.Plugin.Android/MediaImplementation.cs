@@ -1,19 +1,3 @@
-//
-//  Copyright 2011-2013, Xamarin Inc.
-//
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//
-//        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//
-
 using System;
 using System.IO;
 using System.Threading;
@@ -27,6 +11,10 @@ using Plugin.Permissions;
 using Android.Media;
 using Android.Graphics;
 using System.Text.RegularExpressions;
+using Plugin.CurrentActivity;
+using System.Collections.Generic;
+using System.Linq;
+using Permission = Plugin.Permissions.Abstractions.Permission;
 
 namespace Plugin.Media
 {
@@ -36,7 +24,10 @@ namespace Plugin.Media
     [Android.Runtime.Preserve(AllMembers = true)]
     public class MediaImplementation : IMedia
     {
-        /// <summary>
+		const string TAG_PIXEL_X_DIMENSION = "PixelXDimension";
+		const string TAG_PIXEL_Y_DIMENSION = "PixelYDimension";
+
+		/// <summary>
         /// Implementation
         /// </summary>
         public MediaImplementation()
@@ -66,6 +57,27 @@ namespace Plugin.Media
         public bool IsPickVideoSupported => true;
 
 
+        bool IsValidExif(ExifInterface exif)
+        {
+            //if null, then not falid
+            if (exif == null)
+                return false;
+
+			try
+			{
+				//if has thumb, but is <= 0, then not valid
+				if (exif.HasThumbnail && (exif.GetThumbnail()?.Length ?? 0) <= 0)
+					return false;
+			}
+			catch(Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine("Unable to get thumbnail exif: " + ex);
+				return false;
+			}
+
+            return true;
+        }
+
         /// <summary>
         /// Picks a photo from the default gallery
         /// </summary>
@@ -74,7 +86,7 @@ namespace Plugin.Media
         {
             if (!(await RequestStoragePermission()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Storage);
             }
             var media = await TakeMediaAsync("image/*", Intent.ActionPick, null);
 
@@ -86,7 +98,29 @@ namespace Plugin.Media
             {
                 try
                 {
-                    await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
+                    var originalMetadata = new ExifInterface(media.Path);
+
+                    if (options.RotateImage)
+                    {
+                        await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
+                    }
+                    else
+                    {
+                        await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, originalMetadata);
+                    }
+                    if (options.SaveMetaData && IsValidExif(originalMetadata))
+					{
+						try
+						{
+                            originalMetadata?.SaveAttributes();
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine($"Unable to save exif {ex}");
+						}
+					}
+
+					originalMetadata?.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -108,9 +142,9 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission()))
+            if (!(await RequestCameraPermissions()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Camera);
             }
 
 
@@ -170,15 +204,39 @@ namespace Plugin.Media
 
             //check to see if we need to rotate if success
 
+
             try
             {
-                await FixOrientationAndResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize);
+                var exif = new ExifInterface(media.Path);
+                if (options.RotateImage)
+                {
+                    await FixOrientationAndResizeAsync(media.Path, options, exif);
+                }
+                else
+                {
+                    await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, exif);
+                }
+
+                if (options.SaveMetaData && IsValidExif(exif))
+				{
+					SetMissingMetadata(exif, options.Location);
+
+					try
+					{
+						exif?.SaveAttributes();
+					}
+					catch(Exception ex)
+					{
+						Console.WriteLine($"Unable to save exif {ex}");
+					}
+				}
+
+				exif?.Dispose();
             }
             catch(Exception ex)
             {
                 Console.WriteLine("Unable to check orientation: " + ex);
             }
-            
 
             return media;
         }
@@ -192,7 +250,7 @@ namespace Plugin.Media
 
             if (!(await RequestStoragePermission()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Storage);
             }
 
             return await TakeMediaAsync("video/*", Intent.ActionPick, null);
@@ -208,9 +266,9 @@ namespace Plugin.Media
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
 
-            if (!(await RequestStoragePermission()))
+            if (!(await RequestCameraPermissions()))
             {
-                return null;
+                throw new MediaPermissionException(Permission.Camera);
             }
 
             VerifyOptions(options);
@@ -222,6 +280,50 @@ namespace Plugin.Media
         private int requestId;
         private TaskCompletionSource<MediaFile> completionSource;
 
+
+		async Task<bool> RequestCameraPermissions()
+		{
+			//We always have permission on anything lower than marshmallow.
+			if ((int)Build.VERSION.SdkInt < 23)
+				return true;
+
+            bool checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
+
+            var hasStoragePermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
+            var hasCameraPermission = Permissions.Abstractions.PermissionStatus.Granted;
+            if(checkCamera)
+                hasCameraPermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Camera);
+
+
+            var permissions = new List<Permissions.Abstractions.Permission>();
+
+            if (hasCameraPermission != Permissions.Abstractions.PermissionStatus.Granted)
+                permissions.Add(Permissions.Abstractions.Permission.Camera);
+
+            if(hasStoragePermission != Permissions.Abstractions.PermissionStatus.Granted)
+                permissions.Add(Permissions.Abstractions.Permission.Storage);
+
+            if (permissions.Count == 0) //good to go!
+                return true;
+
+            var results = await CrossPermissions.Current.RequestPermissionsAsync(permissions.ToArray());
+
+			if (results.ContainsKey(Permissions.Abstractions.Permission.Storage) &&
+					results[Permissions.Abstractions.Permission.Storage] != Permissions.Abstractions.PermissionStatus.Granted)
+			{
+				Console.WriteLine("Storage permission Denied.");
+				return false;
+			}
+
+			if (results.ContainsKey(Permissions.Abstractions.Permission.Camera) &&
+					results[Permissions.Abstractions.Permission.Camera] != Permissions.Abstractions.PermissionStatus.Granted)
+			{
+				Console.WriteLine("Camera permission Denied.");
+				return false;
+			}
+
+			return true;
+		}
 
         async Task<bool> RequestStoragePermission()
         {
@@ -244,6 +346,48 @@ namespace Plugin.Media
 
             return true;
         }
+
+        IList<string> requestedPermissions;
+		bool HasPermissionInManifest(string permission)
+		{
+			try
+			{
+				if (requestedPermissions != null)
+					return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
+
+				//try to use current activity else application context
+				var permissionContext = CrossCurrentActivity.Current.Activity ?? Android.App.Application.Context;
+
+				if (context == null)
+				{
+                    System.Diagnostics.Debug.WriteLine("Unable to detect current Activity or App Context. Please ensure Plugin.CurrentActivity is installed in your Android project and your Application class is registering with Application.IActivityLifecycleCallbacks.");
+					return false;
+				}
+
+				var info = context.PackageManager.GetPackageInfo(context.PackageName, Android.Content.PM.PackageInfoFlags.Permissions);
+
+				if (info == null)
+				{
+					System.Diagnostics.Debug.WriteLine("Unable to get Package info, will not be able to determine permissions to request.");
+					return false;
+				}
+
+				requestedPermissions = info.RequestedPermissions;
+
+				if (requestedPermissions == null)
+				{
+					System.Diagnostics.Debug.WriteLine("There are no requested permissions, please check to ensure you have marked permissions you want to request.");
+					return false;
+				}
+
+				return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
+			}
+			catch (Exception ex)
+			{
+				Console.Write("Unable to check manifest for permission: " + ex);
+			}
+			return false;
+		}
 
 
         const string IllegalCharacters = "[|\\?*<\":>/']";
@@ -293,6 +437,10 @@ namespace Plugin.Media
                     }
                     pickerIntent.PutExtra(MediaStore.ExtraDurationLimit, (int)vidOptions.DesiredLength.TotalSeconds);
                     pickerIntent.PutExtra(MediaStore.ExtraVideoQuality, (int)vidOptions.Quality);
+                    if (vidOptions.DesiredSize != 0)
+                    {
+                        pickerIntent.PutExtra(MediaStore.ExtraSizeLimit, vidOptions.DesiredSize);
+                    }
                 }
             }
             //pickerIntent.SetFlags(ActivityFlags.ClearTop);
@@ -302,11 +450,11 @@ namespace Plugin.Media
 
         private int GetRequestId()
         {
-            int id = this.requestId;
-            if (this.requestId == Int32.MaxValue)
-                this.requestId = 0;
+            var id = requestId;
+            if (requestId == int.MaxValue)
+                requestId = 0;
             else
-                this.requestId++;
+                requestId++;
 
             return id;
         }
@@ -316,10 +464,10 @@ namespace Plugin.Media
             int id = GetRequestId();
 
             var ntcs = new TaskCompletionSource<MediaFile>(id);
-            if (Interlocked.CompareExchange(ref this.completionSource, ntcs, null) != null)
+            if (Interlocked.CompareExchange(ref completionSource, ntcs, null) != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
 
-            this.context.StartActivity(CreateMediaIntent(id, type, action, options));
+			context.StartActivity(CreateMediaIntent(id, type, action, options));
 
             EventHandler<MediaPickedEventArgs> handler = null;
             handler = (s, e) =>
@@ -348,9 +496,33 @@ namespace Plugin.Media
         ///  Rotate an image if required and saves it back to disk.
         /// </summary>
         /// <param name="filePath">The file image path</param>
-        /// <param name="photoSize">Photo size to go to.</param>
+        /// <param name="mediaOptions">The options.</param>
+        /// <param name="exif">original metadata</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> FixOrientationAndResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize)
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, PickMediaOptions mediaOptions, ExifInterface exif)
+        {
+            return FixOrientationAndResizeAsync(
+                filePath,
+                new StoreCameraMediaOptions
+                {
+                    PhotoSize = mediaOptions.PhotoSize,
+                    CompressionQuality = mediaOptions.CompressionQuality,
+                    CustomPhotoSize = mediaOptions.CustomPhotoSize,
+                    MaxWidthHeight = mediaOptions.MaxWidthHeight,
+                    RotateImage = mediaOptions.RotateImage,
+					SaveMetaData = mediaOptions.SaveMetaData
+                },
+                exif);
+        }
+
+        /// <summary>
+        ///  Rotate an image if required and saves it back to disk.
+        /// </summary>
+        /// <param name="filePath">The file image path</param>
+        /// <param name="mediaOptions">The options.</param>
+        /// <param name="exif">original metadata</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        public Task<bool> FixOrientationAndResizeAsync(string filePath, StoreCameraMediaOptions mediaOptions, ExifInterface exif)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -370,14 +542,14 @@ namespace Plugin.Media
                         //already on background task
                         BitmapFactory.DecodeFile(filePath, options);
 
-                        var rotation = GetRotation(filePath);
+                        var rotation = GetRotation(exif);
 
-						// if we don't need to rotate, aren't resizing, and aren't adjusting quality then simply return
-						if (rotation == 0 && photoSize == PhotoSize.Full && quality == 100)
+                        // if we don't need to rotate, aren't resizing, and aren't adjusting quality then simply return
+                        if (rotation == 0 && mediaOptions.PhotoSize == PhotoSize.Full && mediaOptions.CompressionQuality == 100)
                             return false;
 
                         var percent = 1.0f;
-                        switch (photoSize)
+                        switch (mediaOptions.PhotoSize)
                         {
                             case PhotoSize.Large:
                                 percent = .75f;
@@ -389,10 +561,18 @@ namespace Plugin.Media
                                 percent = .25f;
                                 break;
                             case PhotoSize.Custom:
-                                percent = (float)customPhotoSize / 100f;
+                                percent = (float)mediaOptions.CustomPhotoSize / 100f;
                                 break;
                         }
-                        
+
+                        if (mediaOptions.PhotoSize == PhotoSize.MaxWidthHeight && mediaOptions.MaxWidthHeight.HasValue)
+                        {
+                            var max = Math.Max(options.OutWidth, options.OutHeight);
+                            if (max > mediaOptions.MaxWidthHeight)
+                            {
+                                percent = (float)mediaOptions.MaxWidthHeight / (float)max;
+                            }
+                        }
 
                         var finalWidth = (int)(options.OutWidth * percent);
                         var finalHeight = (int)(options.OutHeight * percent);
@@ -406,11 +586,25 @@ namespace Plugin.Media
 
                         //this now will return the requested width/height from file, so no longer need to scale
                         var originalImage = BitmapFactory.DecodeFile(filePath, options);
+
+						if (originalImage == null)
+							return false;
                         
                         if (finalWidth != originalImage.Width || finalHeight != originalImage.Height)
                         {
                             originalImage = Bitmap.CreateScaledBitmap(originalImage, finalWidth, finalHeight, true);
                         }
+                        if (rotation % 180 == 90)
+                        {
+                            var a = finalWidth;
+                            finalWidth = finalHeight;
+                            finalHeight = a;
+                        }
+
+                        //set scaled and rotated image dimensions
+                        exif?.SetAttribute(TAG_PIXEL_X_DIMENSION, Java.Lang.Integer.ToString(finalWidth));
+                        exif?.SetAttribute(TAG_PIXEL_Y_DIMENSION, Java.Lang.Integer.ToString(finalHeight));
+
                         //if we need to rotate then go for it.
                         //then compresse it if needed
                         if (rotation != 0)
@@ -419,38 +613,27 @@ namespace Plugin.Media
                             matrix.PostRotate(rotation);
                             using (var rotatedImage = Bitmap.CreateBitmap(originalImage, 0, 0, originalImage.Width, originalImage.Height, matrix, true))
                             {
-                                    
                                 //always need to compress to save back to disk
                                 using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                 {
-                                    rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-
-
-
+                                    rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
                                     stream.Close();
                                 }
                                 rotatedImage.Recycle();
                             }
-                            originalImage.Recycle();
-                            originalImage.Dispose();
-                            // Dispose of the Java side bitmap.
-                            GC.Collect();
+                            //change the orienation to "not rotated"
+                            exif?.SetAttribute(ExifInterface.TagOrientation, Java.Lang.Integer.ToString((int)Orientation.Normal));
 
-                            //Save out new exif data
-                            SetExifData(filePath, Orientation.Normal);
-                            return true;
                         }
-
-                            
-
-                        //always need to compress to save back to disk
-                        using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                        else
                         {
-                            originalImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
-                            stream.Close();
+                            //always need to compress to save back to disk
+                            using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
+                            {
+                                originalImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
+                                stream.Close();
+                            }
                         }
-                            
-                            
 
                         originalImage.Recycle();
                         originalImage.Dispose();
@@ -480,8 +663,7 @@ namespace Plugin.Media
 
         }
 
-        public int CalculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight)
+        int CalculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight)
         {
             // Raw height and width of image
             var height = options.OutHeight;
@@ -511,8 +693,11 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="filePath">The file image path</param>
         /// <param name="photoSize">Photo size to go to.</param>
+        /// <param name="quality">Image quality (1-100)</param>
+        /// <param name="customPhotoSize">Custom size in percent</param>
+        /// <param name="exif">original metadata</param>
         /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize)
+        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize, ExifInterface exif)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
@@ -523,8 +708,6 @@ namespace Plugin.Media
                 {
                     try
                     {
-                        
-
                         if (photoSize == PhotoSize.Full)
                             return false;
 
@@ -557,6 +740,10 @@ namespace Plugin.Media
 
                         var finalWidth = (int)(options.OutWidth * percent);
                         var finalHeight = (int)(options.OutHeight * percent);
+
+                        //set scaled image dimensions
+                        exif?.SetAttribute(TAG_PIXEL_X_DIMENSION, Java.Lang.Integer.ToString(finalWidth));
+                        exif?.SetAttribute(TAG_PIXEL_Y_DIMENSION, Java.Lang.Integer.ToString(finalHeight));
 
                         //calculate sample size
                         options.InSampleSize = CalculateInSampleSize(options, finalWidth, finalHeight);
@@ -604,45 +791,64 @@ namespace Plugin.Media
             }
         }
 
-
-        void SetExifData(string filePath, Orientation orientation)
+        void SetMissingMetadata(ExifInterface exif, Location location)
         {
-            try
+            if (exif == null)
+                return;
+            
+            var position = new float[6];
+            if (!exif.GetLatLong(position) && location != null)
             {
-                using (var ei = new ExifInterface(filePath))
-                {
-
-                    ei.SetAttribute(ExifInterface.TagOrientation, Java.Lang.Integer.ToString((int)orientation));
-                    ei.SaveAttributes();                    
-                }
+                exif.SetAttribute(ExifInterface.TagGpsLatitude, CoordinateToRational(location.Latitude));
+                exif.SetAttribute(ExifInterface.TagGpsLongitude, CoordinateToRational(location.Longitude));
+                exif.SetAttribute(ExifInterface.TagGpsLatitudeRef, location.Latitude > 0 ? "N" : "S");
+                exif.SetAttribute(ExifInterface.TagGpsLongitudeRef, location.Longitude > 0 ? "E" : "W");
             }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagDatetime)))
             {
-#if DEBUG
-                throw ex;
-#endif
+                exif.SetAttribute(ExifInterface.TagDatetime, DateTime.Now.ToString("yyyy:MM:dd hh:mm:ss"));
             }
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagMake))) {
+                exif.SetAttribute(ExifInterface.TagMake, Build.Manufacturer);
+            }
+            if (string.IsNullOrEmpty(exif.GetAttribute(ExifInterface.TagModel)))
+            {
+                exif.SetAttribute(ExifInterface.TagModel, Build.Model);
+            }
+			
+			
         }
 
-        static int GetRotation(string filePath)
+        private string CoordinateToRational(double coord)
         {
+            coord = coord > 0 ? coord : -coord;
+            var degrees = (int)coord;
+            coord = (coord % 1) * 60;
+            var minutes = (int)coord;
+            coord = (coord % 1) * 60000;
+            var sec = (int)coord;
+
+            return $"{degrees}/1,{minutes}/1,{sec}/1000";
+        }
+
+        static int GetRotation(ExifInterface exif)
+        {
+            if (exif == null)
+                return 0;
             try
             {
-                using (var ei = new ExifInterface(filePath))
-                {
-                    var orientation = (Orientation)ei.GetAttributeInt(ExifInterface.TagOrientation, (int)Orientation.Normal);
+                var orientation = (Orientation)exif.GetAttributeInt(ExifInterface.TagOrientation, (int)Orientation.Normal);
 
-                    switch (orientation)
-                    {
-                        case Orientation.Rotate90:
-                            return 90;
-                        case Orientation.Rotate180:
-                            return 180;
-                        case Orientation.Rotate270:
-                            return 270;
-                        default:
-                            return 0;
-                    }
+                switch (orientation)
+                {
+                    case Orientation.Rotate90:
+                        return 90;
+                    case Orientation.Rotate180:
+                        return 180;
+                    case Orientation.Rotate270:
+                        return 270;
+                    default:
+                        return 0;
                 }
             }
             catch (Exception ex)
