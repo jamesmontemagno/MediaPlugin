@@ -359,6 +359,12 @@ else
 }
 ```
 
+#### FAQ
+Here are some common answers to questions:
+
+#### On iOS how do I translate the text on the buttons on the camera?
+You need CFBundleLocalizations in your Info.plist.
+
 
 #### License
 
