@@ -69,8 +69,8 @@ namespace Plugin.Media
 			{
                 if (mediaFile == null)
                     tcs.SetException(new FileNotFoundException());
-                
-				tcs.TrySetResult(mediaFile);
+				else
+					tcs.TrySetResult(mediaFile);
 			});
 		}
 
