@@ -67,7 +67,10 @@ namespace Plugin.Media
 
 			Dismiss(picker, () =>
 			{
-				tcs.TrySetResult(mediaFile);
+                if (mediaFile == null)
+                    tcs.SetException(new FileNotFoundException());
+				else
+					tcs.TrySetResult(mediaFile);
 			});
 		}
 
@@ -269,6 +272,9 @@ namespace Plugin.Media
 		private async Task<MediaFile> GetPictureMediaFile(NSDictionary info)
 		{
 			var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
+
+            if (image == null)
+                return null;
 
 			var path = GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
