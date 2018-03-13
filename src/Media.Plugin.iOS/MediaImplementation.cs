@@ -321,7 +321,7 @@ namespace Plugin.Media
 				throw new InvalidOperationException("Only one operation can be active at at time");
 
 			//var picker = SetupController(ndelegate, sourceType, mediaType, options, true);
-			var picker = ELCImagePickerViewController.NewInstance(options, customisations);
+			var picker = ELCImagePickerViewController.Create(options, customisations);
 
 			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
 			{

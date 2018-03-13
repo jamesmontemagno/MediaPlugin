@@ -358,9 +358,10 @@ namespace Plugin.Media.Abstractions
 		public MultiPickerBarStyle BarStyle { get; set; } = MultiPickerBarStyle.Default;
 
 		public string PathToOverlay { get; set; }
-
 		public string AlbumSelectTitle { get; set; }
-
 		public string PhotoSelectTitle { get; set; }
+		public string BackBattonTitle { get; set; }
+		public string DoneButtonTitle { get; set; }
+		public string Loadingtitle { get; set; }
 	}
 }
