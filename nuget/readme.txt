@@ -35,7 +35,7 @@ You must also add a few additional configuration files to adhere to the new stri
 1.) Add the following to your AndroidManifest.xml inside the <application> tags:
 
 <provider android:name="android.support.v4.content.FileProvider" 
-				android:authorities="YOUR_APP_PACKAGE_NAME.fileprovider" 
+				android:authorities="${applicationId}.fileprovider" 
 				android:exported="false" 
 				android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
