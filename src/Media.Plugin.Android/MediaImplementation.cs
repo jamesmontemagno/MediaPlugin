@@ -56,8 +56,11 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsPickVideoSupported => true;
 
+		/// <inheritdoc/>
+		public bool MakePickerFullscreen { get; set; }
 
-        bool IsValidExif(ExifInterface exif)
+
+		bool IsValidExif(ExifInterface exif)
         {
             //if null, then not falid
             if (exif == null)

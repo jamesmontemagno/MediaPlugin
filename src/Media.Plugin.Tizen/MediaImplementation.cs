@@ -65,6 +65,8 @@ namespace Plugin.Media
 		public bool IsTakeVideoSupported { get; }
 		/// <inheritdoc/>
 		public bool IsPickVideoSupported { get; }
+		/// <inheritdoc/>
+		public bool MakePickerFullscreen { get; set; }
 
 		/// <inheritdoc/>
 		public Task<bool> Initialize() => Task.FromResult(true);

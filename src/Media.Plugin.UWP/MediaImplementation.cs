@@ -87,12 +87,15 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsPickVideoSupported => true;
 
-        /// <summary>
-        /// Take a photo async with specified options
-        /// </summary>
-        /// <param name="options">Camera Media Options</param>
-        /// <returns>Media file of photo or null if canceled</returns>
-        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
+		/// <inheritdoc/>
+		public bool MakePickerFullscreen { get; set; }
+
+		/// <summary>
+		/// Take a photo async with specified options
+		/// </summary>
+		/// <param name="options">Camera Media Options</param>
+		/// <returns>Media file of photo or null if canceled</returns>
+		public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
         {
             if (!initialized)
                 await Initialize();
