@@ -31,16 +31,21 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         bool IsTakeVideoSupported { get; }
 
-        /// <summary>
-        /// Gets if the ability to pick a video is supported on the device
-        /// </summary>
-        bool IsPickVideoSupported { get; }
+		/// <summary>
+		/// Gets if the ability to pick a video is supported on the device
+		/// </summary>
+		bool IsPickVideoSupported { get; }
 
-        /// <summary>
-        /// Picks a photo from the default gallery
-        /// </summary>
-        /// <returns>Media file or null if canceled</returns>
-        Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null);
+		/// <summary>
+		/// For setting if the iOS gallery picker should be fullscreen
+		/// </summary>
+		bool MakePickerFullscreen { set; }
+
+		/// <summary>
+		/// Picks a photo from the default gallery
+		/// </summary>
+		/// <returns>Media file or null if canceled</returns>
+		Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null);
 
         /// <summary>
         /// Take a photo async with specified options
