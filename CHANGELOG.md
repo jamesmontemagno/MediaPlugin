@@ -1,5 +1,6 @@
 ## Changelog
-### [3.1.4]
+### 3.2.0
+* Fix for #496: Special case for Huawei devices on pre-N devices
 * Fix for #452: Large images on iPhone X don't save sometimes at 100% (thanks @christophedelanghe)
 
 ### [3.1.3]
