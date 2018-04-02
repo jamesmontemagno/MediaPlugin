@@ -79,7 +79,7 @@ namespace Plugin.Media
             base.OnSaveInstanceState(outState);
         }
 
-        
+		const string HuaweiManufacturer = "Huawei";
 
         /// <summary>
         /// OnCreate
@@ -159,7 +159,21 @@ namespace Plugin.Media
 								pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
 								pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
 							}
-							catch(Exception ex)
+							catch (Java.Lang.IllegalArgumentException iae)
+							{
+								//Using a Huawei device on pre-N. Increased likelihood of failure...
+								if (HuaweiManufacturer.Equals(Build.Manufacturer, StringComparison.CurrentCultureIgnoreCase) && (int)Build.VERSION.SdkInt < 24)
+								{
+									pickIntent.PutExtra(MediaStore.ExtraOutput, path);
+								}
+								else
+								{
+									System.Diagnostics.Debug.WriteLine($"Unable to get file location, check and set manifest with file provider. Exception: {iae}");
+
+									throw new ArgumentException("Unable to get file location. This most likely means that the file provider information is not set in your Android Manifest file. Please check documentation on how to set this up in your project.", iae);
+								}
+							}
+							catch (Exception ex)
 							{
 								System.Diagnostics.Debug.WriteLine($"Unable to get file location, check and set manifest with file provider. Exception: {ex}");
 
