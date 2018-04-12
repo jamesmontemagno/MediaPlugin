@@ -533,15 +533,6 @@ namespace Plugin.Media
                 {
                     try
                     {
-                        //First decode to just get dimensions
-                        var options = new BitmapFactory.Options
-                        {
-                            InJustDecodeBounds = true
-                        };
-
-                        //already on background task
-                        BitmapFactory.DecodeFile(filePath, options);
-
                         var rotation = GetRotation(exif);
 
                         // if we don't need to rotate, aren't resizing, and aren't adjusting quality then simply return
@@ -564,6 +555,15 @@ namespace Plugin.Media
                                 percent = (float)mediaOptions.CustomPhotoSize / 100f;
                                 break;
                         }
+
+                        //First decode to just get dimensions
+                        var options = new BitmapFactory.Options
+                        {
+                            InJustDecodeBounds = true
+                        };
+
+                        //already on background task
+                        BitmapFactory.DecodeFile(filePath, options);
 
                         if (mediaOptions.PhotoSize == PhotoSize.MaxWidthHeight && mediaOptions.MaxWidthHeight.HasValue)
                         {
