@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Plugin.Permissions" Version="2.2.1" />
+    <PackageReference Include="Plugin.Permissions" Version="3.0.0.8" />
   </ItemGroup>
 
 </Project>

@@ -101,14 +101,27 @@ namespace MediaAndroidTest
                   {
 					  var size = switchSize.Checked ? Plugin.Media.Abstractions.VideoQuality.Low : Plugin.Media.Abstractions.VideoQuality.Medium;
 					  var media = new Plugin.Media.MediaImplementation();
-                      var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
-                      {
-                          Directory = "Sample",
-                          Name = $"{DateTime.UtcNow}_{size}|\\?*<\":>/'.mp4".Replace(" ", string.Empty),
+
+					  /*var options = new Plugin.Media.Abstractions.StoreVideoOptions
+					  {
+						  Directory = "Sample",
+						  Name = $"{DateTime.UtcNow}_{size}|\\?*<\":>/'.mp4".Replace(" ", string.Empty),
 						  SaveToAlbum = switchSaveToAlbum.Checked,
 						  Quality = size,
 						  DefaultCamera = switchCamera.Checked ? Plugin.Media.Abstractions.CameraDevice.Front : CameraDevice.Rear
-					  });
+					  };*/
+
+					  var options = new StoreVideoOptions
+					  {
+						  Directory = "HCS",
+						  Name = $"{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}.mp4",
+						  SaveToAlbum = true,
+						  Quality = VideoQuality.Medium,
+						  DesiredSize = 45 * 1000000,
+						  CompressionQuality = 0,
+					  }; 
+
+					  var file = await Plugin.Media.CrossMedia.Current.TakeVideoAsync(options);
                       if (file == null)
                           return;
                       var path = file.Path;

@@ -213,7 +213,7 @@ var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 });
 ```
 
-### Take Photo Overlay (iOS Only Preview)
+### Take Photo Overlay (iOS Only)
 On iOS you are able to specify an overlay on top of the camera. It will show up on the live camera and on the final preview, but it is not saved as part of the photo, which means it is not a filter.
 
 ```csharp
@@ -257,7 +257,7 @@ public override void OnRequestPermissionsResult(int requestCode, string[] permis
 This plugin uses the [Current Activity Plugin](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. Please fully read through the [Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md). At an absolute minimum you must set the following in your Activity's OnCreate method:
 
 ```csharp
-Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
+CrossCurrentActivity.Current.Init(this, bundle);
 ```
 
 It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md)

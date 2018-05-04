@@ -2,16 +2,10 @@ Media Plugin for Xamarin & Windows
 
 Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 
-## News
-- Plugins have moved to .NET Standard and have some important changes! Please read my blog:
-http://motzcod.es/post/162402194007/plugins-for-xamarin-go-dotnet-standard
-
-
 ## Additional Required Setup (Please Read!)
 
 ## Android 
 In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
-
 
 
 Add to Activity:
@@ -27,8 +21,6 @@ Additionally, the following has been added for you:
 [assembly: UsesFeature("android.hardware.camera", Required = false)]
 [assembly: UsesFeature("android.hardware.camera.autofocus", Required = false)]
 
-**ANDROID N**
-If your application targets Android N (API 24) or newer, you must use version 2.6.0+.
 
 You must also add a few additional configuration files to adhere to the new strict mode:
 
@@ -63,7 +55,7 @@ You can read more at: https://developer.android.com/training/camera/photobasics.
 This plugin uses the [Current Activity Plugin](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. Please fully read through the [Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md). At an absolute minimum you must set the following in your Activity's OnCreate method:
 
 ```csharp
-Plugin.CurrentActivity.CrossCurrentActivity.Current.Activity = this;
+CrossCurrentActivity.Current.Init(this, bundle);
 ```
 
 It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md)

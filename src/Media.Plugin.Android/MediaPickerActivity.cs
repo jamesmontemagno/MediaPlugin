@@ -49,7 +49,7 @@ namespace Plugin.Media
         private bool saveToAlbum;
         private string action;
 
-        private double seconds;
+        private int seconds;
         private long size;
         private VideoQuality quality;
 
@@ -66,7 +66,7 @@ namespace Plugin.Media
             outState.PutInt(ExtraId, id);
             outState.PutString(ExtraType, type);
             outState.PutString(ExtraAction, action);
-            outState.PutDouble(MediaStore.ExtraDurationLimit, seconds);
+            outState.PutInt(MediaStore.ExtraDurationLimit, seconds);
             outState.PutLong(MediaStore.ExtraSizeLimit, size);
             outState.PutInt(MediaStore.ExtraVideoQuality, (int)quality);
             outState.PutBoolean(ExtraSaveToAlbum, saveToAlbum);
@@ -114,8 +114,9 @@ namespace Plugin.Media
                 {
                     if (!isPhoto)
                     {
-                        seconds = b.GetDouble(MediaStore.ExtraDurationLimit, 0);
-						if (seconds != 0)
+
+                        seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
+						if (seconds != 0 && (int)Build.VERSION.SdkInt < 27)
 							pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
 						
                         size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
