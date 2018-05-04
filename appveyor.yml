@@ -1,4 +1,4 @@
-version: 3.2.0.{build}-beta
+version: 3.2.1
 image: Visual Studio 2017
 configuration: Release
 environment:
