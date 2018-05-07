@@ -13,6 +13,7 @@ using System.Globalization;
 using ImageIO;
 using MobileCoreServices;
 using System.Drawing;
+using Photos;
 
 namespace Plugin.Media
 {
@@ -405,15 +406,188 @@ namespace Plugin.Media
 			{
 				if (options.SaveToAlbum)
 				{
-					try
+					// 
+					if (!String.IsNullOrWhiteSpace(options.AlbumName))
 					{
-						var library = new ALAssetsLibrary();
-						var albumSave = await library.WriteImageToSavedPhotosAlbumAsync(cgImage, meta);
-						aPath = albumSave.AbsoluteString;
+						#region ALAsset
+
+						// Not tested!
+						/*
+						try
+						{
+							var library = new ALAssetsLibrary();
+
+							// Saves the image.
+							Action<ALAssetsGroup> saveImage = (group) =>
+							{
+								library.WriteImageToSavedPhotosAlbum(cgImage, meta, (url, error) =>
+								{
+									// Image saved successfully
+									if (error.Code == new nint(0))
+									{
+										// get the asset
+										library.AssetForUrl(url, (asset) =>
+										{
+											// write the image to the album
+											group.AddAsset(asset);
+
+											// save the path
+											aPath = url.AbsoluteString;
+										}, (e) =>
+										{
+
+										});
+									}
+								});
+							};
+
+							// is true if an album were found.
+							bool hasAlbumFound = false;
+
+							// Try to find album
+							library.Enumerate(ALAssetsGroupType.Album, (ALAssetsGroup group, ref bool stop) =>
+							{
+								if (group.Name == new NSString(options.Directory))
+								{
+									saveImage(group);
+									hasAlbumFound = true;
+									return;
+								}
+							}, (error) =>
+							{
+
+							});
+
+							// does the album not exist create it
+							if (hasAlbumFound)
+							{
+								// create album
+								library.AddAssetsGroupAlbum(options.Directory, (group) =>
+								{
+									saveImage(group);
+								}, (error) =>
+								{
+
+								});
+							}
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine("unable to save to album:" + ex);
+						}
+					*/
+						#endregion
+
+						#region PHPhoto
+						try
+						{
+							PHAssetCollection assetCollection = null;
+
+							// Opens the assetCollectio / album by name.
+							// Returns null if the given albumName couldn't found
+							Func<PHAssetCollection> fetchAssetCollectionForAlbum = () =>
+							{
+								var fetchOptions = new PHFetchOptions();
+								//string predicateFormat = ;
+
+								fetchOptions.Predicate = NSPredicate.FromFormat($"title = %@", FromObject(options.AlbumName));
+								var collection = PHAssetCollection.FetchAssetCollections(PHAssetCollectionType.Album, PHAssetCollectionSubtype.Any, fetchOptions);
+
+								if (collection.firstObject != null)
+								{
+									return collection.firstObject as PHAssetCollection;
+								}
+								return null;
+							};
+
+							// Saves the image to the sellected assetCollection / album.
+							Action saveImage = () =>
+							{
+								if (assetCollection == null)
+								{
+									throw new Exception("Unable to create album");
+								}
+
+								PHPhotoLibrary.SharedPhotoLibrary.PerformChanges(() =>
+								{
+									var assetChangeRequest = PHAssetChangeRequest.FromImage(image);
+									var assetPlaceholder = assetChangeRequest.PlaceholderForCreatedAsset;
+									var albumChangeRequest = PHAssetCollectionChangeRequest.ChangeRequest(assetCollection);
+									albumChangeRequest.AddAssets(new PHObject[] { assetPlaceholder });
+								}, (success, ex) =>
+								{
+									if (success)
+									{
+										
+									}
+									else
+									{
+
+									}
+								});
+							};
+
+							var tempCollection = fetchAssetCollectionForAlbum();
+							// If the album already exist save image...
+							if (tempCollection != null)
+							{
+								assetCollection = tempCollection;
+								saveImage();
+							}
+							// ...if not create album.
+							else
+							{
+								PHPhotoLibrary.SharedPhotoLibrary.PerformChanges(() =>
+								{
+									PHAssetCollectionChangeRequest.CreateAssetCollection(options.AlbumName);
+								}, (success, ex) =>
+								{
+									// If success save image.
+									if (success)
+									{
+										assetCollection = fetchAssetCollectionForAlbum();
+
+										saveImage();
+									}
+								});
+							}
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine("unable to save into album:" + ex);
+						}
+						#endregion
 					}
-					catch (Exception ex)
+					else
 					{
-						Console.WriteLine("unable to save to album:" + ex);
+						try
+						{
+							
+							image.SaveToPhotosAlbum((i, error) =>
+							{
+								if (error == null)
+								{
+									// Saved
+								}
+								else
+								{
+									// Faield
+									throw new Exception("Failed to save the image.");
+								}
+							});
+
+							#region ALAssetLibrary
+							/*
+							var library = new ALAssetsLibrary();
+							var albumSave = await library.WriteImageToSavedPhotosAlbumAsync(cgImage, meta);
+							aPath = albumSave.AbsoluteString;
+							*/
+							#endregion
+						}
+						catch (Exception ex)
+						{
+							Console.WriteLine("unable to save to album:" + ex);
+						}
 					}
 				}
 
