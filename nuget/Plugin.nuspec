@@ -29,21 +29,21 @@
          </group>
          <group targetFramework="netstandard1.0">
            <dependency id="NETStandard.Library" version="1.6.1" />
-          <dependency id="Plugin.Permissions" version="3.0.0.8"/>
+          <dependency id="Plugin.Permissions" version="3.0.0.9-beta"/>
          </group>
          <group targetFramework="MonoAndroid10">
-           <dependency id="Plugin.Permissions" version="3.0.0.8"/>
+           <dependency id="Plugin.Permissions" version="3.0.0.9-beta"/>
            <dependency id="Xamarin.Android.Support.Core.Utils" version="25.4.0.2"/>
          </group>
          <group targetFramework="Xamarin.iOS10">
-          <dependency id="Plugin.Permissions" version="3.0.0.8"/>
+          <dependency id="Plugin.Permissions" version="3.0.0.9-beta"/>
          </group>
          <group targetFramework="Xamarin.Mac20">
          </group>
          <group targetFramework="portable-net45+win+wpa81+wp80">
          </group>
          <group targetFramework="uap">
-          <dependency id="Plugin.Permissions" version="3.0.0.8"/>
+          <dependency id="Plugin.Permissions" version="3.0.0.9-beta"/>
          </group>
          <group targetFramework="dotnet">
          </group>
