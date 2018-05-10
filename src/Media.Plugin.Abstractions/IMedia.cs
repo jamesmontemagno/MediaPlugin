@@ -62,5 +62,10 @@ namespace Plugin.Media.Abstractions
         /// <returns>Media file of new video or null if canceled</returns>
         Task<MediaFile> TakeVideoAsync(StoreVideoOptions options);
 
-    }
+		/// <summary>
+		/// Capture a screenshot of the current view
+		/// </summary>
+		/// <returns>Screenshot image</returns>
+		Task<byte[]> CaptureScreenshotAsync();
+	}
 }

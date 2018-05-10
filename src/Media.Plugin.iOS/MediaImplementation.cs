@@ -390,5 +390,29 @@ namespace Plugin.Media
 
 			}
 		}
-    }
+
+		public Task<byte[]> CaptureScreenshotAsync()
+		{
+			byte[] imageBytes = null;
+
+			UIApplication.SharedApplication.InvokeOnMainThread(() =>
+			{
+				var view = Helpers.GetCurrentUIController().View;
+
+				UIGraphics.BeginImageContext(view.Frame.Size);
+				view.DrawViewHierarchy(view.Frame, true);
+				var image = UIGraphics.GetImageFromCurrentImageContext();
+				UIGraphics.EndImageContext();
+
+				using (var imageData = image.AsPNG())
+				{
+					var bytes = new byte[imageData.Length];
+					System.Runtime.InteropServices.Marshal.Copy(imageData.Bytes, bytes, 0, Convert.ToInt32(imageData.Length));
+					imageBytes = bytes;
+				}
+			});
+
+			return Task.FromResult(imageBytes);
+		}
+	}
 }

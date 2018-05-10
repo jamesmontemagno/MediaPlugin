@@ -9,6 +9,12 @@ using Windows.Storage.Pickers;
 
 using Plugin.Media.Abstractions;
 using System.Diagnostics;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Graphics.Display;
+using Windows.Storage.Streams;
+using Windows.Graphics.Imaging;
 
 namespace Plugin.Media
 {
@@ -370,5 +376,42 @@ namespace Plugin.Media
                 isCameraAvailable = true;
             }
         }
-    }
+
+		/// <summary>
+		/// Capture a screenshot of the current view
+		/// </summary>
+		/// <returns>
+		/// Screenshot image
+		/// </returns>
+		public async Task<byte[]> CaptureScreenshotAsync()
+		{
+			var rtb = new RenderTargetBitmap();
+			await rtb.RenderAsync(Window.Current.Content);
+
+			var pixelBuffer = await rtb.GetPixelsAsync();
+			var pixels = pixelBuffer.ToArray();
+
+			// Useful for rendering in the correct DPI
+			var displayInformation = DisplayInformation.GetForCurrentView();
+
+			var stream = new InMemoryRandomAccessStream();
+			var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+			encoder.SetPixelData(BitmapPixelFormat.Bgra8,
+			BitmapAlphaMode.Premultiplied,
+			(uint)rtb.PixelWidth,
+			(uint)rtb.PixelHeight,
+			displayInformation.RawDpiX,
+			displayInformation.RawDpiY,
+			pixels);
+
+			await encoder.FlushAsync();
+			stream.Seek(0);
+
+			var readStram = stream.AsStreamForRead();
+			var bytes = new byte[readStram.Length];
+			readStram.Read(bytes, 0, bytes.Length);
+
+			return bytes;
+		}
+	}
 }

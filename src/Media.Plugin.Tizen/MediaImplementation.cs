@@ -277,5 +277,10 @@ namespace Plugin.Media
 			/// In Tizen, no options are available.
 			Log.Info(LOG_TAG, "There is no option to supported");
 		}
+
+		public Task<byte[]> CaptureScreenshotAsync()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
