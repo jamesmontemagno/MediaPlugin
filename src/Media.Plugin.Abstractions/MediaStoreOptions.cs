@@ -48,6 +48,27 @@ namespace Plugin.Media.Abstractions
         Front
     }
 
+	/// <summary>
+	/// Specifies the media picker's modal presentation style.
+	/// Only applies to iOS.
+	/// </summary>
+	public enum MediaPickerModalPresentationStyle
+	{
+		/// <summary>
+		/// This is the equivalent of presenting the media picker with UIKit.UIModalPresentationStyle.FullScreen style.
+		/// Will remove the views of the underlying view controller when presenting the media picker.
+		/// Only applies to iOS.
+		/// </summary>
+		FullScreen,
+
+		/// <summary>
+		/// This is the equivalent of presenting the media picker with UIKit.UIModalPresentationStyle.OverFullScreen style.
+		/// Will keep the views of the underlying view controller when presenting the media picker.
+		/// Only applies to iOS.
+		/// </summary>
+		OverFullScreen
+	}
+
     /// <summary>
     /// 
     /// </summary>
@@ -127,7 +148,14 @@ namespace Plugin.Media.Abstractions
 			get { return saveMetaData; }
 			set { saveMetaData = value; }
 		}
-	}
+
+	    /// <summary>
+	    /// Specifies the media picker's modal presentation style.
+	    /// Only applies to iOS.
+	    /// Defaults to FullScreen, which is the equivalent of using UIKit.UIModalPresentationStyle.FullScreen.
+	    /// </summary>
+		public MediaPickerModalPresentationStyle ModalPresentationStyle { get; set; } = MediaPickerModalPresentationStyle.FullScreen;
+    }
 
     
 
@@ -253,6 +281,13 @@ namespace Plugin.Media.Abstractions
 			get { return saveMetaData; }
 			set { saveMetaData = value; }
 		}
+
+	    /// <summary>
+	    /// Specifies the media picker's modal presentation style.
+	    /// Only applies to iOS.
+	    /// Defaults to FullScreen, which is the equivalent of using UIKit.UIModalPresentationStyle.FullScreen.
+	    /// </summary>
+	    public MediaPickerModalPresentationStyle ModalPresentationStyle { get; set; } = MediaPickerModalPresentationStyle.FullScreen;
 	}
 
     /// <summary>

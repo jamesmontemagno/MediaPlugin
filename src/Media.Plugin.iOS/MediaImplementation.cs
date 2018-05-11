@@ -93,6 +93,7 @@ namespace Plugin.Media
 				RotateImage = options?.RotateImage ?? true,
 				SaveMetaData = options?.SaveMetaData ?? true,
 				SaveToAlbum = false,
+				ModalPresentationStyle = options?.ModalPresentationStyle ?? MediaPickerModalPresentationStyle.FullScreen,
             };
 
             return await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
@@ -284,7 +285,9 @@ namespace Plugin.Media
             {
                 if (UIDevice.CurrentDevice.CheckSystemVersion(9, 0))
                 {
-                    picker.ModalPresentationStyle = UIModalPresentationStyle.FullScreen;
+	                picker.ModalPresentationStyle = options?.ModalPresentationStyle == MediaPickerModalPresentationStyle.OverFullScreen
+		                ? UIModalPresentationStyle.OverFullScreen
+		                : UIModalPresentationStyle.FullScreen;
                 }
                 viewController.PresentViewController(picker, true, null);
             }
