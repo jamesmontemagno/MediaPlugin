@@ -21,8 +21,8 @@ namespace PopUpMediaCameraA.Droid
             base.OnCreate(bundle);
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
-
-            LoadApplication(new PopupMediaCamera.App());
+			Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
+			LoadApplication(new PopupMediaCamera.App());
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)

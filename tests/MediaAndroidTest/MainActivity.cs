@@ -30,10 +30,11 @@ namespace MediaAndroidTest
 
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
+			Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
 
-            // Get our button from the layout resource,
-            // and attach an event to it
-            Button button = FindViewById<Button>(Resource.Id.MyButton);
+			// Get our button from the layout resource,
+			// and attach an event to it
+			Button button = FindViewById<Button>(Resource.Id.MyButton);
             var image = FindViewById<ImageView>(Resource.Id.imageView1);
 
             var switchSize = FindViewById<Switch>(Resource.Id.switch_size);

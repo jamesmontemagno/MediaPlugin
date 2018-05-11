@@ -116,11 +116,8 @@
     <BundleResource Include="Resources\Icon-Small%403x.png" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Plugin.Permissions, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Plugin.Permissions.2.2.1\lib\Xamarin.iOS10\Plugin.Permissions.dll</HintPath>
-    </Reference>
-    <Reference Include="Plugin.Permissions.Abstractions, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Plugin.Permissions.2.2.1\lib\Xamarin.iOS10\Plugin.Permissions.Abstractions.dll</HintPath>
+    <Reference Include="Plugin.Permissions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Plugin.Permissions.3.0.0.9-beta\lib\xamarinios10\Plugin.Permissions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -149,15 +146,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{fbef1e96-bbb6-43b8-9c56-2c01088c4d48}</Project>
-      <Name>Media.Plugin.Abstractions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Media.Plugin.iOS\Media.Plugin.iOS.csproj">
-      <Project>{2882aeeb-d4cd-4eb9-8a6c-6653b33681f0}</Project>
-      <Name>Media.Plugin.iOS</Name>
-      <IsAppExtension>false</IsAppExtension>
-      <IsWatchApp>false</IsWatchApp>
+    <ProjectReference Include="..\..\src\Media.Plugin\Media.Plugin.csproj">
+      <Project>{b9296db0-b091-4a37-aaba-b4b7bc9b8573}</Project>
+      <Name>Media.Plugin</Name>
     </ProjectReference>
     <ProjectReference Include="..\PopupMediaCamera\PopupMediaCamera.csproj">
       <Project>{15a0be14-472c-4586-8947-7bcc2d917d63}</Project>

@@ -12,8 +12,8 @@ Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a 
 * Please see the additional setup for each platforms permissions.
 
 Build Status: 
-* [![Build status](https://ci.appveyor.com/api/projects/status/872kljawr91vphty?svg=true)](https://ci.appveyor.com/project/JamesMontemagno/mediaplugin)
-* CI NuGet Feed: https://ci.appveyor.com/nuget/mediaplugin
+* ![](https://jamesmontemagno.visualstudio.com/_apis/public/build/definitions/6b79a378-ddd6-4e31-98ac-a12fcd68644c/24/badge)
+* CI NuGet Feed: http://myget.org/F/xamarin-plugins
 
 **Platform Support**
 
@@ -22,6 +22,7 @@ Build Status:
 |Xamarin.iOS|iOS 7+|
 |Xamarin.Android|API 14+|
 |Windows 10 UWP|10+|
+|Tizen|4+|
 
 
 ### API Usage

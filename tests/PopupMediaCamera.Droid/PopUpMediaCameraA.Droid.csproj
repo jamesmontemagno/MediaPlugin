@@ -40,13 +40,16 @@
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Plugin.Permissions, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Plugin.Permissions.2.2.1\lib\MonoAndroid10\Plugin.Permissions.dll</HintPath>
+    <Reference Include="Java.Interop" />
+    <Reference Include="Plugin.CurrentActivity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Plugin.CurrentActivity.2.1.0.1\lib\monoandroid44\Plugin.CurrentActivity.dll</HintPath>
     </Reference>
-    <Reference Include="Plugin.Permissions.Abstractions, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Plugin.Permissions.2.2.1\lib\MonoAndroid10\Plugin.Permissions.Abstractions.dll</HintPath>
+    <Reference Include="Plugin.Permissions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Plugin.Permissions.3.0.0.9-beta\lib\monoandroid71\Plugin.Permissions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Runtime" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
@@ -107,9 +110,6 @@
     <Reference Include="Rg.Plugins.Popup.Platform">
       <HintPath>..\packages\Rg.Plugins.Popup.1.0.4\lib\MonoAndroid\Rg.Plugins.Popup.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="Plugin.CurrentActivity">
-      <HintPath>..\packages\Plugin.CurrentActivity.1.0.1\lib\MonoAndroid10\Plugin.CurrentActivity.dll</HintPath>
-    </Reference>
     <Reference Include="FormsViewGroup">
       <HintPath>..\packages\Xamarin.Forms.2.5.0.122203\lib\MonoAndroid10\FormsViewGroup.dll</HintPath>
     </Reference>
@@ -130,7 +130,6 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MainApplication.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -149,17 +148,13 @@
     <AndroidResource Include="Resources\xml\file_paths.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Media.Plugin\Media.Plugin.csproj">
+      <Project>{b9296db0-b091-4a37-aaba-b4b7bc9b8573}</Project>
+      <Name>Media.Plugin</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PopupMediaCamera\PopupMediaCamera.csproj">
       <Project>{15A0BE14-472C-4586-8947-7BCC2D917D63}</Project>
       <Name>PopupMediaCamera</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Media.Plugin.Abstractions\Media.Plugin.Abstractions.csproj">
-      <Project>{FBEF1E96-BBB6-43B8-9C56-2C01088C4D48}</Project>
-      <Name>Media.Plugin.Abstractions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Media.Plugin.Android\Media.Plugin.Android.csproj">
-      <Project>{56A56F17-7DE1-4CA1-9617-BF32E971AC84}</Project>
-      <Name>Media.Plugin.Android</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
