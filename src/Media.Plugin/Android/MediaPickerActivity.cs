@@ -114,9 +114,18 @@ namespace Plugin.Media
                 {
                     if (!isPhoto)
                     {
+						var isPixel = false;
+						try
+						{
+							var name = Settings.System.GetString(Application.Context.ContentResolver, "device_name");
+							isPixel = name.Contains("Pixel") || name.Contains("pixel");
+						}
+						catch (Exception)
+						{
+						}
 
                         seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
-						if (seconds != 0 && (int)Build.VERSION.SdkInt < 27)
+						if (seconds != 0 && !isPixel)
 							pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
 						
                         size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
