@@ -43,7 +43,7 @@
 	<ItemGroup>
 		<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
 		<PackageReference Include="MSBuild.Sdk.Extras" Version="1.4.0" PrivateAssets="All" />
-		<PackageReference Include="Plugin.Permissions" Version="3.0.0.9-beta" />
+		<PackageReference Include="Plugin.Permissions" Version="3.0.0.12" />
 		<Compile Include="**\Shared\*.cs" />
 	</ItemGroup>
 
