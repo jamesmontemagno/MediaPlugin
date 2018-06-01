@@ -422,7 +422,7 @@ namespace Plugin.Media
 			Func<Stream> getStreamForExternalStorage = () =>
 			{
 				if (options.RotateImage)
-					return RotateImage(image);
+					return RotateImage(image, options.CompressionQuality);
 				else
 					return File.OpenRead(path);
 			};
@@ -636,7 +636,7 @@ namespace Plugin.Media
 			}
 		}
 
-		public static Stream RotateImage(UIImage image)
+		public static Stream RotateImage(UIImage image, int compressionQuality)
 		{
 			UIImage imageToReturn = null;
 			if (image.Orientation == UIImageOrientation.Up)
@@ -715,24 +715,25 @@ namespace Plugin.Media
 
 					using (var imageRef = context.ToImage())
 					{
-						imageToReturn = new UIImage(imageRef);
+						imageToReturn = new UIImage(imageRef, 1, UIImageOrientation.Up);
 					}
 				}
 			}
 
-			var finalQuality = 1.0f;
-			var imageData = image.AsJPEG(finalQuality);
+			var finalQuality = compressionQuality / 100f;
+			var imageData = imageToReturn.AsJPEG(finalQuality);
 			//continue to move down quality , rare instances
 			while (imageData == null && finalQuality > 0)
 			{
 				finalQuality -= 0.05f;
-				imageData = image.AsJPEG(finalQuality);
+				imageData = imageToReturn.AsJPEG(finalQuality);
 			}
 
 			if (imageData == null)
 				throw new NullReferenceException("Unable to convert image to jpeg, please ensure file exists or lower quality level");
 
-			var stream = imageData.AsStream();
+			var stream = new MemoryStream();
+			imageData.AsStream().CopyTo(stream);
 			imageData.Dispose();
 			return stream;
 
