@@ -49,6 +49,25 @@ namespace Plugin.Media.Abstractions
     }
 
 	/// <summary>
+	/// Camera flash
+	/// </summary>
+	public enum CameraFlash
+	{
+		/// <summary>
+		/// Off by default
+		/// </summary>
+		Default,
+		/// <summary>
+		/// Flash is ON
+		/// </summary>
+		On,
+		/// <summary>
+		/// Flash is Off
+		/// </summary>
+		Off
+	}
+
+	/// <summary>
 	/// Specifies the media picker's modal presentation style.
 	/// Only applies to iOS.
 	/// </summary>
@@ -183,13 +202,23 @@ namespace Plugin.Media.Abstractions
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the the max width or height of the image.
-        /// The image will aspect resize to the MaxWidthHeight as the max size of the image height or width. 
-        /// This value is only used if PhotoSize is PhotoSize.MaxWidthHeight 
-        /// </summary>
-        /// <value>The max width or height of the image.</value>
-        public int? MaxWidthHeight { get; set; }
+		/// <summary>
+		/// Default camera
+		/// Should work on iOS and Windows, but not guaranteed on Android as not every camera implements it
+		/// </summary>
+		public CameraFlash FlashMode
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the the max width or height of the image.
+		/// The image will aspect resize to the MaxWidthHeight as the max size of the image height or width. 
+		/// This value is only used if PhotoSize is PhotoSize.MaxWidthHeight 
+		/// </summary>
+		/// <value>The max width or height of the image.</value>
+		public int? MaxWidthHeight { get; set; }
 
         /// <summary>
         /// Get or set for an OverlayViewProvider
