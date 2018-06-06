@@ -218,7 +218,8 @@ namespace Plugin.Media
             if (sourceType == UIImagePickerControllerSourceType.Camera)
             {
                 picker.CameraDevice = GetUICameraDevice(options.DefaultCamera);
-                picker.AllowsEditing = options?.AllowCropping ?? false;
+				picker.CameraFlashMode = GetUICameraFlashMode(options.FlashMode);
+				picker.AllowsEditing = options?.AllowCropping ?? false;
 
                 if (options.OverlayViewProvider != null)
                 {
@@ -332,7 +333,22 @@ namespace Plugin.Media
             }
         }
 
-        private static UIImagePickerControllerQualityType GetQuailty(VideoQuality quality)
+		private static UIImagePickerControllerCameraFlashMode GetUICameraFlashMode(CameraFlash device)
+		{
+			switch (device)
+			{
+				case CameraFlash.Default:
+					return UIImagePickerControllerCameraFlashMode.Auto;
+				case CameraFlash.On:
+					return UIImagePickerControllerCameraFlashMode.On;
+				case CameraFlash.Off:
+					return UIImagePickerControllerCameraFlashMode.Off;
+				default:
+					throw new NotSupportedException();
+			}
+		}
+
+		private static UIImagePickerControllerQualityType GetQuailty(VideoQuality quality)
         {
             switch (quality)
             {
