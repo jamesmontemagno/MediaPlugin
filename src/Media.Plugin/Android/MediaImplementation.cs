@@ -426,7 +426,11 @@ namespace Plugin.Media
                     {
                         pickerIntent.PutExtra("android.intent.extras.CAMERA_FACING", 1);
                     }
-                    pickerIntent.PutExtra(MediaPickerActivity.ExtraSaveToAlbum, cameraOptions.SaveToAlbum);
+					if (cameraOptions.FlashMode == CameraFlash.On)
+					{
+						pickerIntent.PutExtra("android.intent.extras.FLASH_MODE_OFF", 0);
+					}
+					pickerIntent.PutExtra(MediaPickerActivity.ExtraSaveToAlbum, cameraOptions.SaveToAlbum);
                 }
                 var vidOptions = (options as StoreVideoOptions);
                 if (vidOptions != null)
