@@ -289,7 +289,7 @@ You must also add a few additional configuration files to adhere to the new stri
 </provider>
 ```
 
-2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`
+2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`. Make sure that this XML file has a Build Action of: `AndroidResource`.
 
 Add the following code:
 ```xml
