@@ -8,6 +8,7 @@ using Android.Widget;
 using Android.OS;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
+using Plugin.CurrentActivity;
 
 namespace MediaSample.Droid
 {
@@ -17,7 +18,7 @@ namespace MediaSample.Droid
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
-
+            CrossCurrentActivity.Current.Init(this, bundle);
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
         }
