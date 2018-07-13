@@ -734,6 +734,7 @@ namespace Plugin.Media
 
 			var stream = new MemoryStream();
 			imageData.AsStream().CopyTo(stream);
+			stream.Position = 0;
 			imageData.Dispose();
 			return stream;
 
