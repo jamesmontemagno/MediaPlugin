@@ -34,8 +34,6 @@ You must also add a few additional configuration files to adhere to the new stri
 				android:resource="@xml/file_paths"></meta-data>
 </provider>
 
-YOUR_APP_PACKAGE_NAME must be set to your app package name!
-
 2.) Add a new folder called xml into your Resources folder and add a new XML file called `file_paths.xml`
 
 Add the following code:
@@ -45,8 +43,6 @@ Add the following code:
     <external-files-path name="my_images" path="Pictures" />
     <external-files-path name="my_movies" path="Movies" />
 </paths>
-
-YOUR_APP_PACKAGE_NAME must be set to your app package name!
 
 You can read more at: https://developer.android.com/training/camera/photobasics.html
 
