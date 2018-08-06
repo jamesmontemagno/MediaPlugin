@@ -164,14 +164,6 @@ namespace Plugin.Media
 				else
 				{
 					picker.DismissViewController(true, onDismiss);
-					try
-					{
-						picker.Dispose();
-					}
-					catch
-					{
-
-					}
 				}
 			}
 		}
