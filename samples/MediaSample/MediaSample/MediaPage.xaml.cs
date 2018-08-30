@@ -20,7 +20,7 @@ namespace MediaSample
 
         if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
         {
-          DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
+          DisplayAlert("No Camera", ":( No camera available.", "OK");
           return;
         }
 
