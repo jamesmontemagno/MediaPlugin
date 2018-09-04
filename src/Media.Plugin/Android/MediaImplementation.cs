@@ -134,6 +134,46 @@ namespace Plugin.Media
             return media;
         }
 
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		{
+			if (!(await RequestStoragePermission()))
+			{
+				return null;
+			}
+
+			var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true });
+
+			if (options == null)
+				options = new PickMediaOptions();
+
+			foreach (var media in medias)
+			{
+				//check to see if we picked a file, and if so then try to fix orientation and resize
+				if (!string.IsNullOrWhiteSpace(media?.Path))
+				{
+					try
+					{
+						var originalMetadata = new ExifInterface(media.Path);
+
+						if (options.RotateImage)
+						{
+							await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
+						}
+						else
+						{
+							await ResizeAsync(media.Path, options, originalMetadata);
+						}
+						originalMetadata.SaveAttributes();
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Unable to check orientation: " + ex);
+					}
+				}
+			}
+
+			return medias;
+		}
 
 	    /// <summary>
 	    /// Take a photo async with specified options
@@ -283,6 +323,7 @@ namespace Plugin.Media
         private readonly Context context;
         private int requestId;
         private TaskCompletionSource<MediaFile> completionSource;
+		private TaskCompletionSource<List<MediaFile>> completionSourceMulti;
 
 
 		async Task<bool> RequestCameraPermissions()
@@ -423,7 +464,13 @@ namespace Plugin.Media
                 pickerIntent.PutExtra(MediaPickerActivity.ExtraPath, options.Directory);
                 pickerIntent.PutExtra(MediaStore.Images.ImageColumns.Title, options.Name);
 
-                var cameraOptions = (options as StoreCameraMediaOptions);
+				var pickerOptions = (options as StorePickerMediaOptions);
+				if (pickerOptions != null)
+				{
+					pickerIntent.PutExtra(MediaPickerActivity.ExtraMultiSelect, pickerOptions.MultiPicker);
+				}
+
+				var cameraOptions = (options as StoreCameraMediaOptions);
                 if (cameraOptions != null)
                 {
                     if (cameraOptions.DefaultCamera == CameraDevice.Front)
@@ -485,29 +532,61 @@ namespace Plugin.Media
 
                 if (e.RequestId != id)
                     return;
-                
-                if(e.IsCanceled)
-                    tcs.SetResult(null);
+
+				if (e.IsCanceled)
+					tcs.SetResult(null);
+				else if (e.Error != null)
+					tcs.SetException(e.Error);
+				else
+					tcs.SetResult(e.Media.FirstOrDefault());
+			};
+
+	        token.Register(() =>
+	        {
+		        var tcs = Interlocked.Exchange(ref this.completionSource, null);
+
+		        MediaPickerActivity.MediaPicked -= handler;
+		        CancelRequested?.Invoke(null, EventArgs.Empty);
+		        CancelRequested = null;
+
+		        tcs.SetResult(null);
+	        });
+
+
+			MediaPickerActivity.MediaPicked += handler;
+
+			return completionSource.Task;
+		}
+
+		private Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options)
+		{
+			int id = GetRequestId();
+
+			var ntcs = new TaskCompletionSource<List<MediaFile>>(id);
+			if (Interlocked.CompareExchange(ref completionSourceMulti, ntcs, null) != null)
+				throw new InvalidOperationException("Only one operation can be active at a time");
+
+			context.StartActivity(CreateMediaIntent(id, type, action, options));
+
+			EventHandler<MediaPickedEventArgs> handler = null;
+			handler = (s, e) =>
+			{
+				var tcs = Interlocked.Exchange(ref this.completionSourceMulti, null);
+
+				MediaPickerActivity.MediaPicked -= handler;
+
+				if (e.RequestId != id)
+					return;
+
+				if (e.IsCanceled)
+					tcs.SetResult(null);
                 else if (e.Error != null)
                     tcs.SetException(e.Error);
                 else
                     tcs.SetResult(e.Media);
             };
 
-			token.Register(() =>
-			{
-				var tcs = Interlocked.Exchange(ref this.completionSource, null);
-
-				MediaPickerActivity.MediaPicked -= handler;
-				CancelRequested?.Invoke(null, EventArgs.Empty);
-				CancelRequested = null;
-
-				tcs.SetResult(null);
-			});
-
-			MediaPickerActivity.MediaPicked += handler;
-
-            return completionSource.Task;
+            return completionSourceMulti.Task;
         }
 
         /// <summary>
