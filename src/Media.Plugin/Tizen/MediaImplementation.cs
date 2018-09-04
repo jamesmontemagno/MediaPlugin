@@ -277,5 +277,13 @@ namespace Plugin.Media
 			/// In Tizen, no options are available.
 			Log.Info(LOG_TAG, "There is no option to supported");
 		}
+
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		{
+			// TODO: complete Tizen implementation
+			var result = await PickPhotoAsync(options);
+
+			return new List<MediaFile> { result };
+		}
 	}
 }

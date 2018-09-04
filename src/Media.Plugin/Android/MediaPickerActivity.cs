@@ -14,6 +14,8 @@ using Plugin.Media.Abstractions;
 using Android.Content.PM;
 using System.Globalization;
 using Android.Support.V4.Content;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Plugin.Media
 {
@@ -30,7 +32,8 @@ namespace Plugin.Media
         internal const string ExtraId = "id";
         internal const string ExtraAction = "action";
         internal const string ExtraTasked = "tasked";
-        internal const string ExtraSaveToAlbum = "album_save";
+		internal const string ExtraMultiSelect = "multi_select";
+		internal const string ExtraSaveToAlbum = "album_save";
         internal const string ExtraFront = "android.intent.extras.CAMERA_FACING";
 
         internal static event EventHandler<MediaPickedEventArgs> MediaPicked;
@@ -48,8 +51,9 @@ namespace Plugin.Media
         private bool isPhoto;
         private bool saveToAlbum;
         private string action;
+		private bool multiSelect;
 
-        private int seconds;
+		private int seconds;
         private long size;
         private VideoQuality quality;
 
@@ -72,8 +76,9 @@ namespace Plugin.Media
             outState.PutBoolean(ExtraSaveToAlbum, saveToAlbum);
             outState.PutBoolean(ExtraTasked, tasked);
             outState.PutInt(ExtraFront, front);
+			outState.PutBoolean(ExtraMultiSelect, multiSelect);
 
-            if (path != null)
+			if (path != null)
                 outState.PutString(ExtraPath, path.Path);
 
             base.OnSaveInstanceState(outState);
@@ -100,7 +105,8 @@ namespace Plugin.Media
             id = b.GetInt(ExtraId, 0);
             type = b.GetString(ExtraType);
             front = b.GetInt(ExtraFront);
-            if (type == "image/*")
+			multiSelect = b.GetBoolean(ExtraMultiSelect);
+			if (type == "image/*")
                 isPhoto = true;
 
             action = b.GetString(ExtraAction);
@@ -109,8 +115,13 @@ namespace Plugin.Media
             {
                 pickIntent = new Intent(action);
                 if (action == Intent.ActionPick)
-                    pickIntent.SetType(type);
-                else
+				{
+					if (multiSelect)
+						pickIntent.PutExtra(Intent.ExtraAllowMultiple, true);
+
+					pickIntent.SetType(type);
+				}
+				else
                 {
                     if (!isPhoto)
                     {
@@ -338,9 +349,27 @@ namespace Plugin.Media
 
             if (tasked)
             {
+				if (data?.ClipData != null)
+				{
+					ClipData clipData = data.ClipData;
+					var mediaFiles = new List<MediaFile>();
+					for (int i = 0; i < clipData.ItemCount; i++)
+					{
+						ClipData.Item item = clipData.GetItemAt(i);
+						var media = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, item.Uri, false);
 
-               
-                Task<MediaPickedEventArgs> future;
+						// TODO: This can be done better.
+						mediaFiles.AddRange(media.Media);
+					}
+
+					Finish();
+					await Task.Delay(50);
+					OnMediaPicked(new MediaPickedEventArgs(requestCode, resultCode == Result.Canceled, mediaFiles));
+
+					return;
+				}
+
+				Task<MediaPickedEventArgs> future;
 
                 if (resultCode == Result.Canceled)
                 {
@@ -634,11 +663,21 @@ namespace Plugin.Media
             IsCanceled = isCanceled;
             if (!IsCanceled && media == null)
                 throw new ArgumentNullException("media");
+			
+			Media = new List<MediaFile> { media };
+		}
 
-            Media = media;
-        }
+		public MediaPickedEventArgs(int id, bool isCanceled, List<MediaFile> medias)
+		{
+			RequestId = id;
+			IsCanceled = isCanceled;
+			if (!IsCanceled && medias == null)
+				throw new ArgumentNullException("medias");
 
-        public int RequestId
+			Media = medias;
+		}
+
+		public int RequestId
         {
             get;
             private set;
@@ -656,7 +695,7 @@ namespace Plugin.Media
             private set;
         }
 
-        public MediaFile Media
+        public List<MediaFile> Media
         {
             get;
             private set;
@@ -671,7 +710,7 @@ namespace Plugin.Media
             else if (Error != null)
                 tcs.SetException(Error);
             else
-                tcs.SetResult(Media);
+                tcs.SetResult(Media.FirstOrDefault());
 
             return tcs.Task;
         }

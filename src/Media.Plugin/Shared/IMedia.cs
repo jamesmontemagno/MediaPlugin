@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Plugin.Media.Abstractions
@@ -42,12 +43,18 @@ namespace Plugin.Media.Abstractions
         /// <returns>Media file or null if canceled</returns>
         Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null);
 
-        /// <summary>
-        /// Take a photo async with specified options
-        /// </summary>
-        /// <param name="options">Camera Media Options</param>
-        /// <returns>Media file of photo or null if canceled</returns>
-        Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options);
+		/// <summary>
+		/// Picks a photo from the default gallery
+		/// </summary>
+		/// <returns>Media file or null if canceled</returns>
+		Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null);
+
+		/// <summary>
+		/// Take a photo async with specified options
+		/// </summary>
+		/// <param name="options">Camera Media Options</param>
+		/// <returns>Media file of photo or null if canceled</returns>
+		Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options);
 
         /// <summary>
         /// Picks a video from the default gallery

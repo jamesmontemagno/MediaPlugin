@@ -222,12 +222,20 @@ namespace Plugin.Media
                 }, albumPath: aPath);
         }
 
-        /// <summary>
-        /// Take a video with specified options
-        /// </summary>
-        /// <param name="options">Video Media Options</param>
-        /// <returns>Media file of new video or null if canceled</returns>
-        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		{
+			// TODO: Implement UWP multi-picker
+			var result = await PickPhotoAsync(options);
+
+			return new List<MediaFile> { result };
+		}
+
+		/// <summary>
+		/// Take a video with specified options
+		/// </summary>
+		/// <param name="options">Video Media Options</param>
+		/// <returns>Media file of new video or null if canceled</returns>
+		public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
         {
             if (!initialized)
                 await Initialize();
