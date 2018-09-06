@@ -99,10 +99,18 @@ namespace Plugin.Media
             return await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
         }
 
-		public Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
 		{
 			if (!IsPickPhotoSupported)
 				throw new NotSupportedException();
+
+			//Does not need permission on iOS 11
+			if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+			{
+				CheckUsageDescription(photoDescription);
+
+				await CheckPermissions(Permission.Photos);
+			}
 
 			var cameraOptions = new StoreCameraMediaOptions
 			{
@@ -116,7 +124,7 @@ namespace Plugin.Media
 			};
 
 
-			return GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, customisations);
+			return await GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, customisations);
 		}
 
 		/// <summary>
@@ -267,25 +275,7 @@ namespace Plugin.Media
         private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
         {
 			
-			UIViewController viewController = null;
-            UIWindow window = UIApplication.SharedApplication.KeyWindow;
-            if (window == null)
-                throw new InvalidOperationException("There's no current active window");
-
-            if(window.WindowLevel == UIWindowLevel.Normal)
-                viewController = window.RootViewController;
-
-            if (viewController == null)
-            {
-                window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null && w.WindowLevel == UIWindowLevel.Normal);
-                if (window == null)
-                    throw new InvalidOperationException("Could not find current view controller");
-                else
-                    viewController = window.RootViewController;
-            }
-
-            while (viewController.PresentedViewController != null)
-                viewController = viewController.PresentedViewController;
+			var viewController = GetHostViewController();
 
             MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
@@ -340,25 +330,7 @@ namespace Plugin.Media
 
 		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerCustomisations customisations = null)
 		{
-			UIViewController viewController = null;
-			UIWindow window = UIApplication.SharedApplication.KeyWindow;
-			if (window == null)
-				throw new InvalidOperationException("There's no current active window");
-
-			if (window.WindowLevel == UIWindowLevel.Normal)
-				viewController = window.RootViewController;
-
-			if (viewController == null)
-			{
-				window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null && w.WindowLevel == UIWindowLevel.Normal);
-				if (window == null)
-					throw new InvalidOperationException("Could not find current view controller");
-				else
-					viewController = window.RootViewController;
-			}
-
-			while (viewController.PresentedViewController != null)
-				viewController = viewController.PresentedViewController;
+			var viewController = GetHostViewController();
 
 			if (options == null)
 				options = new StoreCameraMediaOptions();
@@ -412,7 +384,32 @@ namespace Plugin.Media
 			}).Unwrap();
 		}
 
-				private static UIImagePickerControllerCameraDevice GetUICameraDevice(CameraDevice device)
+		private static UIViewController GetHostViewController()
+		{
+			UIViewController viewController = null;
+			UIWindow window = UIApplication.SharedApplication.KeyWindow;
+			if (window == null)
+				throw new InvalidOperationException("There's no current active window");
+
+			if (window.WindowLevel == UIWindowLevel.Normal)
+				viewController = window.RootViewController;
+
+			if (viewController == null)
+			{
+				window = UIApplication.SharedApplication.Windows.OrderByDescending(w => w.WindowLevel).FirstOrDefault(w => w.RootViewController != null && w.WindowLevel == UIWindowLevel.Normal);
+				if (window == null)
+					throw new InvalidOperationException("Could not find current view controller");
+				else
+					viewController = window.RootViewController;
+			}
+
+			while (viewController.PresentedViewController != null)
+				viewController = viewController.PresentedViewController;
+
+			return viewController;
+		}
+
+		private static UIImagePickerControllerCameraDevice GetUICameraDevice(CameraDevice device)
         {
             switch (device)
             {
