@@ -119,10 +119,11 @@ namespace Plugin.Media
 				AllowCropping = false,
 				CustomPhotoSize = options?.CustomPhotoSize ?? 100,
 				MaxWidthHeight = options?.MaxWidthHeight,
-				RotateImage = options?.RotateImage ?? false,
+				RotateImage = options?.RotateImage ?? true,
+				SaveMetaData = options?.SaveMetaData ?? true,
 				SaveToAlbum = false,
+				ModalPresentationStyle = options?.ModalPresentationStyle ?? MediaPickerModalPresentationStyle.FullScreen,
 			};
-
 
 			return await GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, customisations);
 		}
@@ -211,7 +212,7 @@ namespace Plugin.Media
         }
 
         private UIPopoverController popover;
-        private UIImagePickerControllerDelegate pickerDelegate;
+		private UIImagePickerControllerDelegate pickerDelegate;
         /// <summary>
         /// image type
         /// </summary>
@@ -303,27 +304,8 @@ namespace Plugin.Media
 
             return ndelegate.Task.ContinueWith(t =>
             {
-				try
-				{
-					popover?.Dispose();
-				}
-				catch
-				{
+				Dismiss(popover, picker);
 
-				}
-                popover = null;
-                
-
-                Interlocked.Exchange(ref pickerDelegate, null);
-
-				try
-				{
-					picker?.Dispose();
-				}
-				catch
-				{
-
-				}
 				return t.Result.FirstOrDefault();
 			});
         }
@@ -339,8 +321,7 @@ namespace Plugin.Media
 			var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
 			if (od != null)
 				throw new InvalidOperationException("Only one operation can be active at at time");
-
-			//var picker = SetupController(ndelegate, sourceType, mediaType, options, true);
+			
 			var picker = ELCImagePickerViewController.Create(options, customisations);
 
 			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
@@ -357,24 +338,12 @@ namespace Plugin.Media
 				}
 				viewController.PresentViewController(picker, true, null);
 			}
-
+			
 			// TODO: Make this use the existing Delegate?
 			return picker.Completion.ContinueWith(t =>
 			{
-				if (popover != null)
-				{
-					popover.Dispose();
-					popover = null;
-				}
-
-				picker.BeginInvokeOnMainThread(() =>
-				{
-					//dismiss the picker
-					picker.DismissViewController(true, null);
-				});
-
-				Interlocked.Exchange(ref pickerDelegate, null);
-
+				Dismiss(popover, picker);
+				
 				if (t.IsCanceled || t.Exception != null)
 				{
 					return Task.FromResult(new List<MediaFile>());
@@ -384,6 +353,23 @@ namespace Plugin.Media
 			}).Unwrap();
 		}
 
+		private void Dismiss(UIPopoverController popover, UIViewController picker)
+		{
+			if (popover != null)
+			{
+				popover.Dispose();
+				popover = null;
+			}
+
+			picker?.BeginInvokeOnMainThread(() =>
+			{
+				//dismiss the picker
+				picker.DismissViewController(true, null);
+			});
+
+			Interlocked.Exchange(ref pickerDelegate, null);
+		}
+		
 		private static UIViewController GetHostViewController()
 		{
 			UIViewController viewController = null;
