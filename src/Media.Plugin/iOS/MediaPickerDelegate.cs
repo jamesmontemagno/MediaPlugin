@@ -90,6 +90,21 @@ namespace Plugin.Media
 			});
 		}
 
+		public override void Canceled(UIImagePickerController picker)
+		{
+			RemoveOrientationChangeObserverAndNotifications();
+
+			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
+			{
+				UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
+			}
+
+			Dismiss(picker, () =>
+			{
+				tcs.SetResult(null);
+			});
+		}
+
 		public void DisplayPopover(bool hideFirst = false)
 		{
 			if (Popover == null)

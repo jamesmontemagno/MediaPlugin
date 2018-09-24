@@ -306,7 +306,7 @@ namespace Plugin.Media
             {
 				Dismiss(popover, picker);
 
-				return t.Result.FirstOrDefault();
+				return t.Result == null ? null : t.Result.FirstOrDefault();
 			});
         }
 

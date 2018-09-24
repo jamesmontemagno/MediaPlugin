@@ -257,13 +257,6 @@ namespace Plugin.Media
 			_TaskCompletionSource.TrySetCanceled();
 		}
 
-		public override void ViewDidDisappear(bool animated)
-		{
-			base.ViewDidDisappear(animated);
-			// when running on iPad a popover closed by tapping outside the popover will trigger this path
-			_TaskCompletionSource?.TrySetCanceled();
-		}
-
 		bool ShouldSelectAsset(ALAsset asset, int previousCount)
 		{
 			var shouldSelect = MaximumImagesCount <= 0 || previousCount < MaximumImagesCount;
