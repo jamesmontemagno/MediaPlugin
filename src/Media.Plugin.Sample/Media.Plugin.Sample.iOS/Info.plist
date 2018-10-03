@@ -36,5 +36,7 @@
 	<string>Assets.xcassets/AppIcon.appiconset</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to the photo library</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need to be able to take photos</string>
 </dict>
 </plist>

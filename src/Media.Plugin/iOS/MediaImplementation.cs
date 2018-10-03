@@ -343,6 +343,10 @@ namespace Plugin.Media
 			return picker.Completion.ContinueWith(t =>
 			{
 				Dismiss(popover, picker);
+				picker.BeginInvokeOnMainThread(() =>
+				{
+					picker.DismissViewController(true, null);
+				});
 				
 				if (t.IsCanceled || t.Exception != null)
 				{
@@ -361,11 +365,14 @@ namespace Plugin.Media
 				popover = null;
 			}
 
-			picker?.BeginInvokeOnMainThread(() =>
+			try
 			{
-				//dismiss the picker
-				picker.DismissViewController(true, null);
-			});
+				picker?.Dispose();
+			}
+			catch
+			{
+
+			}
 
 			Interlocked.Exchange(ref pickerDelegate, null);
 		}
