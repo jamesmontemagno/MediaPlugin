@@ -271,7 +271,7 @@ namespace Plugin.Media
             MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
             if (od != null)
-                throw new InvalidOperationException("Only one operation can be active at at time");
+                throw new InvalidOperationException("Only one operation can be active at a time");
 
             var picker = SetupController(ndelegate, sourceType, mediaType, options);
 
