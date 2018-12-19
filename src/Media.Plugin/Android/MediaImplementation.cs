@@ -82,7 +82,7 @@ namespace Plugin.Media
         /// Picks a photo from the default gallery
         /// </summary>
         /// <returns>Media file or null if canceled</returns>
-        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
+        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
         {
             if (!(await RequestStoragePermission()))
             {
@@ -137,7 +137,7 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="options">Camera Media Options</param>
         /// <returns>Media file of photo or null if canceled</returns>
-        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
+        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
@@ -245,7 +245,7 @@ namespace Plugin.Media
         /// Picks a video from the default gallery
         /// </summary>
         /// <returns>Media file of video or null if canceled</returns>
-        public async Task<MediaFile> PickVideoAsync()
+        public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
         {
 
             if (!(await RequestStoragePermission()))
@@ -261,7 +261,7 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="options">Video Media Options</param>
         /// <returns>Media file of new video or null if canceled</returns>
-        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
@@ -459,7 +459,7 @@ namespace Plugin.Media
             return id;
         }
 
-        private Task<MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options)
+        private Task<MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             int id = GetRequestId();
 

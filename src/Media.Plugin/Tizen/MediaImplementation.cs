@@ -73,8 +73,9 @@ namespace Plugin.Media
 		/// Take a photo async with specified options
 		/// </summary>
 		/// <param name="options">Camera Media Options</param>
+		/// <param name="token">Cancellation token (currently ignored)</param>
 		/// <returns>Media file of photo or null if canceled</returns>
-		public Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
+		public Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
 		{
 			if (!IsCameraAvailable || !IsTakePhotoSupported)
 			{
@@ -96,8 +97,9 @@ namespace Plugin.Media
 		/// Take a video with specified options
 		/// </summary>
 		/// <param name="options">Video Media Options</param>
+		/// <param name="token">Cancellation token (currently ignored)</param>
 		/// <returns>Media file of new video or null if canceled</returns>
-		public Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+		public Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken))
 		{
 			if (!IsCameraAvailable || !IsTakeVideoSupported) {
 				Log.Error(LOG_TAG, "TakeVideo is not supported");
@@ -117,8 +119,9 @@ namespace Plugin.Media
 		/// <summary>
 		/// Picks a video from the default gallery
 		/// </summary>
+		/// <param name="token">Cancellation token (currently ignored)</param>
 		/// <returns>Media file of video or null if canceled</returns>
-		public Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
+		public Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
 		{
 			if (!IsPickPhotoSupported)
 			{
@@ -139,8 +142,9 @@ namespace Plugin.Media
 		/// <summary>
 		/// Picks a video from the default gallery
 		/// </summary>
+		/// <param name="token">Cancellation token (currently ignored)</param>
 		/// <returns>Media file of video or null if canceled</returns>
-		public Task<MediaFile> PickVideoAsync()
+		public Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
 		{
 			if (!IsPickVideoSupported)
 			{
