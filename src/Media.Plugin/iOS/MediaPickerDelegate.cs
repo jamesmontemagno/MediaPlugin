@@ -13,12 +13,14 @@ using System.Globalization;
 using ImageIO;
 using MobileCoreServices;
 using System.Drawing;
+using System.Threading;
 
 namespace Plugin.Media
 {
 	internal class MediaPickerDelegate : UIImagePickerControllerDelegate
 	{
-		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType, StoreCameraMediaOptions options)
+		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType,
+			StoreCameraMediaOptions options, CancellationToken token)
 		{
 			this.viewController = viewController;
 			source = sourceType;
@@ -29,6 +31,11 @@ namespace Plugin.Media
 				UIDevice.CurrentDevice.BeginGeneratingDeviceOrientationNotifications();
 				observer = NSNotificationCenter.DefaultCenter.AddObserver(UIDevice.OrientationDidChangeNotification, DidRotate);
 			}
+
+			token.Register(() =>
+			{
+				tcs.SetResult(null);
+			});
 		}
 
 		public UIPopoverController Popover

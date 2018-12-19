@@ -268,7 +268,9 @@ namespace Plugin.Media
             while (viewController.PresentedViewController != null)
                 viewController = viewController.PresentedViewController;
 
-            MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
+	        if (token.IsCancellationRequested) return Task.FromResult((MediaFile) null);
+
+            MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
             if (od != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
@@ -290,7 +292,7 @@ namespace Plugin.Media
 		                : UIModalPresentationStyle.FullScreen;
                 }
                 viewController.PresentViewController(picker, true, null);
-            }
+			}
 
             return ndelegate.Task.ContinueWith(t =>
             {

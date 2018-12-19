@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras/1.6.47">
+<!--<Project Sdk="Microsoft.NET.Sdk">-->
 
 	<PropertyGroup>
 		<TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid71;Xamarin.iOS10;uap10.0.10240;Tizen40</TargetFrameworks>
