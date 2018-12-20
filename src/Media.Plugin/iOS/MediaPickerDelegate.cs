@@ -34,6 +34,7 @@ namespace Plugin.Media
 
 			token.Register(() =>
 			{
+				// The continuation attached to this Task in MediaImplementaiton will close the UI.
 				tcs.SetResult(null);
 			});
 		}
