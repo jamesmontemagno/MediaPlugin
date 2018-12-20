@@ -1,8 +1,6 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/1.6.47">
-<!--<Project Sdk="Microsoft.NET.Sdk">-->
-
+﻿<Project Sdk="MSBuild.Sdk.Extras/1.6.65">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid71;Xamarin.iOS10;uap10.0.10240;Tizen40</TargetFrameworks>
+		<TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid71;MonoAndroid80;MonoAndroid81;Xamarin.iOS10;uap10.0.16299;Tizen40</TargetFrameworks>
 		<AssemblyName>Plugin.Media</AssemblyName>
 		<RootNamespace>Plugin.Media</RootNamespace>
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
@@ -30,21 +28,29 @@
 		<LangVersion>default</LangVersion>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 
+		<GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
 		<DefineConstants>$(DefineConstants);</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
 		<DebugType>full</DebugType>
 		<DebugSymbols>true</DebugSymbols>
 	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+	<PropertyGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
 		<DebugType>pdbonly</DebugType>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<!-- sourcelink: Include PDB in the built .nupkg -->
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	</PropertyGroup>
+	<ItemGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
+	</ItemGroup>
+	
 	<ItemGroup>
 		<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-		<PackageReference Include="MSBuild.Sdk.Extras" Version="1.4.0" PrivateAssets="All" />
-		<PackageReference Include="Plugin.Permissions" Version="3.0.0.12" />
+		<PackageReference Include="Plugin.Permissions" Version="4.0.2-beta" />
 		<Compile Include="**\Shared\*.cs" />
 	</ItemGroup>
 
@@ -52,28 +58,26 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
-		<PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="5.2.3" />
 		<Compile Include="**\UWP\*.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-		<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="25.4.0.2" />
 		<Compile Include="**\Android\*.cs" />
 	</ItemGroup>
-
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid81')) ">
+		<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="27.0.2.1" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid80')) ">
+		<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="26.1.0.1" />
+	</ItemGroup>
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid71')) ">
+		<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="25.4.0.2" />
+	</ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
 		<Compile Include="**\iOS\*.cs" />
 	</ItemGroup>
-
-
-
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Tizen')) ">
 		<Compile Include="**\Tizen\*.cs" />
 		<PackageReference Include="Tizen.NET" Version="4.0.0" />
 	</ItemGroup>
-
-
-
-	<Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
-
 </Project>
