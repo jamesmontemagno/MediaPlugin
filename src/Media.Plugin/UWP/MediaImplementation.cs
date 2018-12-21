@@ -91,8 +91,9 @@ namespace Plugin.Media
         /// Take a photo async with specified options
         /// </summary>
         /// <param name="options">Camera Media Options</param>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file of photo or null if canceled</returns>
-        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
+        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!initialized)
                 await Initialize();
@@ -182,8 +183,9 @@ namespace Plugin.Media
         /// <summary>
         /// Picks a photo from the default gallery
         /// </summary>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file or null if canceled</returns>
-        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
+        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
         {
             var picker = new FileOpenPicker();
             picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
@@ -226,8 +228,9 @@ namespace Plugin.Media
         /// Take a video with specified options
         /// </summary>
         /// <param name="options">Video Media Options</param>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file of new video or null if canceled</returns>
-        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!initialized)
                 await Initialize();
@@ -271,8 +274,9 @@ namespace Plugin.Media
         /// <summary>
         /// Picks a video from the default gallery
         /// </summary>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file of video or null if canceled</returns>
-        public async Task<MediaFile> PickVideoAsync()
+        public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
         {
 			var picker = new FileOpenPicker()
 			{
