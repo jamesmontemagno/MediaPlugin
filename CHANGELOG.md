@@ -5,6 +5,7 @@
 * Fix for #514: Videos on Android 8.1 stop after short time.
 * Upgrade to CurrentActivityPlugin 2.0 and Permissions 3.0
 * Ability on iOS to specify pop over style
+* Fix for #642: Android dock/undock issue
 
 ### [3.1.3]
 * Remove need for Android Target versions (always use File Provider via #442 and @ddobrev)
