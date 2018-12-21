@@ -109,7 +109,7 @@ namespace Plugin.Media
                     }
                     else
                     {
-                        await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, originalMetadata);
+                        await ResizeAsync(media.Path, options, originalMetadata);
                     }
                     if (options.SaveMetaData && IsValidExif(originalMetadata))
 					{
@@ -218,7 +218,7 @@ namespace Plugin.Media
                 }
                 else
                 {
-                    await ResizeAsync(media.Path, options.PhotoSize, options.CompressionQuality, options.CustomPhotoSize, exif);
+                    await ResizeAsync(media.Path, options, exif);
                 }
 
                 if (options.SaveMetaData && IsValidExif(exif))
@@ -705,22 +705,49 @@ namespace Plugin.Media
             return inSampleSize;
         }
 
-        /// <summary>
-        /// Resize Image Async
-        /// </summary>
-        /// <param name="filePath">The file image path</param>
-        /// <param name="photoSize">Photo size to go to.</param>
-        /// <param name="quality">Image quality (1-100)</param>
-        /// <param name="customPhotoSize">Custom size in percent</param>
-        /// <param name="exif">original metadata</param>
-        /// <returns>True if rotation or compression occured, else false</returns>
-        public Task<bool> ResizeAsync(string filePath, PhotoSize photoSize, int quality, int customPhotoSize, ExifInterface exif)
+
+		/// <summary>
+		///  Rotate an image if required and saves it back to disk.
+		/// </summary>
+		/// <param name="filePath">The file image path</param>
+		/// <param name="mediaOptions">The options.</param>
+		/// <param name="exif">original metadata</param>
+		/// <returns>True if rotation or compression occured, else false</returns>
+		public Task<bool> ResizeAsync(string filePath, PickMediaOptions mediaOptions, ExifInterface exif)
+		{
+			return ResizeAsync(
+				filePath,
+				new StoreCameraMediaOptions
+				{
+					PhotoSize = mediaOptions.PhotoSize,
+					CompressionQuality = mediaOptions.CompressionQuality,
+					CustomPhotoSize = mediaOptions.CustomPhotoSize,
+					MaxWidthHeight = mediaOptions.MaxWidthHeight,
+					RotateImage = mediaOptions.RotateImage,
+					SaveMetaData = mediaOptions.SaveMetaData
+				},
+				exif);
+		}
+
+		/// <summary>
+		/// Resize Image Async
+		/// </summary>
+		/// <param name="filePath">The file image path</param>
+		/// <param name="photoSize">Photo size to go to.</param>
+		/// <param name="quality">Image quality (1-100)</param>
+		/// <param name="customPhotoSize">Custom size in percent</param>
+		/// <param name="exif">original metadata</param>
+		/// <returns>True if rotation or compression occured, else false</returns>
+		public Task<bool> ResizeAsync(string filePath, StoreCameraMediaOptions mediaOptions, ExifInterface exif)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
 
             try
             {
+				var photoSize = mediaOptions.PhotoSize;
+				var customPhotoSize = mediaOptions.CustomPhotoSize;
+				var quality = mediaOptions.CompressionQuality;
                 return Task.Run(() =>
                 {
                     try
@@ -755,7 +782,16 @@ namespace Plugin.Media
                         //already on background task
                         BitmapFactory.DecodeFile(filePath, options);
 
-                        var finalWidth = (int)(options.OutWidth * percent);
+						if (mediaOptions.PhotoSize == PhotoSize.MaxWidthHeight && mediaOptions.MaxWidthHeight.HasValue)
+						{
+							var max = Math.Max(options.OutWidth, options.OutHeight);
+							if (max > mediaOptions.MaxWidthHeight)
+							{
+								percent = (float)mediaOptions.MaxWidthHeight / (float)max;
+							}
+						}
+
+						var finalWidth = (int)(options.OutWidth * percent);
                         var finalHeight = (int)(options.OutHeight * percent);
 
                         //set scaled image dimensions

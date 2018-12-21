@@ -5,6 +5,11 @@
 * Fix for #514: Videos on Android 8.1 stop after short time.
 * Upgrade to CurrentActivityPlugin 2.0 and Permissions 3.0
 * Ability on iOS to specify pop over style
+* Fix for #642: Android dock/undock issue
+* Fix for #639: Null reference sometimes when can't accessing file on Android.
+* Fix for #553: When not rotating image on android ensure we take max width/height into consideration.
+* Fix for #545: iOS error sometimes when saving metadata.
+* Fix for #608: Possible null on iOS when picking video sometimes.
 
 ### [3.1.3]
 * Remove need for Android Target versions (always use File Provider via #442 and @ddobrev)
