@@ -307,9 +307,9 @@ namespace Plugin.Media
             return pathFuture.ContinueWith(t =>
             {
                 
-                var resultPath = t.Result.Item1;
+                var resultPath = t?.Result?.Item1;
                 var aPath = originalPath;
-                if (resultPath != null && File.Exists(t.Result.Item1))
+                if (resultPath != null && File.Exists(resultPath))
                 {
                     var mf = new MediaFile(resultPath, () =>
                       {

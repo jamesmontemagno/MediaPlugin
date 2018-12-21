@@ -6,6 +6,7 @@
 * Upgrade to CurrentActivityPlugin 2.0 and Permissions 3.0
 * Ability on iOS to specify pop over style
 * Fix for #642: Android dock/undock issue
+* Fix for #639: Null reference sometimes when can't accessing file on Android.
 
 ### [3.1.3]
 * Remove need for Android Target versions (always use File Provider via #442 and @ddobrev)
