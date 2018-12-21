@@ -467,7 +467,8 @@ namespace Plugin.Media
         {
             int id = GetRequestId();
 
-	        if (token.IsCancellationRequested) return Task.FromResult((MediaFile) null);
+	        if (token.IsCancellationRequested)
+				return Task.FromResult((MediaFile) null);
 
             var ntcs = new TaskCompletionSource<MediaFile>(id);
             if (Interlocked.CompareExchange(ref completionSource, ntcs, null) != null)

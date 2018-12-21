@@ -9,6 +9,7 @@ using Windows.Storage.Pickers;
 
 using Plugin.Media.Abstractions;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Plugin.Media
 {
@@ -111,8 +112,8 @@ namespace Plugin.Media
                 capture.PhotoSettings.AllowCropping = options?.AllowCropping ?? true;
             
 
-            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
-            if (result == null)
+            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo).AsTask(token);
+			if (result == null)
                 return null;
 
             var folder = ApplicationData.Current.LocalFolder;
@@ -194,7 +195,9 @@ namespace Plugin.Media
             foreach (var filter in SupportedImageFileTypes)
                 picker.FileTypeFilter.Add(filter);
 
-            var result = await picker.PickSingleFileAsync();
+			
+
+            var result = await picker.PickSingleFileAsync().AsTask(token);
             if (result == null)
                 return null;
 
@@ -249,7 +252,7 @@ namespace Plugin.Media
 
             capture.VideoSettings.Format = CameraCaptureUIVideoFormat.Mp4;
             
-            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Video);
+            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Video).AsTask(token);
             if (result == null)
                 return null;
 
@@ -287,8 +290,8 @@ namespace Plugin.Media
 			foreach (var filter in SupportedVideoFileTypes)
                 picker.FileTypeFilter.Add(filter);
 
-            var result = await picker.PickSingleFileAsync();
-            if (result == null)
+            var result = await picker.PickSingleFileAsync().AsTask(token);
+			if (result == null)
                 return null;
 
             var aPath = result.Path;
