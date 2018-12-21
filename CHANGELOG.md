@@ -8,6 +8,7 @@
 * Fix for #642: Android dock/undock issue
 * Fix for #639: Null reference sometimes when can't accessing file on Android.
 * Fix for #553: When not rotating image on android ensure we take max width/height into consideration.
+* Fix for #545: iOS error sometimes when saving metadata.
 
 ### [3.1.3]
 * Remove need for Android Target versions (always use File Provider via #442 and @ddobrev)

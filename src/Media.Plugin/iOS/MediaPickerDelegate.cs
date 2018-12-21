@@ -348,7 +348,9 @@ namespace Plugin.Media
 					}
 					else
 					{
-						meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(info[UIImagePickerController.ReferenceUrl] as NSUrl);
+						var url = info[UIImagePickerController.ReferenceUrl] as NSUrl;
+						if(url != null)
+							meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(url);
 					}
 				}
 
