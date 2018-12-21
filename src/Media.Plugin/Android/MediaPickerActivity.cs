@@ -22,7 +22,7 @@ namespace Plugin.Media
 	/// <summary>
 	/// Picker
 	/// </summary>
-	[Activity(ConfigurationChanges= ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
+	[Activity(ConfigurationChanges= ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
     public class MediaPickerActivity
         : Activity, Android.Media.MediaScannerConnection.IOnScanCompletedListener
     {
@@ -318,9 +318,9 @@ namespace Plugin.Media
             return pathFuture.ContinueWith(t =>
             {
                 
-                var resultPath = t.Result.Item1;
+                var resultPath = t?.Result?.Item1;
                 var aPath = originalPath;
-                if (resultPath != null && File.Exists(t.Result.Item1))
+                if (resultPath != null && File.Exists(resultPath))
                 {
                     var mf = new MediaFile(resultPath, () =>
                       {

@@ -364,7 +364,9 @@ namespace Plugin.Media
 					}
 					else
 					{
-						meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(info[UIImagePickerController.ReferenceUrl] as NSUrl);
+						var url = info[UIImagePickerController.ReferenceUrl] as NSUrl;
+						if(url != null)
+							meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(url);
 					}
 				}
 
@@ -546,24 +548,27 @@ namespace Plugin.Media
 
 		private async Task<MediaFile> GetMovieMediaFile(NSDictionary info)
 		{
-			var url = (NSUrl)info[UIImagePickerController.MediaURL];
+			var url = info[UIImagePickerController.MediaURL] as NSUrl;
+			if (url == null)
+				return null;
 
 			var path = GetOutputPath(MediaImplementation.TypeMovie,
-					  options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
-					  options.Name ?? Path.GetFileName(url.Path));
+					  options?.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
+					  options?.Name ?? Path.GetFileName(url.Path));
 
+			
 			File.Move(url.Path, path);
 
 			string aPath = null;
 			if (source != UIImagePickerControllerSourceType.Camera)
 			{
 				//try to get the album path's url
-				var url2 = (NSUrl)info[UIImagePickerController.ReferenceUrl];
+				var url2 = info[UIImagePickerController.ReferenceUrl] as NSUrl;
 				aPath = url2?.AbsoluteString;
 			}
 			else
 			{
-				if (options.SaveToAlbum)
+				if (options?.SaveToAlbum ?? false)
 				{
 					try
 					{
