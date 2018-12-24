@@ -110,9 +110,8 @@ namespace Plugin.Media
             //we can only disable cropping if resolution is set to max
             if (capture.PhotoSettings.MaxResolution == CameraCaptureUIMaxPhotoResolution.HighestAvailable)
                 capture.PhotoSettings.AllowCropping = options?.AllowCropping ?? true;
-            
-
-            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo).AsTask(token);
+			
+			var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
 			if (result == null)
                 return null;
 
@@ -197,7 +196,7 @@ namespace Plugin.Media
 
 			
 
-            var result = await picker.PickSingleFileAsync().AsTask(token);
+            var result = await picker.PickSingleFileAsync();
             if (result == null)
                 return null;
 
@@ -252,7 +251,7 @@ namespace Plugin.Media
 
             capture.VideoSettings.Format = CameraCaptureUIVideoFormat.Mp4;
             
-            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Video).AsTask(token);
+            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Video);
             if (result == null)
                 return null;
 
@@ -290,7 +289,7 @@ namespace Plugin.Media
 			foreach (var filter in SupportedVideoFileTypes)
                 picker.FileTypeFilter.Add(filter);
 
-            var result = await picker.PickSingleFileAsync().AsTask(token);
+            var result = await picker.PickSingleFileAsync();
 			if (result == null)
                 return null;
 

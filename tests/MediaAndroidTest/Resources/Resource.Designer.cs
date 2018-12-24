@@ -237,23 +237,23 @@ namespace MediaAndroidTest
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f0a000e
-			public const int MyButton = 2131361806;
-			
-			// aapt resource value: 0x7f0a0013
-			public const int action_container = 2131361811;
-			
-			// aapt resource value: 0x7f0a001f
-			public const int action_divider = 2131361823;
+			// aapt resource value: 0x7f0a000f
+			public const int MyButton = 2131361807;
 			
 			// aapt resource value: 0x7f0a0014
-			public const int action_image = 2131361812;
-			
-			// aapt resource value: 0x7f0a0015
-			public const int action_text = 2131361813;
+			public const int action_container = 2131361812;
 			
 			// aapt resource value: 0x7f0a0020
-			public const int actions = 2131361824;
+			public const int action_divider = 2131361824;
+			
+			// aapt resource value: 0x7f0a0015
+			public const int action_image = 2131361813;
+			
+			// aapt resource value: 0x7f0a0016
+			public const int action_text = 2131361814;
+			
+			// aapt resource value: 0x7f0a0021
+			public const int actions = 2131361825;
 			
 			// aapt resource value: 0x7f0a0006
 			public const int async = 2131361798;
@@ -261,32 +261,32 @@ namespace MediaAndroidTest
 			// aapt resource value: 0x7f0a0007
 			public const int blocking = 2131361799;
 			
-			// aapt resource value: 0x7f0a000f
-			public const int button1 = 2131361807;
-			
-			// aapt resource value: 0x7f0a0011
-			public const int button2 = 2131361809;
+			// aapt resource value: 0x7f0a0010
+			public const int button1 = 2131361808;
 			
 			// aapt resource value: 0x7f0a0012
-			public const int button3 = 2131361810;
+			public const int button2 = 2131361810;
 			
-			// aapt resource value: 0x7f0a001e
-			public const int chronometer = 2131361822;
+			// aapt resource value: 0x7f0a0013
+			public const int button3 = 2131361811;
+			
+			// aapt resource value: 0x7f0a001f
+			public const int chronometer = 2131361823;
 			
 			// aapt resource value: 0x7f0a0008
 			public const int forever = 2131361800;
 			
-			// aapt resource value: 0x7f0a0017
-			public const int icon = 2131361815;
+			// aapt resource value: 0x7f0a0018
+			public const int icon = 2131361816;
 			
-			// aapt resource value: 0x7f0a0021
-			public const int icon_group = 2131361825;
+			// aapt resource value: 0x7f0a0022
+			public const int icon_group = 2131361826;
 			
-			// aapt resource value: 0x7f0a0010
-			public const int imageView1 = 2131361808;
+			// aapt resource value: 0x7f0a0011
+			public const int imageView1 = 2131361809;
 			
-			// aapt resource value: 0x7f0a001a
-			public const int info = 2131361818;
+			// aapt resource value: 0x7f0a001b
+			public const int info = 2131361819;
 			
 			// aapt resource value: 0x7f0a0009
 			public const int italic = 2131361801;
@@ -300,20 +300,23 @@ namespace MediaAndroidTest
 			// aapt resource value: 0x7f0a000a
 			public const int normal = 2131361802;
 			
-			// aapt resource value: 0x7f0a001c
-			public const int notification_background = 2131361820;
-			
-			// aapt resource value: 0x7f0a0018
-			public const int notification_main_column = 2131361816;
-			
-			// aapt resource value: 0x7f0a0016
-			public const int notification_main_column_container = 2131361814;
-			
-			// aapt resource value: 0x7f0a001b
-			public const int right_icon = 2131361819;
+			// aapt resource value: 0x7f0a001d
+			public const int notification_background = 2131361821;
 			
 			// aapt resource value: 0x7f0a0019
-			public const int right_side = 2131361817;
+			public const int notification_main_column = 2131361817;
+			
+			// aapt resource value: 0x7f0a0017
+			public const int notification_main_column_container = 2131361815;
+			
+			// aapt resource value: 0x7f0a001c
+			public const int right_icon = 2131361820;
+			
+			// aapt resource value: 0x7f0a001a
+			public const int right_side = 2131361818;
+			
+			// aapt resource value: 0x7f0a000e
+			public const int switch_cancel = 2131361806;
 			
 			// aapt resource value: 0x7f0a000d
 			public const int switch_front = 2131361805;
@@ -333,8 +336,8 @@ namespace MediaAndroidTest
 			// aapt resource value: 0x7f0a0004
 			public const int text2 = 2131361796;
 			
-			// aapt resource value: 0x7f0a001d
-			public const int time = 2131361821;
+			// aapt resource value: 0x7f0a001e
+			public const int time = 2131361822;
 			
 			// aapt resource value: 0x7f0a0005
 			public const int title = 2131361797;

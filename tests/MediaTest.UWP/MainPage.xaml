@@ -24,7 +24,12 @@
                 <ToggleSwitch x:Name="ToggleCrop"/>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal">
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Cancel After 10 Seconds" Margin="10"/>
+				<ToggleSwitch x:Name="ToggleCancel"/>
+			</StackPanel>
+
+			<StackPanel Orientation="Horizontal">
                 <TextBlock Text="25" Margin="10"/>
                 <Slider x:Name="SliderQuality" Width="200" Value="92" Minimum="25" Maximum="100"/>
                 <TextBlock Text="100" Margin="10"/>

@@ -18,6 +18,11 @@
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:text="Use Front Camera" />
+	<Switch
+			android:id="@+id/switch_cancel"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="Cancel After 10 Seconds" />
     <Button
         android:id="@+id/MyButton"
         android:layout_width="fill_parent"

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Popups;
@@ -32,8 +33,12 @@ namespace MediaTest.UWP
 
         private async void ButtonTakePhoto_Click(object sender, RoutedEventArgs e)
         {
-            
-            var file = await Plugin.Media.CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+			var cts = new CancellationTokenSource();
+			if (ToggleCancel.IsOn)
+			{
+				cts.CancelAfter(TimeSpan.FromSeconds(10));
+			}
+			var file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
             {
                 Directory = "Sample",
                 Name = "test.jpg",
@@ -41,7 +46,7 @@ namespace MediaTest.UWP
                 AllowCropping = ToggleCrop.IsOn,
                 PhotoSize = ToggleResize.IsOn ? Plugin.Media.Abstractions.PhotoSize.Large : Plugin.Media.Abstractions.PhotoSize.Full,
                 CompressionQuality = (int)SliderQuality.Value
-            });
+            }, cts.Token);
             if (file == null)
                 return;
             var path = file.Path;
@@ -57,12 +62,16 @@ namespace MediaTest.UWP
 
         private async void ButtonPickPhoto_Click(object sender, RoutedEventArgs e)
         {
-            
-            var file = await Plugin.Media.CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
+			var cts = new CancellationTokenSource();
+			if (ToggleCancel.IsOn)
+			{
+				cts.CancelAfter(TimeSpan.FromSeconds(10));
+			}
+			var file = await CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
             {
                 PhotoSize = ToggleResize.IsOn ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
                 CompressionQuality = (int)SliderQuality.Value
-            });
+            }, cts.Token);
             if (file == null)
                 return;
             var path = file.Path;
@@ -79,7 +88,12 @@ namespace MediaTest.UWP
 
         private async void ButtonTakeVIdeo_Click(object sender, RoutedEventArgs e)
         {
-            var file = await CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
+			var cts = new CancellationTokenSource();
+			if (ToggleCancel.IsOn)
+			{
+				cts.CancelAfter(TimeSpan.FromSeconds(10));
+			}
+			var file = await CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
             {
                 Directory = "Sample",
                 Name = "test.mp4",
@@ -88,7 +102,7 @@ namespace MediaTest.UWP
                 PhotoSize = ToggleResize.IsOn ? Plugin.Media.Abstractions.PhotoSize.Large : Plugin.Media.Abstractions.PhotoSize.Full,
                 CompressionQuality = (int)SliderQuality.Value,
                 Quality = ToggleResize.IsOn ? Plugin.Media.Abstractions.VideoQuality.High : Plugin.Media.Abstractions.VideoQuality.Low
-            });
+            }, cts.Token);
             if (file == null)
                 return;
             var path = file.Path;
@@ -102,7 +116,12 @@ namespace MediaTest.UWP
 
         private async void ButtonPickVideo_Click(object sender, RoutedEventArgs e)
         {
-            var file = await CrossMedia.Current.PickVideoAsync();
+			var cts = new CancellationTokenSource();
+			if (ToggleCancel.IsOn)
+			{
+				cts.CancelAfter(TimeSpan.FromSeconds(10));
+			}
+			var file = await CrossMedia.Current.PickVideoAsync(cts.Token);
             if (file == null)
                 return;
             var path = file.Path;
