@@ -268,7 +268,8 @@ namespace Plugin.Media
             while (viewController.PresentedViewController != null)
                 viewController = viewController.PresentedViewController;
 
-	        if (token.IsCancellationRequested) return Task.FromResult((MediaFile) null);
+	        if (token.IsCancellationRequested)
+				return Task.FromResult((MediaFile) null);
 
             MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
@@ -282,6 +283,14 @@ namespace Plugin.Media
                 ndelegate.Popover = popover = new UIPopoverController(picker);
                 ndelegate.Popover.Delegate = new MediaPickerPopoverDelegate(ndelegate, picker);
                 ndelegate.DisplayPopover();
+
+				token.Register(() =>
+				{
+					NSRunLoop.Main.BeginInvokeOnMainThread(() =>
+					{
+						ndelegate.Popover.Dismiss(true);
+					});
+				});
             }
             else
             {
@@ -292,6 +301,15 @@ namespace Plugin.Media
 		                : UIModalPresentationStyle.FullScreen;
                 }
                 viewController.PresentViewController(picker, true, null);
+
+				token.Register(() =>
+				{
+					NSRunLoop.Main.BeginInvokeOnMainThread(() =>
+					{
+
+						picker.DismissModalViewController(true);
+					});
+				});
 			}
 
             return ndelegate.Task.ContinueWith(t =>

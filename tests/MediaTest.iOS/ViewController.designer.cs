@@ -52,6 +52,10 @@ namespace MediaTest.iOS
 
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
+        UIKit.UISwitch SwitchCancel { get; set; }
+
+        [Outlet]
+        [GeneratedCode ("iOS Designer", "1.0")]
         UIKit.UISwitch SwitchRotate { get; set; }
 
         [Outlet]
@@ -107,6 +111,11 @@ namespace MediaTest.iOS
             if (SliderQuality != null) {
                 SliderQuality.Dispose ();
                 SliderQuality = null;
+            }
+
+            if (SwitchCancel != null) {
+                SwitchCancel.Dispose ();
+                SwitchCancel = null;
             }
 
             if (SwitchRotate != null) {

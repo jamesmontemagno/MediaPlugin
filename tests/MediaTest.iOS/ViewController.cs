@@ -5,6 +5,7 @@ using System.Linq;
 
 using UIKit;
 using Plugin.Media.Abstractions;
+using System.Threading;
 
 namespace MediaTest.iOS
 {
@@ -26,7 +27,12 @@ namespace MediaTest.iOS
 
             TakePhoto.TouchUpInside += async (sender, args) =>
             {
-                Func<object> func = CreateOverlay;
+				var cts = new CancellationTokenSource();
+				if (SwitchCancel.On)
+				{
+					cts.CancelAfter(TimeSpan.FromSeconds(10));
+				}
+				Func<object> func = CreateOverlay;
 				var test = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
                 {
                     Name = "test1.jpg",
@@ -38,7 +44,7 @@ namespace MediaTest.iOS
                     Directory = "Sample",
                     DefaultCamera = FrontSwitch.On ? Plugin.Media.Abstractions.CameraDevice.Front : Plugin.Media.Abstractions.CameraDevice.Rear,
                     RotateImage = SwitchRotate.On
-                });
+                }, cts.Token);
 
                 if (test == null)
                     return;
@@ -59,13 +65,18 @@ namespace MediaTest.iOS
 
             PickPhoto.TouchUpInside += async (sender, args) =>
             {
-                var test = await CrossMedia.Current.PickPhotoAsync(
+				var cts = new CancellationTokenSource();
+				if (SwitchCancel.On)
+				{
+					cts.CancelAfter(TimeSpan.FromSeconds(10));
+				}
+				var test = await CrossMedia.Current.PickPhotoAsync(
                     new Plugin.Media.Abstractions.PickMediaOptions
                     {
                         PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
                         CompressionQuality = (int)SliderQuality.Value,
                         RotateImage = SwitchRotate.On
-                    });
+                    }, cts.Token);
                 if (test == null)
                     return;
 
@@ -80,11 +91,16 @@ namespace MediaTest.iOS
 
             TakeVideo.TouchUpInside += async (sender, args) =>
             {
-                var test = await CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
+				var cts = new CancellationTokenSource();
+				if (SwitchCancel.On)
+				{
+					cts.CancelAfter(TimeSpan.FromSeconds(10));
+				}
+				var test = await CrossMedia.Current.TakeVideoAsync(new Plugin.Media.Abstractions.StoreVideoOptions
                 {
                     Name = "test1.mp4",
                     SaveToAlbum = true
-                });
+                }, cts.Token);
 
                 if (test == null)
                     return;
@@ -96,7 +112,12 @@ namespace MediaTest.iOS
 
             PickVideo.TouchUpInside += async (sender, args) =>
             {
-                var test = await CrossMedia.Current.PickVideoAsync();
+				var cts = new CancellationTokenSource();
+				if (SwitchCancel.On)
+				{
+					cts.CancelAfter(TimeSpan.FromSeconds(10));
+				}
+				var test = await CrossMedia.Current.PickVideoAsync(cts.Token);
                 if (test == null)
                     return;
 
