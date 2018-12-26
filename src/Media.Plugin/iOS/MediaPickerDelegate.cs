@@ -31,18 +31,17 @@ namespace Plugin.Media
 				UIDevice.CurrentDevice.BeginGeneratingDeviceOrientationNotifications();
 				observer = NSNotificationCenter.DefaultCenter.AddObserver(UIDevice.OrientationDidChangeNotification, DidRotate);
 			}
-
-			token.Register(() =>
-			{
-				// The continuation attached to this Task in MediaImplementaiton will close the UI.
-				tcs.SetResult(null);
-			});
 		}
 
 		public UIPopoverController Popover
 		{
 			get;
 			set;
+		}
+
+		public void CancelTask()
+		{
+			tcs.SetResult(null);
 		}
 
 		public UIView View => viewController.View;

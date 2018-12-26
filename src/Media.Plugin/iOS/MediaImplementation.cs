@@ -286,9 +286,12 @@ namespace Plugin.Media
 
 				token.Register(() =>
 				{
+					if (popover == null)
+						return;
 					NSRunLoop.Main.BeginInvokeOnMainThread(() =>
 					{
 						ndelegate.Popover.Dismiss(true);
+						ndelegate.CancelTask();
 					});
 				});
             }
@@ -304,10 +307,13 @@ namespace Plugin.Media
 
 				token.Register(() =>
 				{
-					NSRunLoop.Main.BeginInvokeOnMainThread(() =>
-					{
+					if (picker == null)
+						return;
 
+					NSRunLoop.Main.BeginInvokeOnMainThread(() =>
+					{						
 						picker.DismissModalViewController(true);
+						ndelegate.CancelTask();
 					});
 				});
 			}
@@ -335,6 +341,7 @@ namespace Plugin.Media
 				{
 
 				}
+				picker = null;
                 return t;
             }).Unwrap();
         }

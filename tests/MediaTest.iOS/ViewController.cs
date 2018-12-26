@@ -37,12 +37,12 @@ namespace MediaTest.iOS
                 {
                     Name = "test1.jpg",
                     SaveToAlbum = AlbumSwitch.On,
-                    PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
+                    PhotoSize = SizeSwitch.On ? PhotoSize.Medium : PhotoSize.Full,
                     OverlayViewProvider = OverlaySwitch.On ? func : null,
                     AllowCropping = CroppingSwitch.On,
                     CompressionQuality = (int)SliderQuality.Value,
                     Directory = "Sample",
-                    DefaultCamera = FrontSwitch.On ? Plugin.Media.Abstractions.CameraDevice.Front : Plugin.Media.Abstractions.CameraDevice.Rear,
+                    DefaultCamera = FrontSwitch.On ? CameraDevice.Front : CameraDevice.Rear,
                     RotateImage = SwitchRotate.On
                 }, cts.Token);
 
@@ -71,12 +71,14 @@ namespace MediaTest.iOS
 					cts.CancelAfter(TimeSpan.FromSeconds(10));
 				}
 				var test = await CrossMedia.Current.PickPhotoAsync(
-                    new Plugin.Media.Abstractions.PickMediaOptions
-                    {
-                        PhotoSize = SizeSwitch.On ? Plugin.Media.Abstractions.PhotoSize.Medium : Plugin.Media.Abstractions.PhotoSize.Full,
+                    new PickMediaOptions
+					{
+                        PhotoSize = SizeSwitch.On ? PhotoSize.Medium : PhotoSize.Full,
                         CompressionQuality = (int)SliderQuality.Value,
                         RotateImage = SwitchRotate.On
                     }, cts.Token);
+
+				cts.Dispose();
                 if (test == null)
                     return;
 
