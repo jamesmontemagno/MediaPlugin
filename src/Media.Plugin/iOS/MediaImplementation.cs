@@ -69,7 +69,7 @@ namespace Plugin.Media
         /// Picks a photo from the default gallery
         /// </summary>
         /// <returns>Media file or null if canceled</returns>
-        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
+        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
         {
             if (!IsPickPhotoSupported)
                 throw new NotSupportedException();
@@ -96,7 +96,7 @@ namespace Plugin.Media
 				ModalPresentationStyle = options?.ModalPresentationStyle ?? MediaPickerModalPresentationStyle.FullScreen,
             };
 
-            return await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions);
+            return await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, token);
         }
 
 
@@ -105,7 +105,7 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="options">Camera Media Options</param>
         /// <returns>Media file of photo or null if canceled</returns>
-        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
+        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!IsTakePhotoSupported)
                 throw new NotSupportedException();
@@ -124,7 +124,7 @@ namespace Plugin.Media
 
 			await CheckPermissions(permissionsToCheck.ToArray());
 
-            return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeImage, options);
+            return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeImage, options, token);
         }
 
 
@@ -132,7 +132,7 @@ namespace Plugin.Media
         /// Picks a video from the default gallery
         /// </summary>
         /// <returns>Media file of video or null if canceled</returns>
-        public async Task<MediaFile> PickVideoAsync()
+        public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
         {
             if (!IsPickVideoSupported)
                 throw new NotSupportedException();
@@ -147,7 +147,7 @@ namespace Plugin.Media
 				await CheckPermissions(Permission.Photos);
 			}
 
-			var media = await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie);
+			var media = await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie, token: token);
 
             UIApplication.SharedApplication.EndBackgroundTask(backgroundTask);
 
@@ -160,7 +160,7 @@ namespace Plugin.Media
         /// </summary>
         /// <param name="options">Video Media Options</param>
         /// <returns>Media file of new video or null if canceled</returns>
-        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!IsTakeVideoSupported)
                 throw new NotSupportedException();
@@ -180,7 +180,7 @@ namespace Plugin.Media
 
 			await CheckPermissions(permissionsToCheck.ToArray());
 
-            return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeMovie, options);
+            return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeMovie, options, token);
         }
 
         private UIPopoverController popover;
@@ -245,7 +245,7 @@ namespace Plugin.Media
             return picker;
         }
 
-        private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+        private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, CancellationToken token = default(CancellationToken))
         {
 			
 			UIViewController viewController = null;
@@ -268,7 +268,10 @@ namespace Plugin.Media
             while (viewController.PresentedViewController != null)
                 viewController = viewController.PresentedViewController;
 
-            MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
+	        if (token.IsCancellationRequested)
+				return Task.FromResult((MediaFile) null);
+
+            MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
             if (od != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
@@ -280,6 +283,17 @@ namespace Plugin.Media
                 ndelegate.Popover = popover = new UIPopoverController(picker);
                 ndelegate.Popover.Delegate = new MediaPickerPopoverDelegate(ndelegate, picker);
                 ndelegate.DisplayPopover();
+
+				token.Register(() =>
+				{
+					if (popover == null)
+						return;
+					NSRunLoop.Main.BeginInvokeOnMainThread(() =>
+					{
+						ndelegate.Popover.Dismiss(true);
+						ndelegate.CancelTask();
+					});
+				});
             }
             else
             {
@@ -290,7 +304,19 @@ namespace Plugin.Media
 		                : UIModalPresentationStyle.FullScreen;
                 }
                 viewController.PresentViewController(picker, true, null);
-            }
+
+				token.Register(() =>
+				{
+					if (picker == null)
+						return;
+
+					NSRunLoop.Main.BeginInvokeOnMainThread(() =>
+					{						
+						picker.DismissModalViewController(true);
+						ndelegate.CancelTask();
+					});
+				});
+			}
 
             return ndelegate.Task.ContinueWith(t =>
             {
@@ -315,6 +341,7 @@ namespace Plugin.Media
 				{
 
 				}
+				picker = null;
                 return t;
             }).Unwrap();
         }

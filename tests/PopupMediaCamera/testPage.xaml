@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:test" x:Class="test.testPage">
-	<StackLayout Padding="40">
-		<Label Text="Welcome to Xamarin Forms!" VerticalOptions="Center" HorizontalOptions="Center" />
-		<Image x:Name="profilePicture" HeightRequest="360" WidthRequest="60" BackgroundColor="Silver" />
-		<Button Text="Upload Picture" Clicked="Handle_Clicked" BorderColor="Silver" BorderWidth="1" BorderRadius="5" />
-	</StackLayout>
-
-</ContentPage>

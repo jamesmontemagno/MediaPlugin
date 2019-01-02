@@ -88,8 +88,9 @@ namespace Plugin.Media
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+	        MediaImplementation.CancelRequested += CancellationRequested;
 
-            var b = (savedInstanceState ?? Intent.Extras);
+			var b = (savedInstanceState ?? Intent.Extras);
 
             var ran = b.GetBoolean("ran", defaultValue: false);
 
@@ -218,7 +219,14 @@ namespace Plugin.Media
             }
         }
 
-        private void Touch()
+	    private void CancellationRequested(object sender, EventArgs e)
+	    {
+			FinishActivity(id);
+			DeleteOutputFile();
+			Finish();
+		}
+		
+		private void Touch()
         {
             if (path.Scheme != "file")
                 return;
@@ -332,9 +340,9 @@ namespace Plugin.Media
         protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             completed = true;
+	        MediaImplementation.CancelRequested -= CancellationRequested;
             base.OnActivityResult(requestCode, resultCode, data);
-
-
+			
 
             if (tasked)
             {

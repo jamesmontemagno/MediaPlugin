@@ -9,6 +9,7 @@ using Windows.Storage.Pickers;
 
 using Plugin.Media.Abstractions;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Plugin.Media
 {
@@ -91,8 +92,9 @@ namespace Plugin.Media
         /// Take a photo async with specified options
         /// </summary>
         /// <param name="options">Camera Media Options</param>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file of photo or null if canceled</returns>
-        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options)
+        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!initialized)
                 await Initialize();
@@ -108,10 +110,9 @@ namespace Plugin.Media
             //we can only disable cropping if resolution is set to max
             if (capture.PhotoSettings.MaxResolution == CameraCaptureUIMaxPhotoResolution.HighestAvailable)
                 capture.PhotoSettings.AllowCropping = options?.AllowCropping ?? true;
-            
-
-            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
-            if (result == null)
+			
+			var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
+			if (result == null)
                 return null;
 
             var folder = ApplicationData.Current.LocalFolder;
@@ -182,8 +183,9 @@ namespace Plugin.Media
         /// <summary>
         /// Picks a photo from the default gallery
         /// </summary>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file or null if canceled</returns>
-        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null)
+        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
         {
             var picker = new FileOpenPicker();
             picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
@@ -191,6 +193,8 @@ namespace Plugin.Media
            
             foreach (var filter in SupportedImageFileTypes)
                 picker.FileTypeFilter.Add(filter);
+
+			
 
             var result = await picker.PickSingleFileAsync();
             if (result == null)
@@ -226,8 +230,9 @@ namespace Plugin.Media
         /// Take a video with specified options
         /// </summary>
         /// <param name="options">Video Media Options</param>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file of new video or null if canceled</returns>
-        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options)
+        public async Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!initialized)
                 await Initialize();
@@ -271,8 +276,9 @@ namespace Plugin.Media
         /// <summary>
         /// Picks a video from the default gallery
         /// </summary>
+        /// <param name="token">Cancellation token (currently ignored)</param>
         /// <returns>Media file of video or null if canceled</returns>
-        public async Task<MediaFile> PickVideoAsync()
+        public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
         {
 			var picker = new FileOpenPicker()
 			{
@@ -284,7 +290,7 @@ namespace Plugin.Media
                 picker.FileTypeFilter.Add(filter);
 
             var result = await picker.PickSingleFileAsync();
-            if (result == null)
+			if (result == null)
                 return null;
 
             var aPath = result.Path;

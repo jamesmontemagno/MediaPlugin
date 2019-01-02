@@ -13,12 +13,14 @@ using System.Globalization;
 using ImageIO;
 using MobileCoreServices;
 using System.Drawing;
+using System.Threading;
 
 namespace Plugin.Media
 {
 	internal class MediaPickerDelegate : UIImagePickerControllerDelegate
 	{
-		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType, StoreCameraMediaOptions options)
+		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType,
+			StoreCameraMediaOptions options, CancellationToken token)
 		{
 			this.viewController = viewController;
 			source = sourceType;
@@ -35,6 +37,11 @@ namespace Plugin.Media
 		{
 			get;
 			set;
+		}
+
+		public void CancelTask()
+		{
+			tcs.SetResult(null);
 		}
 
 		public UIView View => viewController.View;
