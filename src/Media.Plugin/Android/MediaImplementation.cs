@@ -282,7 +282,7 @@ namespace Plugin.Media
 
         private readonly Context context;
         private int requestId;
-        private TaskCompletionSource<MediaFile> completionSource;
+        public static TaskCompletionSource<MediaFile> completionSource;
 
 
 		async Task<bool> RequestCameraPermissions()
@@ -479,7 +479,7 @@ namespace Plugin.Media
             EventHandler<MediaPickedEventArgs> handler = null;
             handler = (s, e) =>
             {
-                var tcs = Interlocked.Exchange(ref this.completionSource, null);
+                var tcs = Interlocked.Exchange(ref completionSource, null);
 
                 MediaPickerActivity.MediaPicked -= handler;
 
@@ -496,7 +496,7 @@ namespace Plugin.Media
 
 			token.Register(() =>
 			{
-				var tcs = Interlocked.Exchange(ref this.completionSource, null);
+				var tcs = Interlocked.Exchange(ref completionSource, null);
 
 				MediaPickerActivity.MediaPicked -= handler;
 				CancelRequested?.Invoke(null, EventArgs.Empty);
