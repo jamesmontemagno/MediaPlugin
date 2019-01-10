@@ -134,14 +134,14 @@ namespace Plugin.Media
             return media;
         }
 
-		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
 		{
 			if (!(await RequestStoragePermission()))
 			{
 				return null;
 			}
 
-			var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true });
+			var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true }, token);
 
 			if (options == null)
 				options = new PickMediaOptions();
@@ -558,9 +558,12 @@ namespace Plugin.Media
 			return completionSource.Task;
 		}
 
-		private Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options)
+		private Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
 		{
 			int id = GetRequestId();
+
+			if (token.IsCancellationRequested)
+				return Task.FromResult((List<MediaFile>)null);
 
 			var ntcs = new TaskCompletionSource<List<MediaFile>>(id);
 			if (Interlocked.CompareExchange(ref completionSourceMulti, ntcs, null) != null)
@@ -586,7 +589,18 @@ namespace Plugin.Media
                     tcs.SetResult(e.Media);
             };
 
-            return completionSourceMulti.Task;
+			token.Register(() =>
+			{
+				var tcs = Interlocked.Exchange(ref this.completionSource, null);
+
+				MediaPickerActivity.MediaPicked -= handler;
+				CancelRequested?.Invoke(null, EventArgs.Empty);
+				CancelRequested = null;
+
+				tcs.SetResult(null);
+			});
+
+			return completionSourceMulti.Task;
         }
 
         /// <summary>

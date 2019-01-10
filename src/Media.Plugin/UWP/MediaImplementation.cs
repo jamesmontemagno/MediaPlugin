@@ -198,7 +198,7 @@ namespace Plugin.Media
                 }, albumPath: aPath);
         }
 
-		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
 		{
 			var picker = new FileOpenPicker();
 			picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;

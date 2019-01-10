@@ -99,7 +99,7 @@ namespace Plugin.Media
             return await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, token);
         }
 
-		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
 		{
 			if (!IsPickPhotoSupported)
 				throw new NotSupportedException();
@@ -125,7 +125,7 @@ namespace Plugin.Media
 				ModalPresentationStyle = options?.ModalPresentationStyle ?? MediaPickerModalPresentationStyle.FullScreen,
 			};
 
-			return await GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, customisations);
+			return await GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, customisations, token);
 		}
 
         /// <summary>
@@ -336,14 +336,14 @@ namespace Plugin.Media
 			});
         }
 
-		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
 		{
 			var viewController = GetHostViewController();
 
 			if (options == null)
 				options = new StoreCameraMediaOptions();
 
-			MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options);
+			MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
 			var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
 			if (od != null)
 				throw new InvalidOperationException("Only one operation can be active at at time");
