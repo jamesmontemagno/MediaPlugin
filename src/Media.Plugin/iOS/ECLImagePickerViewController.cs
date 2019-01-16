@@ -93,7 +93,7 @@ namespace Plugin.Media
 		/// <param name="backBattonTitle">Back batton title.</param>
 		/// <param name="pickPhotoTitle">Pick photo title.</param>
 		/// <param name="doneButtonTitle">Done button title.</param>
-		/// <param name="loadingtitle">Loadingtitle.</param>
+		/// <param name="loadingtitle">LoadingTitle.</param>
 		public static ELCImagePickerViewController Create(StoreCameraMediaOptions options = null, int maxImages = 4, string selectAlbumTitle = null, string pickPhotosTitle = null, string backBattonTitle = null, string pickPhotoTitle = null, string doneButtonTitle = null, string loadingtitle = null, string pathToOverlay = null)
 		{
 			var albumPicker = new ELCAlbumPickerController()
@@ -116,7 +116,7 @@ namespace Plugin.Media
 		public static ELCImagePickerViewController Create(StoreCameraMediaOptions options = null, MultiPickerCustomisations customisations = null)
 		{
 			customisations = customisations ?? new MultiPickerCustomisations();
-			return Create(options, customisations.MaximumImagesCount, customisations.AlbumSelectTitle, customisations.PhotoSelectTitle, customisations.BackBattonTitle, null, customisations.DoneButtonTitle, customisations.Loadingtitle, customisations.PathToOverlay);
+			return Create(options, customisations.MaximumImagesCount, customisations.AlbumSelectTitle, customisations.PhotoSelectTitle, customisations.BackButtonTitle, null, customisations.DoneButtonTitle, customisations.LoadingTitle, customisations.PathToOverlay);
 		}
 
 		ELCImagePickerViewController(UIViewController rootController, StoreCameraMediaOptions options = null) : base(rootController)

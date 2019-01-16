@@ -101,29 +101,7 @@ namespace Plugin.Media
             {
                 try
                 {
-                    var originalMetadata = new ExifInterface(media.Path);
-
-                    if (options.RotateImage)
-                    {
-                        await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
-                    }
-                    else
-                    {
-                        await ResizeAsync(media.Path, options, originalMetadata);
-                    }
-                    if (options.SaveMetaData && IsValidExif(originalMetadata))
-					{
-						try
-						{
-                            originalMetadata?.SaveAttributes();
-						}
-						catch (Exception ex)
-						{
-							Console.WriteLine($"Unable to save exif {ex}");
-						}
-					}
-
-					originalMetadata?.Dispose();
+	                await FixOrientationAndResize(options, media);
                 }
                 catch (Exception ex)
                 {
@@ -134,7 +112,7 @@ namespace Plugin.Media
             return media;
         }
 
-		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
+	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
 		{
 			if (!(await RequestStoragePermission()))
 			{
@@ -153,17 +131,7 @@ namespace Plugin.Media
 				{
 					try
 					{
-						var originalMetadata = new ExifInterface(media.Path);
-
-						if (options.RotateImage)
-						{
-							await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
-						}
-						else
-						{
-							await ResizeAsync(media.Path, options, originalMetadata);
-						}
-						originalMetadata.SaveAttributes();
+						await FixOrientationAndResize(options, media);
 					}
 					catch (Exception ex)
 					{
@@ -175,13 +143,41 @@ namespace Plugin.Media
 			return medias;
 		}
 
-	    /// <summary>
-	    /// Take a photo async with specified options
-	    /// </summary>
-	    /// <param name="options">Camera Media Options</param>
-	    /// <param name="token">Cancellation token</param>
-	    /// <returns>Media file of photo or null if canceled</returns>
-	    public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
+	    private async Void FixOrientationAndResize(PickMediaOptions options, Object media)
+	    {
+		    var originalMetadata = new ExifInterface(media.Path);
+
+		    if (options.RotateImage)
+		    {
+			    await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
+		    }
+		    else
+		    {
+			    await ResizeAsync(media.Path, options, originalMetadata);
+		    }
+
+		    if (options.SaveMetaData && IsValidExif(originalMetadata))
+		    {
+			    try
+			    {
+				    originalMetadata?.SaveAttributes();
+			    }
+			    catch (Exception ex)
+			    {
+				    Console.WriteLine($"Unable to save exif {ex}");
+			    }
+		    }
+
+		    originalMetadata?.Dispose();
+	    }
+
+		/// <summary>
+		/// Take a photo async with specified options
+		/// </summary>
+		/// <param name="options">Camera Media Options</param>
+		/// <param name="token">Cancellation token</param>
+		/// <returns>Media file of photo or null if canceled</returns>
+		public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
@@ -591,7 +587,7 @@ namespace Plugin.Media
 
 			token.Register(() =>
 			{
-				var tcs = Interlocked.Exchange(ref this.completionSource, null);
+				var tcs = Interlocked.Exchange(ref this.completionSourceMulti, null);
 
 				MediaPickerActivity.MediaPicked -= handler;
 				CancelRequested?.Invoke(null, EventArgs.Empty);
@@ -599,6 +595,8 @@ namespace Plugin.Media
 
 				tcs.SetResult(null);
 			});
+
+			MediaPickerActivity.MediaPicked += handler;
 
 			return completionSourceMulti.Task;
         }
