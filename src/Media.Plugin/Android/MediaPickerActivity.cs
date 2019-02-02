@@ -359,11 +359,11 @@ namespace Plugin.Media
             {
 				if (data?.ClipData != null)
 				{
-					ClipData clipData = data.ClipData;
+					var clipData = data.ClipData;
 					var mediaFiles = new List<MediaFile>();
-					for (int i = 0; i < clipData.ItemCount; i++)
+					for (var i = 0; i < clipData.ItemCount; i++)
 					{
-						ClipData.Item item = clipData.GetItemAt(i);
+						var item = clipData.GetItemAt(i);
 						var media = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, item.Uri, false);
 
 						// TODO: This can be done better.
@@ -411,7 +411,7 @@ namespace Plugin.Media
                 }
                 else
                 {
-                    Intent resultData = new Intent();
+                    var resultData = new Intent();
                     resultData.PutExtra("MediaFile", data?.Data);
                     resultData.PutExtra("path", path);
                     resultData.PutExtra("isPhoto", isPhoto);
@@ -481,7 +481,7 @@ namespace Plugin.Media
         {
             var ext = Path.GetExtension(name);
             if (ext == string.Empty)
-                ext = ((isPhoto) ? ".jpg" : ".mp4");
+                ext = (isPhoto) ? ".jpg" : ".mp4";
 
             name = Path.GetFileNameWithoutExtension(name);
 

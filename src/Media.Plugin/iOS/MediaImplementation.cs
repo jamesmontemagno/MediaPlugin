@@ -41,7 +41,7 @@ namespace Plugin.Media
             var availableCameraMedia = UIImagePickerController.AvailableMediaTypes(UIImagePickerControllerSourceType.Camera) ?? new string[0];
             var avaialbleLibraryMedia = UIImagePickerController.AvailableMediaTypes(UIImagePickerControllerSourceType.PhotoLibrary) ?? new string[0];
 
-            foreach (string type in availableCameraMedia.Concat(avaialbleLibraryMedia))
+            foreach (var type in availableCameraMedia.Concat(avaialbleLibraryMedia))
             {
                 if (type == TypeMovie)
                     IsTakeVideoSupported = IsPickVideoSupported = true;
@@ -99,7 +99,7 @@ namespace Plugin.Media
             return await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, token);
         }
 
-		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
+		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
 		{
 			if (!IsPickPhotoSupported)
 				throw new NotSupportedException();
@@ -125,7 +125,7 @@ namespace Plugin.Media
 				ModalPresentationStyle = options?.ModalPresentationStyle ?? MediaPickerModalPresentationStyle.FullScreen,
 			};
 
-			return await GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, customisations, token);
+			return await GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeImage, cameraOptions, pickerOptions, token);
 		}
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace Plugin.Media
                 }
                 else if (mediaType == TypeMovie)
                 {
-                    StoreVideoOptions voptions = (StoreVideoOptions)options;
+                    var voptions = (StoreVideoOptions)options;
 
                     picker.CameraCaptureMode = UIImagePickerControllerCameraCaptureMode.Video;
                     picker.VideoQuality = GetQuailty(voptions.Quality);
@@ -281,7 +281,7 @@ namespace Plugin.Media
 	        if (token.IsCancellationRequested)
 				return Task.FromResult((MediaFile) null);
 
-            MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
+            var ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
             var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
             if (od != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
@@ -336,19 +336,19 @@ namespace Plugin.Media
 			});
         }
 
-		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
+		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
 		{
 			var viewController = GetHostViewController();
 
 			if (options == null)
 				options = new StoreCameraMediaOptions();
 
-			MediaPickerDelegate ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
+			var ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
 			var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
 			if (od != null)
 				throw new InvalidOperationException("Only one operation can be active at at time");
 			
-			var picker = ELCImagePickerViewController.Create(options, customisations);
+			var picker = ELCImagePickerViewController.Create(options, pickerOptions);
 
 			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
 			{
@@ -406,7 +406,7 @@ namespace Plugin.Media
 		private static UIViewController GetHostViewController()
 		{
 			UIViewController viewController = null;
-			UIWindow window = UIApplication.SharedApplication.KeyWindow;
+			var window = UIApplication.SharedApplication.KeyWindow;
 			if (window == null)
 				throw new InvalidOperationException("There's no current active window");
 

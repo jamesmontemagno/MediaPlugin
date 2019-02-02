@@ -112,9 +112,9 @@ namespace Plugin.Media
             return media;
         }
 
-	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerCustomisations customisations = null, CancellationToken token = default(CancellationToken))
+	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
 		{
-			if (!(await RequestStoragePermission()))
+			if (!await RequestStoragePermission())
 			{
 				return null;
 			}
@@ -143,7 +143,7 @@ namespace Plugin.Media
 			return medias;
 		}
 
-	    private async Void FixOrientationAndResize(PickMediaOptions options, Object media)
+	    private async Task FixOrientationAndResize(PickMediaOptions options, MediaFile media)
 	    {
 		    var originalMetadata = new ExifInterface(media.Path);
 
@@ -216,7 +216,7 @@ namespace Plugin.Media
                     {
                         Android.Media.MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
 
-                        ContentValues values = new ContentValues();
+                        var values = new ContentValues();
                         values.Put(MediaStore.Images.Media.InterfaceConsts.Title, System.IO.Path.GetFileNameWithoutExtension(f.AbsolutePath));
                         values.Put(MediaStore.Images.Media.InterfaceConsts.Description, string.Empty);
                         values.Put(MediaStore.Images.Media.InterfaceConsts.DateTaken, Java.Lang.JavaSystem.CurrentTimeMillis());
@@ -328,7 +328,7 @@ namespace Plugin.Media
 			if ((int)Build.VERSION.SdkInt < 23)
 				return true;
 
-            bool checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
+            var checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
 
             var hasStoragePermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
             var hasCameraPermission = Permissions.Abstractions.PermissionStatus.Granted;
@@ -449,7 +449,7 @@ namespace Plugin.Media
 
         private Intent CreateMediaIntent(int id, string type, string action, StoreMediaOptions options, bool tasked = true)
         {
-            Intent pickerIntent = new Intent(this.context, typeof(MediaPickerActivity));
+            var pickerIntent = new Intent(this.context, typeof(MediaPickerActivity));
             pickerIntent.PutExtra(MediaPickerActivity.ExtraId, id);
             pickerIntent.PutExtra(MediaPickerActivity.ExtraType, type);
             pickerIntent.PutExtra(MediaPickerActivity.ExtraAction, action);
@@ -508,7 +508,7 @@ namespace Plugin.Media
 
         private Task<MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
         {
-            int id = GetRequestId();
+            var id = GetRequestId();
 
 	        if (token.IsCancellationRequested)
 				return Task.FromResult((MediaFile) null);
@@ -518,16 +518,15 @@ namespace Plugin.Media
                 throw new InvalidOperationException("Only one operation can be active at a time");
 
 			context.StartActivity(CreateMediaIntent(id, type, action, options));
-			
-            EventHandler<MediaPickedEventArgs> handler = null;
-            handler = (s, e) =>
-            {
-                var tcs = Interlocked.Exchange(ref this.completionSource, null);
 
-                MediaPickerActivity.MediaPicked -= handler;
+			void handler(object s, MediaPickedEventArgs e)
+			{
+				var tcs = Interlocked.Exchange(ref completionSource, null);
 
-                if (e.RequestId != id)
-                    return;
+				MediaPickerActivity.MediaPicked -= handler;
+
+				if (e.RequestId != id)
+					return;
 
 				if (e.IsCanceled)
 					tcs.SetResult(null);
@@ -535,11 +534,11 @@ namespace Plugin.Media
 					tcs.SetException(e.Error);
 				else
 					tcs.SetResult(e.Media.FirstOrDefault());
-			};
+			}
 
-	        token.Register(() =>
+			token.Register(() =>
 	        {
-		        var tcs = Interlocked.Exchange(ref this.completionSource, null);
+		        var tcs = Interlocked.Exchange(ref completionSource, null);
 
 		        MediaPickerActivity.MediaPicked -= handler;
 		        CancelRequested?.Invoke(null, EventArgs.Empty);
@@ -556,7 +555,7 @@ namespace Plugin.Media
 
 		private Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
 		{
-			int id = GetRequestId();
+			var id = GetRequestId();
 
 			if (token.IsCancellationRequested)
 				return Task.FromResult((List<MediaFile>)null);
@@ -567,10 +566,9 @@ namespace Plugin.Media
 
 			context.StartActivity(CreateMediaIntent(id, type, action, options));
 
-			EventHandler<MediaPickedEventArgs> handler = null;
-			handler = (s, e) =>
+			void handler(object s, MediaPickedEventArgs e)
 			{
-				var tcs = Interlocked.Exchange(ref this.completionSourceMulti, null);
+				var tcs = Interlocked.Exchange(ref completionSourceMulti, null);
 
 				MediaPickerActivity.MediaPicked -= handler;
 
@@ -579,15 +577,15 @@ namespace Plugin.Media
 
 				if (e.IsCanceled)
 					tcs.SetResult(null);
-                else if (e.Error != null)
-                    tcs.SetException(e.Error);
-                else
-                    tcs.SetResult(e.Media);
-            };
+				else if (e.Error != null)
+					tcs.SetException(e.Error);
+				else
+					tcs.SetResult(e.Media);
+			}
 
 			token.Register(() =>
 			{
-				var tcs = Interlocked.Exchange(ref this.completionSourceMulti, null);
+				var tcs = Interlocked.Exchange(ref completionSourceMulti, null);
 
 				MediaPickerActivity.MediaPicked -= handler;
 				CancelRequested?.Invoke(null, EventArgs.Empty);

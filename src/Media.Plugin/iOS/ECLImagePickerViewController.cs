@@ -113,10 +113,10 @@ namespace Plugin.Media
 			return picker;
 		}
 
-		public static ELCImagePickerViewController Create(StoreCameraMediaOptions options = null, MultiPickerCustomisations customisations = null)
+		public static ELCImagePickerViewController Create(StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null)
 		{
-			customisations = customisations ?? new MultiPickerCustomisations();
-			return Create(options, customisations.MaximumImagesCount, customisations.AlbumSelectTitle, customisations.PhotoSelectTitle, customisations.BackButtonTitle, null, customisations.DoneButtonTitle, customisations.LoadingTitle, customisations.PathToOverlay);
+			pickerOptions = pickerOptions ?? new MultiPickerOptions();
+			return Create(options, pickerOptions.MaximumImagesCount, pickerOptions.AlbumSelectTitle, pickerOptions.PhotoSelectTitle, pickerOptions.BackButtonTitle, null, pickerOptions.DoneButtonTitle, pickerOptions.LoadingTitle, pickerOptions.PathToOverlay);
 		}
 
 		ELCImagePickerViewController(UIViewController rootController, StoreCameraMediaOptions options = null) : base(rootController)
@@ -262,16 +262,16 @@ namespace Plugin.Media
 			var shouldSelect = MaximumImagesCount <= 0 || previousCount < MaximumImagesCount;
 			if (!shouldSelect)
 			{
-				var first = NSBundle.MainBundle.LocalizedString("Only", "Only");
-				var second = NSBundle.MainBundle.LocalizedString("photos please", "photos please!");
+				var first = NSBundle.MainBundle.GetLocalizedString("Only", "Only");
+				var second = NSBundle.MainBundle.GetLocalizedString("photos please", "photos please!");
 
-				string title = String.Format("{0} {1} {2}", first, MaximumImagesCount, second);
+				var title = $"{first} {MaximumImagesCount} {second}";
 
-				var third = NSBundle.MainBundle.LocalizedString("You can only send", "You can only send");
-				var fourth = NSBundle.MainBundle.LocalizedString("photos at a time", "photos at a time.");
+				var third = NSBundle.MainBundle.GetLocalizedString("You can only send", "You can only send");
+				var fourth = NSBundle.MainBundle.GetLocalizedString("photos at a time", "photos at a time.");
 
-				string message = String.Format("{0} {1} {2}", third, MaximumImagesCount, fourth);
-				var alert = new UIAlertView(title, message, null, null, NSBundle.MainBundle.LocalizedString("Okay", "Okay"));
+				var message = $"{third} {MaximumImagesCount} {fourth}";
+				var alert = new UIAlertView(title, message, null, null, NSBundle.MainBundle.GetLocalizedString("Okay", "Okay"));
 				alert.Show();
 			}
 			return shouldSelect;
@@ -287,22 +287,22 @@ namespace Plugin.Media
 			public string PickPhotosTitle { get; set; }
 			public string PathToOverlay { get; set; }
 
-			static readonly NSObject _Dispatcher = new NSObject();
-			readonly List<ALAssetsGroup> AssetGroups = new List<ALAssetsGroup>();
+			static readonly NSObject dispatcher = new NSObject();
+			readonly List<ALAssetsGroup> assetGroups = new List<ALAssetsGroup>();
 
-			ALAssetsLibrary Library;
+			ALAssetsLibrary library;
 
-			WeakReference _Parent;
+			WeakReference parent;
 
 			public ELCImagePickerViewController Parent
 			{
 				get
 				{
-					return _Parent == null ? null : _Parent.Target as ELCImagePickerViewController;
+					return parent == null ? null : parent.Target as ELCImagePickerViewController;
 				}
 				set
 				{
-					_Parent = new WeakReference(value);
+					parent = new WeakReference(value);
 				}
 			}
 
@@ -313,17 +313,17 @@ namespace Plugin.Media
 			public override void ViewDidLoad()
 			{
 				base.ViewDidLoad();
-				string loading = string.IsNullOrWhiteSpace(LoadingTitle) ? NSBundle.MainBundle.LocalizedString("Loading", "Loading...") : LoadingTitle;
+				var loading = string.IsNullOrWhiteSpace(LoadingTitle) ? NSBundle.MainBundle.GetLocalizedString("Loading", "Loading...") : LoadingTitle;
 
 				NavigationItem.Title = loading;
 				var cancelButton = new UIBarButtonItem(UIBarButtonSystemItem.Cancel);
 				cancelButton.Clicked += CancelClicked;
 				NavigationItem.RightBarButtonItem = cancelButton;
 
-				AssetGroups.Clear();
+				assetGroups.Clear();
 
-				Library = new ALAssetsLibrary();
-				Library.Enumerate(ALAssetsGroupType.All, GroupsEnumerator, GroupsEnumeratorFailed);
+				library = new ALAssetsLibrary();
+				library.Enumerate(ALAssetsGroupType.All, GroupsEnumerator, GroupsEnumeratorFailed);
 			}
 
 			public override void ViewDidDisappear(bool animated)
@@ -346,7 +346,7 @@ namespace Plugin.Media
 
 			void GroupsEnumeratorFailed(NSError error)
 			{
-				Console.WriteLine(NSBundle.MainBundle.LocalizedString("Enumerator failed", "Enumerator failed!"));
+				Console.WriteLine(NSBundle.MainBundle.GetLocalizedString("Enumerator failed", "Enumerator failed!"));
 			}
 
 			void GroupsEnumerator(ALAssetsGroup agroup, ref bool stop)
@@ -359,32 +359,26 @@ namespace Plugin.Media
 				// added fix for camera albums order
 				if (agroup.Name.ToString().ToLower() == "camera roll" && agroup.Type == ALAssetsGroupType.SavedPhotos)
 				{
-					AssetGroups.Insert(0, agroup);
+					assetGroups.Insert(0, agroup);
 				}
 				else
 				{
-					AssetGroups.Add(agroup);
+					assetGroups.Add(agroup);
 				}
 
-				_Dispatcher.BeginInvokeOnMainThread(ReloadTableView);
+				dispatcher.BeginInvokeOnMainThread(ReloadTableView);
 			}
 
 			void ReloadTableView()
 			{
 				TableView.ReloadData();
-				string selectAlbum = string.IsNullOrWhiteSpace(SelectAlbumTitle) ? NSBundle.MainBundle.LocalizedString("Select an Album", "Select an Album") : SelectAlbumTitle;
+				var selectAlbum = string.IsNullOrWhiteSpace(SelectAlbumTitle) ? NSBundle.MainBundle.GetLocalizedString("Select an Album", "Select an Album") : SelectAlbumTitle;
 				NavigationItem.Title = selectAlbum;
 			}
 
-			public override nint NumberOfSections(UITableView tableView)
-			{
-				return 1;
-			}
+			public override nint NumberOfSections(UITableView tableView) => 1;
 
-			public override nint RowsInSection(UITableView tableview, nint section)
-			{
-				return AssetGroups.Count;
-			}
+			public override nint RowsInSection(UITableView tableview, nint section) => assetGroups.Count;
 
 			public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
 			{
@@ -397,7 +391,7 @@ namespace Plugin.Media
 				}
 
 				// Get count
-				var g = AssetGroups[indexPath.Row];
+				var g = assetGroups[indexPath.Row];
 				g.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 				var gCount = g.Count;
 				cell.TextLabel.Text = string.Format("{0} ({1})", g.Name, gCount);
@@ -407,7 +401,7 @@ namespace Plugin.Media
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("{0} {1}", NSBundle.MainBundle.LocalizedString("Failed to set thumbnail", "Failed to set thumbnail"), e);
+					Console.WriteLine("{0} {1}", NSBundle.MainBundle.GetLocalizedString("Failed to set thumbnail", "Failed to set thumbnail"), e);
 				}
 				cell.Accessory = UITableViewCellAccessory.DisclosureIndicator;
 
@@ -416,7 +410,7 @@ namespace Plugin.Media
 
 			public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
 			{
-				var assetGroup = AssetGroups[indexPath.Row];
+				var assetGroup = assetGroups[indexPath.Row];
 				assetGroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 				var picker = new ELCAssetTablePicker(assetGroup);
 
@@ -428,9 +422,9 @@ namespace Plugin.Media
 
 				picker.Parent = Parent;
 
-				string backButtonTitle = string.IsNullOrWhiteSpace(BackButtonTitle) ? NSBundle.MainBundle.LocalizedString("Back", "Back") : BackButtonTitle;
+				var backButtonTitle = string.IsNullOrWhiteSpace(BackButtonTitle) ? NSBundle.MainBundle.GetLocalizedString("Back", "Back") : BackButtonTitle;
 
-				this.NavigationItem.BackBarButtonItem = new UIBarButtonItem(backButtonTitle, UIBarButtonItemStyle.Plain, null);
+				NavigationItem.BackBarButtonItem = new UIBarButtonItem(backButtonTitle, UIBarButtonItemStyle.Plain, null);
 
 				NavigationController.PushViewController(picker, true);
 			}
@@ -444,10 +438,10 @@ namespace Plugin.Media
 
 		class ELCAssetTablePicker : UITableViewController
 		{
-			private string doneButtonTitle { get; set; }
-			private string pickPhotoTitle { get; set; }
-			private string pickPhotosTitle { get; set; }
-			private string loadingTitle { get; set; }
+			string doneButtonTitle;
+			string pickPhotoTitle;
+			string pickPhotosTitle;
+			string loadingTitle;
 			public string PathToOverlay { get; set; }
 
 			public string DoneButtonTitle
@@ -455,7 +449,7 @@ namespace Plugin.Media
 				get
 				{
 					if (string.IsNullOrWhiteSpace(doneButtonTitle))
-						return NSBundle.MainBundle.LocalizedString("Done", "Done");
+						return NSBundle.MainBundle.GetLocalizedString("Done", "Done");
 
 					return doneButtonTitle;
 				}
@@ -467,7 +461,7 @@ namespace Plugin.Media
 				get
 				{
 					if (string.IsNullOrWhiteSpace(pickPhotoTitle))
-						return NSBundle.MainBundle.LocalizedString("Pick Photo", "Pick Photo");
+						return NSBundle.MainBundle.GetLocalizedString("Pick Photo", "Pick Photo");
 
 					return pickPhotoTitle;
 				}
@@ -479,7 +473,7 @@ namespace Plugin.Media
 				get
 				{
 					if (string.IsNullOrWhiteSpace(pickPhotosTitle))
-						return NSBundle.MainBundle.LocalizedString("Pick Photos", "Pick Photos");
+						return NSBundle.MainBundle.GetLocalizedString("Pick Photos", "Pick Photos");
 
 					return pickPhotosTitle;
 				}
@@ -491,43 +485,34 @@ namespace Plugin.Media
 				get
 				{
 					if (string.IsNullOrWhiteSpace(loadingTitle))
-						return NSBundle.MainBundle.LocalizedString("Loading", "Loading...");
+						return NSBundle.MainBundle.GetLocalizedString("Loading", "Loading...");
 
 					return loadingTitle;
 				}
 				set { loadingTitle = value; }
 			}
 
-			static readonly NSObject _Dispatcher = new NSObject();
+			static readonly NSObject dispatcher = new NSObject();
 
-			int Columns = 4;
+			int columns = 4;
 
 			public bool SingleSelection { get; set; }
 
 			public bool ImmediateReturn { get; set; }
 
-			readonly ALAssetsGroup AssetGroup;
+			readonly ALAssetsGroup assetGroup;
 
-			readonly List<ELCAsset> ElcAssets = new List<ELCAsset>();
+			readonly List<ELCAsset> elcAssets = new List<ELCAsset>();
 
-			WeakReference _Parent;
+			WeakReference parent;
 
 			public ELCImagePickerViewController Parent
 			{
-				get
-				{
-					return _Parent == null ? null : _Parent.Target as ELCImagePickerViewController;
-				}
-				set
-				{
-					_Parent = new WeakReference(value);
-				}
+				get => parent == null ? null : parent.Target as ELCImagePickerViewController;
+				set => parent = new WeakReference(value);
 			}
 
-			public ELCAssetTablePicker(ALAssetsGroup assetGroup)
-			{
-				AssetGroup = assetGroup;
-			}
+			public ELCAssetTablePicker(ALAssetsGroup assetGroup) => this.assetGroup = assetGroup;
 
 			public override void ViewDidLoad()
 			{
@@ -552,7 +537,7 @@ namespace Plugin.Media
 			public override void ViewWillAppear(bool animated)
 			{
 				base.ViewWillAppear(animated);
-				Columns = (int)(View.Bounds.Size.Width / 80f);
+				columns = (int)(View.Bounds.Size.Width / 80f);
 			}
 
 			public override void ViewDidDisappear(bool animated)
@@ -567,15 +552,15 @@ namespace Plugin.Media
 			public override void DidRotate(UIInterfaceOrientation fromInterfaceOrientation)
 			{
 				base.DidRotate(fromInterfaceOrientation);
-				Columns = (int)(View.Bounds.Size.Width / 80f);
+				columns = (int)(View.Bounds.Size.Width / 80f);
 				TableView.ReloadData();
 			}
 
 			void PreparePhotos()
 			{
-				AssetGroup.Enumerate(PhotoEnumerator);
+				assetGroup.Enumerate(PhotoEnumerator);
 
-				_Dispatcher.BeginInvokeOnMainThread(() =>
+				dispatcher.BeginInvokeOnMainThread(() =>
 				{
 					TableView.ReloadData();
 					// scroll to bottom
@@ -600,9 +585,9 @@ namespace Plugin.Media
 					return;
 				}
 
-				ELCAsset elcAsset = new ELCAsset(this, result);
+				var elcAsset = new ELCAsset(this, result);
 
-				bool isAssetFiltered = false;
+				var isAssetFiltered = false;
 				/*if (self.assetPickerFilterDelegate &&
                     [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
                 {
@@ -614,7 +599,7 @@ namespace Plugin.Media
 
 				if (!isAssetFiltered)
 				{
-					ElcAssets.Add(elcAsset);
+					elcAssets.Add(elcAsset);
 				}
 			}
 
@@ -622,7 +607,7 @@ namespace Plugin.Media
 			{
 				var selected = new List<ALAsset>();
 
-				foreach (var asset in ElcAssets)
+				foreach (var asset in elcAssets)
 				{
 					if (asset.Selected)
 					{
@@ -639,8 +624,8 @@ namespace Plugin.Media
 
 			bool ShouldSelectAsset(ELCAsset asset)
 			{
-				int selectionCount = TotalSelectedAssets;
-				bool shouldSelect = true;
+				var selectionCount = TotalSelectedAssets;
+				var shouldSelect = true;
 
 				var parent = Parent;
 				if (parent != null)
@@ -657,7 +642,7 @@ namespace Plugin.Media
 
 				if (SingleSelection)
 				{
-					foreach (var elcAsset in ElcAssets)
+					foreach (var elcAsset in elcAssets)
 					{
 						if (asset != elcAsset)
 						{
@@ -681,17 +666,17 @@ namespace Plugin.Media
 
 			public override nint RowsInSection(UITableView tableview, nint section)
 			{
-				if (Columns <= 0)
+				if (columns <= 0)
 					return 4;
-				int numRows = (int)Math.Ceiling((float)ElcAssets.Count / Columns);
+				var numRows = (int)Math.Ceiling((float)elcAssets.Count / columns);
 				return numRows;
 			}
 
 			List<ELCAsset> AssetsForIndexPath(NSIndexPath path)
 			{
-				int index = path.Row * Columns;
-				int length = Math.Min(Columns, ElcAssets.Count - index);
-				return ElcAssets.GetRange(index, length);
+				var index = path.Row * columns;
+				var length = Math.Min(columns, elcAssets.Count - index);
+				return elcAssets.GetRange(index, length);
 			}
 
 			public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
@@ -703,7 +688,7 @@ namespace Plugin.Media
 				{
 					cell = new ELCAssetCell(UITableViewCellStyle.Default, cellIdentifier, PathToOverlay);
 				}
-				cell.SetAssets(AssetsForIndexPath(indexPath), Columns);
+				cell.SetAssets(AssetsForIndexPath(indexPath), columns);
 				return cell;
 			}
 
@@ -768,7 +753,7 @@ namespace Plugin.Media
 
 				public ELCAssetCell(UITableViewCellStyle style, string reuseIdentifier, string pathToOverlay) : base(style, reuseIdentifier)
 				{
-					UITapGestureRecognizer tapRecognizer = new UITapGestureRecognizer(CellTapped);
+					var tapRecognizer = new UITapGestureRecognizer(CellTapped);
 					AddGestureRecognizer(tapRecognizer);
 					_pathToOverlay = pathToOverlay;
 				}
@@ -806,7 +791,7 @@ namespace Plugin.Media
 					}
 
 					UIImage overlayImage = null;
-					for (int i = 0; i < RowAssets.Count; i++)
+					for (var i = 0; i < RowAssets.Count; i++)
 					{
 						var asset = RowAssets[i];
 
@@ -831,7 +816,7 @@ namespace Plugin.Media
 						}
 						catch (Exception e)
 						{
-							Console.WriteLine("{0} {1}", NSBundle.MainBundle.LocalizedString("Failed to set thumbnail", "Failed to set thumbnail"), e);
+							Console.WriteLine("{0} {1}", NSBundle.MainBundle.GetLocalizedString("Failed to set thumbnail", "Failed to set thumbnail"), e);
 						}
 
 						if (i < OverlayViewArray.Count)
@@ -859,11 +844,11 @@ namespace Plugin.Media
 					var startX = (Bounds.Size.Width - totalWidth) / 2;
 
 					var frame = new CGRect(startX, 2, 75, 75);
-					for (int i = 0; i < RowAssets.Count; ++i)
+					for (var i = 0; i < RowAssets.Count; ++i)
 					{
 						if (frame.Contains(point))
 						{
-							ELCAsset asset = RowAssets[i];
+							var asset = RowAssets[i];
 							asset.Selected = !asset.Selected;
 							var overlayView = OverlayViewArray[i];
 							overlayView.Checked = asset.Selected;
@@ -881,7 +866,7 @@ namespace Plugin.Media
 
 					var frame = new CGRect(startX, 2, 75, 75);
 
-					int i = 0;
+					var i = 0;
 					foreach (var imageView in ImageViewArray)
 					{
 						imageView.Frame = frame;

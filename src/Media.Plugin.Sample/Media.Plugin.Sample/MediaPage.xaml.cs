@@ -2,6 +2,7 @@
 using Plugin.Media.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,16 +15,20 @@ namespace Media.Plugin.Sample
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class MediaPage : ContentPage
 	{
+		ObservableCollection<MediaFile> files = new ObservableCollection<MediaFile>();
 		public MediaPage()
 		{
 			InitializeComponent();
 
+			files.CollectionChanged += Files_CollectionChanged;
+
+
 			takePhoto.Clicked += async (sender, args) =>
 			{
-
+				files.Clear();
 				if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
 				{
-					DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
+					await DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
 					return;
 				}
 
@@ -37,21 +42,17 @@ namespace Media.Plugin.Sample
 				if (file == null)
 					return;
 
-				DisplayAlert("File Location", file.Path, "OK");
+				await DisplayAlert("File Location", file.Path, "OK");
 
-				image.Source = ImageSource.FromStream(() =>
-				{
-					var stream = file.GetStream();
-					file.Dispose();
-					return stream;
-				});
+				files.Add(file);
 			};
 
 			pickPhoto.Clicked += async (sender, args) =>
 			{
+				files.Clear();
 				if (!CrossMedia.Current.IsPickPhotoSupported)
 				{
-					DisplayAlert("Photos Not Supported", ":( Permission not granted to photos.", "OK");
+					await DisplayAlert("Photos Not Supported", ":( Permission not granted to photos.", "OK");
 					return;
 				}
 				var file = await CrossMedia.Current.PickPhotoAsync(new PickMediaOptions
@@ -63,40 +64,33 @@ namespace Media.Plugin.Sample
 				if (file == null)
 					return;
 
-				image.Source = ImageSource.FromStream(() =>
-				{
-					var stream = file.GetStream();
-					file.Dispose();
-					return stream;
-				});
+				files.Add(file);
 			};
 
 			pickPhotos.Clicked += async (sender, args) =>
 			{
+				files.Clear();
 				if (!CrossMedia.Current.IsPickPhotoSupported)
 				{
 					await DisplayAlert("Photos Not Supported", ":( Permission not granted to photos.", "OK");
 					return;
 				}
-				var files = await CrossMedia.Current.PickPhotosAsync();
+				var picked = await CrossMedia.Current.PickPhotosAsync();
 
 
-				if (files == null)
+				if (picked == null)
 					return;
-
-				image.Source = ImageSource.FromStream(() =>
-				{
-					var stream = files.First().GetStream();
-					files.ForEach(f => f.Dispose());
-					return stream;
-				});
+				foreach (var file in picked)
+					files.Add(file);
+				
 			};
 
 			takeVideo.Clicked += async (sender, args) =>
 			{
+				files.Clear();
 				if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakeVideoSupported)
 				{
-					DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
+					await DisplayAlert("No Camera", ":( No camera avaialble.", "OK");
 					return;
 				}
 
@@ -109,16 +103,17 @@ namespace Media.Plugin.Sample
 				if (file == null)
 					return;
 
-				DisplayAlert("Video Recorded", "Location: " + file.Path, "OK");
+				await DisplayAlert("Video Recorded", "Location: " + file.Path, "OK");
 
 				file.Dispose();
 			};
 
 			pickVideo.Clicked += async (sender, args) =>
 			{
+				files.Clear();
 				if (!CrossMedia.Current.IsPickVideoSupported)
 				{
-					DisplayAlert("Videos Not Supported", ":( Permission not granted to videos.", "OK");
+					await DisplayAlert("Videos Not Supported", ":( Permission not granted to videos.", "OK");
 					return;
 				}
 				var file = await CrossMedia.Current.PickVideoAsync();
@@ -126,9 +121,29 @@ namespace Media.Plugin.Sample
 				if (file == null)
 					return;
 
-				DisplayAlert("Video Selected", "Location: " + file.Path, "OK");
+				await DisplayAlert("Video Selected", "Location: " + file.Path, "OK");
 				file.Dispose();
 			};
+		}
+
+		private void Files_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			if(files.Count == 0)
+			{
+				ImageList.Children.Clear();
+				return;
+			}
+			if (e.NewItems.Count == 0)
+				return;
+
+			var file = e.NewItems[0] as MediaFile;
+			var image = new Image { WidthRequest = 300, HeightRequest = 300, Aspect = Aspect.AspectFit };
+			image.Source = ImageSource.FromStream(() =>
+			{
+				var stream = file.GetStream();
+				return stream;
+			});
+			ImageList.Children.Add(image);
 		}
 	}
 }

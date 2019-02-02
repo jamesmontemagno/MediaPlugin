@@ -342,9 +342,9 @@ namespace Plugin.Media.Abstractions
 	}
 
 	/// <summary>
-	/// UI customisations for iOS multi image picker
+	/// UI options for iOS multi image picker
 	/// </summary>
-	public class MultiPickerCustomisations
+	public class MultiPickerOptions
 	{
 		// TODO: This only affects iOS since Android uses native
 

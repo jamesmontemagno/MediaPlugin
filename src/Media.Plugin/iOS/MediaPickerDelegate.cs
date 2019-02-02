@@ -258,7 +258,7 @@ namespace Plugin.Media
 			if (!viewController.ShouldAutorotate())
 				return false;
 
-			UIInterfaceOrientationMask mask = UIInterfaceOrientationMask.Portrait;
+			var mask = UIInterfaceOrientationMask.Portrait;
 			switch (orientation)
 			{
 				case UIDeviceOrientation.LandscapeLeft:
@@ -670,7 +670,7 @@ namespace Plugin.Media
 			}
 			else
 			{
-				CGAffineTransform transform = CGAffineTransform.MakeIdentity();
+				var transform = CGAffineTransform.MakeIdentity();
 
 				switch (image.Orientation)
 				{

@@ -143,10 +143,17 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="3.0.0.482510" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.0.1"/>
+    <PackageReference Include="Plugin.Permissions">
+      <Version>4.0.2-beta</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Forms" Version="3.5.0.94564-pre3" />
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Media.Plugin\Media.Plugin.csproj">
+      <Project>{8fa0e4f3-3882-41c0-9824-b335daded425}</Project>
+      <Name>Media.Plugin</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Media.Plugin.Sample\Media.Plugin.Sample.csproj">
       <Project>{B9EEC491-CF4E-4F53-BF9B-EF6EDF6ADFE5}</Project>
       <Name>Media.Plugin.Sample</Name>
