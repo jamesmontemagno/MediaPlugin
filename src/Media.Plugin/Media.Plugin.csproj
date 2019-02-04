@@ -50,7 +50,7 @@
 	
 	<ItemGroup>
 		<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-		<PackageReference Include="Plugin.Permissions" Version="4.0.3-beta" />
+		<PackageReference Include="Plugin.Permissions" Version="4.0.4-beta" />
 		<Compile Include="**\Shared\*.cs" />
 	</ItemGroup>
 
