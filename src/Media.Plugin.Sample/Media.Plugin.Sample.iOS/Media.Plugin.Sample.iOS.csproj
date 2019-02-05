@@ -148,7 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Plugin.Permissions">
-      <Version>4.0.2-beta</Version>
+      <Version>4.0.4-beta</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="3.5.0.94564-pre3" />
   </ItemGroup>
