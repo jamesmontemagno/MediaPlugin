@@ -45,12 +45,12 @@
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	</PropertyGroup>
 	<ItemGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All" />
 	</ItemGroup>
 	
 	<ItemGroup>
 		<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-		<PackageReference Include="Plugin.Permissions" Version="4.0.2-beta" />
+		<PackageReference Include="Plugin.Permissions" Version="4.0.4-beta" />
 		<Compile Include="**\Shared\*.cs" />
 	</ItemGroup>
 
@@ -78,6 +78,5 @@
 	</ItemGroup>
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Tizen')) ">
 		<Compile Include="**\Tizen\*.cs" />
-		<PackageReference Include="Tizen.NET" Version="4.0.0" />
 	</ItemGroup>
 </Project>
