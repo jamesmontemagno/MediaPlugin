@@ -4,9 +4,9 @@ namespace Plugin.Media
 {
     internal class MediaPickerPopoverDelegate
         : UIPopoverControllerDelegate
-    {
-        internal MediaPickerPopoverDelegate(MediaPickerDelegate pickerDelegate, UIImagePickerController picker)
-        {
+	{
+		internal MediaPickerPopoverDelegate(MediaPickerDelegate pickerDelegate, UINavigationController picker)
+		{
             this.pickerDelegate = pickerDelegate;
             this.picker = picker;
         }
@@ -17,7 +17,7 @@ namespace Plugin.Media
             pickerDelegate.Canceled(picker);
 
         private readonly MediaPickerDelegate pickerDelegate;
-        private readonly UIImagePickerController picker;
-    }
+		private readonly UINavigationController picker;
+	}
 }
 

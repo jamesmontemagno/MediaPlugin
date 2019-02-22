@@ -1,0 +1,8 @@
+﻿<Application
+    x:Class="Media.Plugin.Sample.UWP.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Media.Plugin.Sample.UWP"
+    RequestedTheme="Light">
+
+</Application>

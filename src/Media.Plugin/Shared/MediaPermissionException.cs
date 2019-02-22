@@ -32,7 +32,7 @@ namespace Plugin.Media.Abstractions
         {
             get
             {
-                string missingPermissions = string.Join(", ", Permissions);
+                var missingPermissions = string.Join(", ", Permissions);
                 return $"{missingPermissions} permission(s) are required.";
             }
         }

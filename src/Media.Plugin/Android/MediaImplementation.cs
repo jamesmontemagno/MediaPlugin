@@ -101,29 +101,7 @@ namespace Plugin.Media
             {
                 try
                 {
-                    var originalMetadata = new ExifInterface(media.Path);
-
-                    if (options.RotateImage)
-                    {
-                        await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
-                    }
-                    else
-                    {
-                        await ResizeAsync(media.Path, options, originalMetadata);
-                    }
-                    if (options.SaveMetaData && IsValidExif(originalMetadata))
-					{
-						try
-						{
-                            originalMetadata?.SaveAttributes();
-						}
-						catch (Exception ex)
-						{
-							Console.WriteLine($"Unable to save exif {ex}");
-						}
-					}
-
-					originalMetadata?.Dispose();
+	                await FixOrientationAndResize(options, media);
                 }
                 catch (Exception ex)
                 {
@@ -134,14 +112,72 @@ namespace Plugin.Media
             return media;
         }
 
+	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
+		{
+			if (!await RequestStoragePermission())
+			{
+				return null;
+			}
 
-	    /// <summary>
-	    /// Take a photo async with specified options
-	    /// </summary>
-	    /// <param name="options">Camera Media Options</param>
-	    /// <param name="token">Cancellation token</param>
-	    /// <returns>Media file of photo or null if canceled</returns>
-	    public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
+			var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true }, token);
+
+			if (options == null)
+				options = new PickMediaOptions();
+
+			foreach (var media in medias)
+			{
+				//check to see if we picked a file, and if so then try to fix orientation and resize
+				if (!string.IsNullOrWhiteSpace(media?.Path))
+				{
+					try
+					{
+						await FixOrientationAndResize(options, media);
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Unable to check orientation: " + ex);
+					}
+				}
+			}
+
+			return medias;
+		}
+
+	    private async Task FixOrientationAndResize(PickMediaOptions options, MediaFile media)
+	    {
+		    var originalMetadata = new ExifInterface(media.Path);
+
+		    if (options.RotateImage)
+		    {
+			    await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
+		    }
+		    else
+		    {
+			    await ResizeAsync(media.Path, options, originalMetadata);
+		    }
+
+		    if (options.SaveMetaData && IsValidExif(originalMetadata))
+		    {
+			    try
+			    {
+				    originalMetadata?.SaveAttributes();
+			    }
+			    catch (Exception ex)
+			    {
+				    Console.WriteLine($"Unable to save exif {ex}");
+			    }
+		    }
+
+		    originalMetadata?.Dispose();
+	    }
+
+		/// <summary>
+		/// Take a photo async with specified options
+		/// </summary>
+		/// <param name="options">Camera Media Options</param>
+		/// <param name="token">Cancellation token</param>
+		/// <returns>Media file of photo or null if canceled</returns>
+		public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
@@ -180,7 +216,7 @@ namespace Plugin.Media
                     {
                         Android.Media.MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
 
-                        ContentValues values = new ContentValues();
+                        var values = new ContentValues();
                         values.Put(MediaStore.Images.Media.InterfaceConsts.Title, System.IO.Path.GetFileNameWithoutExtension(f.AbsolutePath));
                         values.Put(MediaStore.Images.Media.InterfaceConsts.Description, string.Empty);
                         values.Put(MediaStore.Images.Media.InterfaceConsts.DateTaken, Java.Lang.JavaSystem.CurrentTimeMillis());
@@ -283,6 +319,7 @@ namespace Plugin.Media
         private readonly Context context;
         private int requestId;
         private TaskCompletionSource<MediaFile> completionSource;
+		private TaskCompletionSource<List<MediaFile>> completionSourceMulti;
 
 
 		async Task<bool> RequestCameraPermissions()
@@ -291,7 +328,7 @@ namespace Plugin.Media
 			if ((int)Build.VERSION.SdkInt < 23)
 				return true;
 
-            bool checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
+            var checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
 
             var hasStoragePermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
             var hasCameraPermission = Permissions.Abstractions.PermissionStatus.Granted;
@@ -412,7 +449,7 @@ namespace Plugin.Media
 
         private Intent CreateMediaIntent(int id, string type, string action, StoreMediaOptions options, bool tasked = true)
         {
-            Intent pickerIntent = new Intent(this.context, typeof(MediaPickerActivity));
+            var pickerIntent = new Intent(this.context, typeof(MediaPickerActivity));
             pickerIntent.PutExtra(MediaPickerActivity.ExtraId, id);
             pickerIntent.PutExtra(MediaPickerActivity.ExtraType, type);
             pickerIntent.PutExtra(MediaPickerActivity.ExtraAction, action);
@@ -423,7 +460,13 @@ namespace Plugin.Media
                 pickerIntent.PutExtra(MediaPickerActivity.ExtraPath, options.Directory);
                 pickerIntent.PutExtra(MediaStore.Images.ImageColumns.Title, options.Name);
 
-                var cameraOptions = (options as StoreCameraMediaOptions);
+				var pickerOptions = (options as StorePickerMediaOptions);
+				if (pickerOptions != null)
+				{
+					pickerIntent.PutExtra(MediaPickerActivity.ExtraMultiSelect, pickerOptions.MultiPicker);
+				}
+
+				var cameraOptions = (options as StoreCameraMediaOptions);
                 if (cameraOptions != null)
                 {
                     if (cameraOptions.DefaultCamera == CameraDevice.Front)
@@ -465,7 +508,7 @@ namespace Plugin.Media
 
         private Task<MediaFile> TakeMediaAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
         {
-            int id = GetRequestId();
+            var id = GetRequestId();
 
 	        if (token.IsCancellationRequested)
 				return Task.FromResult((MediaFile) null);
@@ -475,28 +518,74 @@ namespace Plugin.Media
                 throw new InvalidOperationException("Only one operation can be active at a time");
 
 			context.StartActivity(CreateMediaIntent(id, type, action, options));
-			
-            EventHandler<MediaPickedEventArgs> handler = null;
-            handler = (s, e) =>
-            {
-                var tcs = Interlocked.Exchange(ref this.completionSource, null);
 
-                MediaPickerActivity.MediaPicked -= handler;
+			void handler(object s, MediaPickedEventArgs e)
+			{
+				var tcs = Interlocked.Exchange(ref completionSource, null);
 
-                if (e.RequestId != id)
-                    return;
-                
-                if(e.IsCanceled)
-                    tcs.SetResult(null);
-                else if (e.Error != null)
-                    tcs.SetException(e.Error);
-                else
-                    tcs.SetResult(e.Media);
-            };
+				MediaPickerActivity.MediaPicked -= handler;
+
+				if (e.RequestId != id)
+					return;
+
+				if (e.IsCanceled)
+					tcs.SetResult(null);
+				else if (e.Error != null)
+					tcs.SetException(e.Error);
+				else
+					tcs.SetResult(e.Media.FirstOrDefault());
+			}
+
+			token.Register(() =>
+	        {
+		        var tcs = Interlocked.Exchange(ref completionSource, null);
+
+		        MediaPickerActivity.MediaPicked -= handler;
+		        CancelRequested?.Invoke(null, EventArgs.Empty);
+		        CancelRequested = null;
+
+		        tcs.SetResult(null);
+	        });
+
+
+			MediaPickerActivity.MediaPicked += handler;
+
+			return completionSource.Task;
+		}
+
+		private Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
+		{
+			var id = GetRequestId();
+
+			if (token.IsCancellationRequested)
+				return Task.FromResult((List<MediaFile>)null);
+
+			var ntcs = new TaskCompletionSource<List<MediaFile>>(id);
+			if (Interlocked.CompareExchange(ref completionSourceMulti, ntcs, null) != null)
+				throw new InvalidOperationException("Only one operation can be active at a time");
+
+			context.StartActivity(CreateMediaIntent(id, type, action, options));
+
+			void handler(object s, MediaPickedEventArgs e)
+			{
+				var tcs = Interlocked.Exchange(ref completionSourceMulti, null);
+
+				MediaPickerActivity.MediaPicked -= handler;
+
+				if (e.RequestId != id)
+					return;
+
+				if (e.IsCanceled)
+					tcs.SetResult(null);
+				else if (e.Error != null)
+					tcs.SetException(e.Error);
+				else
+					tcs.SetResult(e.Media);
+			}
 
 			token.Register(() =>
 			{
-				var tcs = Interlocked.Exchange(ref this.completionSource, null);
+				var tcs = Interlocked.Exchange(ref completionSourceMulti, null);
 
 				MediaPickerActivity.MediaPicked -= handler;
 				CancelRequested?.Invoke(null, EventArgs.Empty);
@@ -507,7 +596,7 @@ namespace Plugin.Media
 
 			MediaPickerActivity.MediaPicked += handler;
 
-            return completionSource.Task;
+			return completionSourceMulti.Task;
         }
 
         /// <summary>
