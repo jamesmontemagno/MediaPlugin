@@ -102,15 +102,30 @@ namespace Plugin.Media
 				BackButtonTitle = backBattonTitle,
 				DoneButtonTitle = doneButtonTitle,
 				LoadingTitle = loadingtitle,
-				PickPhotosTitle = pickPhotosTitle,
-				PickPhotoTitle = pickPhotoTitle,
-				PathToOverlay = pathToOverlay
+				PickAssetTitle = AssetTitle(maxImages, pickPhotoTitle, pickPhotosTitle),
 			};
 
 			var picker = new ELCImagePickerViewController(albumPicker, options);
 			albumPicker.Parent = picker;
 			picker.MaximumImagesCount = maxImages;
 			return picker;
+		}
+
+		private static string AssetTitle(int maximumImages, string singularTitle, string pluralTitle)
+		{
+			if (maximumImages == 1)
+			{
+				if (string.IsNullOrWhiteSpace(singularTitle))
+				{
+					return NSBundle.MainBundle.GetLocalizedString("Pick Photo", "Pick Photo");
+				}
+				return singularTitle;
+			}
+
+			if (string.IsNullOrWhiteSpace(pluralTitle))
+				return NSBundle.MainBundle.GetLocalizedString("Pick Photos", "Pick Photos");
+
+			return pluralTitle;
 		}
 
 		public static ELCImagePickerViewController Create(StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null)
@@ -146,7 +161,6 @@ namespace Plugin.Media
 
 			_TaskCompletionSource.TrySetResult(results);
 		}
-
 
 		private MediaFile GetPictureMediaFile(ALAsset asset)
 		{
@@ -283,9 +297,7 @@ namespace Plugin.Media
 			public string BackButtonTitle { get; set; }
 			public string SelectAlbumTitle { get; set; }
 			public string LoadingTitle { get; set; }
-			public string PickPhotoTitle { get; set; }
-			public string PickPhotosTitle { get; set; }
-			public string PathToOverlay { get; set; }
+			public string PickAssetTitle { get; set; }
 
 			static readonly NSObject dispatcher = new NSObject();
 			readonly List<ALAssetsGroup> assetGroups = new List<ALAssetsGroup>();
@@ -413,12 +425,10 @@ namespace Plugin.Media
 				var assetGroup = assetGroups[indexPath.Row];
 				assetGroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 				var picker = new ELCAssetTablePicker(assetGroup);
-
+				
 				picker.LoadingTitle = LoadingTitle;
-				picker.PickPhotosTitle = PickPhotosTitle;
-				picker.PickPhotoTitle = PickPhotoTitle;
+				picker.PickAssetTitle = PickAssetTitle;
 				picker.DoneButtonTitle = DoneButtonTitle;
-				picker.PathToOverlay = PathToOverlay;
 
 				picker.Parent = Parent;
 
@@ -436,13 +446,10 @@ namespace Plugin.Media
 		}
 
 
-		class ELCAssetTablePicker : UITableViewController
+		class ELCAssetTablePicker : UICollectionViewController
 		{
 			string doneButtonTitle;
-			string pickPhotoTitle;
-			string pickPhotosTitle;
 			string loadingTitle;
-			public string PathToOverlay { get; set; }
 
 			public string DoneButtonTitle
 			{
@@ -456,30 +463,6 @@ namespace Plugin.Media
 				set { doneButtonTitle = value; }
 			}
 
-			public string PickPhotoTitle
-			{
-				get
-				{
-					if (string.IsNullOrWhiteSpace(pickPhotoTitle))
-						return NSBundle.MainBundle.GetLocalizedString("Pick Photo", "Pick Photo");
-
-					return pickPhotoTitle;
-				}
-				set { pickPhotoTitle = value; }
-			}
-
-			public string PickPhotosTitle
-			{
-				get
-				{
-					if (string.IsNullOrWhiteSpace(pickPhotosTitle))
-						return NSBundle.MainBundle.GetLocalizedString("Pick Photos", "Pick Photos");
-
-					return pickPhotosTitle;
-				}
-				set { pickPhotosTitle = value; }
-			}
-
 			public string LoadingTitle
 			{
 				get
@@ -491,18 +474,15 @@ namespace Plugin.Media
 				}
 				set { loadingTitle = value; }
 			}
+			public string PickAssetTitle { get; set; }
 
 			static readonly NSObject dispatcher = new NSObject();
-
-			int columns = 4;
-
-			public bool SingleSelection { get; set; }
 
 			public bool ImmediateReturn { get; set; }
 
 			readonly ALAssetsGroup assetGroup;
 
-			readonly List<ELCAsset> elcAssets = new List<ELCAsset>();
+			readonly List<ALAsset> assets = new List<ALAsset>();
 
 			WeakReference parent;
 
@@ -512,18 +492,23 @@ namespace Plugin.Media
 				set => parent = new WeakReference(value);
 			}
 
-			public ELCAssetTablePicker(ALAssetsGroup assetGroup) => this.assetGroup = assetGroup;
+			public ELCAssetTablePicker(ALAssetsGroup assetGroup) : base(new UICollectionViewFlowLayout {
+				ItemSize = new CGSize(75, 75),
+				MinimumLineSpacing = 4,
+				MinimumInteritemSpacing = 4,
+				SectionInset = new UIEdgeInsets(0, 4, 0, 4),
+				ScrollDirection = UICollectionViewScrollDirection.Vertical })
+			{
+				this.assetGroup = assetGroup;
+			}
 
 			public override void ViewDidLoad()
 			{
-				TableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;
-				TableView.AllowsSelection = false;
+				CollectionView.RegisterClassForCell(typeof(ELCAssetCell), "Cell");
+				CollectionView.AllowsMultipleSelection = true;
+				CollectionView.BackgroundColor = UIColor.White;
 
-				if (ImmediateReturn)
-				{
-
-				}
-				else
+				if (!ImmediateReturn)
 				{
 					var doneButtonItem = new UIBarButtonItem(DoneButtonTitle, UIBarButtonItemStyle.Done, null);
 					doneButtonItem.Clicked += DoneClicked;
@@ -532,12 +517,6 @@ namespace Plugin.Media
 				}
 
 				Task.Run((Action)PreparePhotos);
-			}
-
-			public override void ViewWillAppear(bool animated)
-			{
-				base.ViewWillAppear(animated);
-				columns = (int)(View.Bounds.Size.Width / 80f);
 			}
 
 			public override void ViewDidDisappear(bool animated)
@@ -549,70 +528,104 @@ namespace Plugin.Media
 				}
 			}
 
-			public override void DidRotate(UIInterfaceOrientation fromInterfaceOrientation)
+			#region UICollectionViewDelegate
+
+			public override bool ShouldSelectItem(UICollectionView collectionView, NSIndexPath indexPath)
 			{
-				base.DidRotate(fromInterfaceOrientation);
-				columns = (int)(View.Bounds.Size.Width / 80f);
-				TableView.ReloadData();
+				var selectionCount = collectionView.GetIndexPathsForSelectedItems().Length;
+				var shouldSelect = true;
+				var asset = AssetForIndexPath(indexPath);
+
+				var parent = Parent;
+				if (parent != null)
+				{
+					shouldSelect = parent.ShouldSelectAsset(asset, selectionCount);
+				}
+
+				return shouldSelect;
 			}
 
-			void PreparePhotos()
+			public override void ItemSelected(UICollectionView collectionView, NSIndexPath indexPath) => AssetSelected(indexPath, true);
+
+			public override void ItemDeselected(UICollectionView collectionView, NSIndexPath indexPath) => AssetSelected(indexPath, false);
+
+			#endregion
+
+			#region UICollectionViewDataSource
+
+			public override nint NumberOfSections(UICollectionView collectionView) => 1;
+			public override nint GetItemsCount(UICollectionView collectionView, nint section) => assets.Count;
+
+			public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
+			{
+				var cell = (ELCAssetCell)collectionView.DequeueReusableCell("Cell", indexPath);
+				cell.Asset = AssetForIndexPath(indexPath);
+				return cell;
+			}
+
+			#endregion
+
+			#region Not interested in
+
+			private ALAsset AssetForIndexPath(NSIndexPath path)
+			{
+				return assets[path.Row];
+			}
+
+			private void AssetSelected(NSIndexPath targetIndexPath, bool selected)
+			{
+				if (ImmediateReturn)
+				{
+					var asset = AssetForIndexPath(targetIndexPath);
+					var obj = new List<ALAsset> { asset };
+					Parent.SelectedAssets(obj);
+				}
+			}
+
+			private void PreparePhotos()
 			{
 				assetGroup.Enumerate(PhotoEnumerator);
 
 				dispatcher.BeginInvokeOnMainThread(() =>
 				{
-					TableView.ReloadData();
+					CollectionView.ReloadData();
 					// scroll to bottom
-					var section = NumberOfSections(TableView) - 1;
-					var row = TableView.NumberOfRowsInSection(section) - 1;
+					var section = NumberOfSections(CollectionView) - 1;
+					var row = CollectionView.NumberOfItemsInSection(section) - 1;
 					if (section >= 0 && row >= 0)
 					{
 						var ip = NSIndexPath.FromRowSection(row, section);
-						TableView.ScrollToRow(ip, UITableViewScrollPosition.Bottom, false);
+						CollectionView.ScrollToItem(ip, UICollectionViewScrollPosition.Bottom, false);
 					}
 
-
-					NavigationItem.Title = SingleSelection ? PickPhotoTitle : PickPhotosTitle;
+					NavigationItem.Title = PickAssetTitle;
 				});
 			}
 
-			#region Not interested in
-			void PhotoEnumerator(ALAsset result, nint index, ref bool stop)
+			private void PhotoEnumerator(ALAsset result, nint index, ref bool stop)
 			{
 				if (result == null)
 				{
 					return;
 				}
 
-				var elcAsset = new ELCAsset(this, result);
-
 				var isAssetFiltered = false;
-				/*if (self.assetPickerFilterDelegate &&
-                    [self.assetPickerFilterDelegate respondsToSelector:@selector(assetTablePicker:isAssetFilteredOut:)])
-                {
-                    isAssetFiltered = [self.assetPickerFilterDelegate assetTablePicker:self isAssetFilteredOut:(ELCAsset*)elcAsset];
-                }*/
-
 				if (result.DefaultRepresentation == null)
 					isAssetFiltered = true;
 
 				if (!isAssetFiltered)
 				{
-					elcAssets.Add(elcAsset);
+					assets.Add(result);
 				}
 			}
 
-			void DoneClicked(object sender = null, EventArgs e = null)
+			private void DoneClicked(object sender = null, EventArgs e = null)
 			{
 				var selected = new List<ALAsset>();
 
-				foreach (var asset in elcAssets)
+				foreach (var selectedIndexPath in CollectionView.GetIndexPathsForSelectedItems())
 				{
-					if (asset.Selected)
-					{
-						selected.Add(asset.Asset);
-					}
+					selected.Add(AssetForIndexPath(selectedIndexPath));
 				}
 
 				var parent = Parent;
@@ -622,269 +635,116 @@ namespace Plugin.Media
 				}
 			}
 
-			bool ShouldSelectAsset(ELCAsset asset)
+			class ELCAssetCell : UICollectionViewCell
 			{
-				var selectionCount = TotalSelectedAssets;
-				var shouldSelect = true;
-
-				var parent = Parent;
-				if (parent != null)
+				public ALAsset Asset
 				{
-					shouldSelect = parent.ShouldSelectAsset(asset.Asset, selectionCount);
-				}
-
-				return shouldSelect;
-			}
-
-			void AssetSelected(ELCAsset asset, bool selected)
-			{
-				TotalSelectedAssets += (selected) ? 1 : -1;
-
-				if (SingleSelection)
-				{
-					foreach (var elcAsset in elcAssets)
-					{
-						if (asset != elcAsset)
-						{
-							elcAsset.Selected = false;
-						}
-					}
-				}
-				if (ImmediateReturn)
-				{
-					var parent = Parent;
-					var obj = new List<ALAsset>(1);
-					obj.Add(asset.Asset);
-					parent.SelectedAssets(obj);
-				}
-			}
-
-			public override nint NumberOfSections(UITableView tableView)
-			{
-				return 1;
-			}
-
-			public override nint RowsInSection(UITableView tableview, nint section)
-			{
-				if (columns <= 0)
-					return 4;
-				var numRows = (int)Math.Ceiling((float)elcAssets.Count / columns);
-				return numRows;
-			}
-
-			List<ELCAsset> AssetsForIndexPath(NSIndexPath path)
-			{
-				var index = path.Row * columns;
-				var length = Math.Min(columns, elcAssets.Count - index);
-				return elcAssets.GetRange(index, length);
-			}
-
-			public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
-			{
-				const string cellIdentifier = "Cell";
-
-				var cell = TableView.DequeueReusableCell(cellIdentifier) as ELCAssetCell;
-				if (cell == null)
-				{
-					cell = new ELCAssetCell(UITableViewCellStyle.Default, cellIdentifier, PathToOverlay);
-				}
-				cell.SetAssets(AssetsForIndexPath(indexPath), columns);
-				return cell;
-			}
-
-			public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath)
-			{
-				return 79;
-			}
-
-			public int TotalSelectedAssets;
-
-			public class ELCAsset
-			{
-				public readonly ALAsset Asset;
-				readonly WeakReference _Parent;
-
-				bool _Selected;
-
-				public ELCAsset(ELCAssetTablePicker parent, ALAsset asset)
-				{
-					_Parent = new WeakReference(parent);
-					Asset = asset;
-				}
-
-				public void ToggleSelected()
-				{
-					Selected = !Selected;
-				}
-
-				public bool Selected
-				{
-					get
-					{
-						return _Selected;
-					}
-
 					set
 					{
-						var parent = _Parent.Target as ELCAssetTablePicker;
-						if (value && parent != null && !parent.ShouldSelectAsset(this))
-						{
-							return;
-						}
-
-						_Selected = value;
-
-						if (parent != null)
-						{
-							parent.AssetSelected(this, value);
-						}
-					}
-				}
-			}
-
-			class ELCAssetCell : UITableViewCell
-			{
-				List<ELCAsset> RowAssets;
-				int Columns;
-				readonly List<UIImageView> ImageViewArray = new List<UIImageView>();
-				readonly List<CheckMarkView> OverlayViewArray = new List<CheckMarkView>();
-
-				private string _pathToOverlay;
-
-				public ELCAssetCell(UITableViewCellStyle style, string reuseIdentifier, string pathToOverlay) : base(style, reuseIdentifier)
-				{
-					var tapRecognizer = new UITapGestureRecognizer(CellTapped);
-					AddGestureRecognizer(tapRecognizer);
-					_pathToOverlay = pathToOverlay;
-				}
-
-				//private UIImage GetOverlayImage()
-				//{
-				//	if (!string.IsNullOrEmpty(_pathToOverlay))
-				//	{
-				//		try
-				//		{
-				//			return new UIImage(_pathToOverlay);
-				//		}
-				//		catch
-				//		{
-				//			// Failed to load custom overlay image
-				//		}
-				//	}
-
-				//	return UIImage.FromResource(null, (UIScreen.MainScreen.Scale > 1.0) 
-				//		? "Overlay_MediaPicker@2x.png" : "Overlay_MediaPicker.png");
-				//}
-
-				public void SetAssets(List<ELCAsset> assets, int columns)
-				{
-					RowAssets = assets;
-					Columns = columns;
-
-					foreach (var view in ImageViewArray)
-					{
-						view.RemoveFromSuperview();
-					}
-					foreach (var view in OverlayViewArray)
-					{
-						view.RemoveFromSuperview();
-					}
-
-					UIImage overlayImage = null;
-					for (var i = 0; i < RowAssets.Count; i++)
-					{
-						var asset = RowAssets[i];
-
 						try
 						{
-
-							if (asset.Asset != null
-									&& asset.Asset.Thumbnail != null)
-							{
-								if (i < ImageViewArray.Count)
-								{
-									var imageView = ImageViewArray[i];
-									imageView.Image = new UIImage(asset.Asset.Thumbnail);
-								}
-								else
-								{
-									var imageView = new UIImageView(new UIImage(asset.Asset.Thumbnail));
-									ImageViewArray.Add(imageView);
-								}
-							}
-
+							var thumb = value?.Thumbnail;
+							ImageView.Image = thumb != null ? new UIImage(thumb) : null;
 						}
 						catch (Exception e)
 						{
 							Console.WriteLine("{0} {1}", NSBundle.MainBundle.GetLocalizedString("Failed to set thumbnail", "Failed to set thumbnail"), e);
 						}
-
-						if (i < OverlayViewArray.Count)
-						{
-							var overlayView = OverlayViewArray[i];
-							overlayView.Checked = asset.Selected;
-						}
-						else
-						{
-							//if (overlayImage == null)
-							//{
-							//	overlayImage = GetOverlayImage();
-							//}
-							var overlayView = new CheckMarkView(); //new UIImageView(overlayImage);
-							OverlayViewArray.Add(overlayView);
-							overlayView.Checked = asset.Selected;
-						}
 					}
 				}
 
-				void CellTapped(UITapGestureRecognizer tapRecognizer)
+				public override bool Highlighted
 				{
-					var point = tapRecognizer.LocationInView(this);
-					var totalWidth = Columns * 75 + (Columns - 1) * 4;
-					var startX = (Bounds.Size.Width - totalWidth) / 2;
-
-					var frame = new CGRect(startX, 2, 75, 75);
-					for (var i = 0; i < RowAssets.Count; ++i)
-					{
-						if (frame.Contains(point))
-						{
-							var asset = RowAssets[i];
-							asset.Selected = !asset.Selected;
-							var overlayView = OverlayViewArray[i];
-							overlayView.Checked = asset.Selected;
-							break;
-						}
-						var x = frame.X + frame.Width + 4;
-						frame = new CGRect(x, frame.Y, frame.Width, frame.Height);
+					get => base.Highlighted;
+					set {
+						HighlightedView.Hidden = !value;
+						base.Highlighted = value;
 					}
 				}
 
-				public override void LayoutSubviews()
+				public override bool Selected
 				{
-					var totalWidth = Columns * 75 + (Columns - 1) * 4;
-					var startX = (Bounds.Size.Width - totalWidth) / 2;
-
-					var frame = new CGRect(startX, 2, 75, 75);
-
-					var i = 0;
-					foreach (var imageView in ImageViewArray)
+					get => base.Selected;
+					set
 					{
-						imageView.Frame = frame;
-						AddSubview(imageView);
-
-						var overlayView = OverlayViewArray[i++];
-						overlayView.Frame = new CGRect(frame.Location.X + 2, frame.Location.Y + 2, 25, 25);
-						AddSubview(overlayView);
-
-						var x = frame.X + frame.Width + 4;
-						frame = new CGRect(x, frame.Y, frame.Width, frame.Height);
+						SelectedView.Checked = value;
+						base.Selected = value;
 					}
+				}
+
+				private readonly UIImageView ImageView = new UIImageView
+				{
+					TranslatesAutoresizingMaskIntoConstraints = false,
+				};
+				private readonly UIView HighlightedView = new UIView
+				{
+					TranslatesAutoresizingMaskIntoConstraints = false,
+					BackgroundColor = UIColor.Black.ColorWithAlpha(0.3f),
+					Hidden = true,
+				};
+				private readonly CheckMarkView SelectedView = new CheckMarkView
+				{
+					TranslatesAutoresizingMaskIntoConstraints = false,
+				};
+
+				public ELCAssetCell() : base()
+				{
+					Initialize();
+				}
+
+				protected internal ELCAssetCell(IntPtr handle) : base(handle)
+				{
+					Initialize();
+				}
+
+				public ELCAssetCell(NSCoder coder) : base(coder)
+				{
+					Initialize();
+				}
+
+				protected ELCAssetCell(NSObjectFlag t) : base(t)
+				{
+					Initialize();
+				}
+
+				public ELCAssetCell(CGRect frame) : base(frame)
+				{
+					Initialize();
+				}
+
+				protected void Initialize()
+				{
+					ContentView.Add(ImageView);
+					ContentView.Add(HighlightedView);
+					ContentView.Add(SelectedView);
+
+					NSLayoutConstraint.ActivateConstraints(new[]
+					{
+						ImageView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
+						ImageView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
+						ImageView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
+						ImageView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
+
+						HighlightedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
+						HighlightedView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
+						HighlightedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
+						HighlightedView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
+
+						SelectedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor, 2),
+						SelectedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor, 2),
+						SelectedView.WidthAnchor.ConstraintEqualTo(25),
+						SelectedView.HeightAnchor.ConstraintEqualTo(25),
+					});
+				}
+
+				public override void PrepareForReuse()
+				{
+					base.PrepareForReuse();
+					Asset = null;
 				}
 			}
 
 			#endregion
-
-
 		}
 	}
 }
