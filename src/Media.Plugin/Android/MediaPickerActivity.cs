@@ -649,7 +649,7 @@ namespace Plugin.Media
             {
                 DeleteOutputFile();
 				MediaImplementation.completionSource = null;
-				completionSourceMulti.completionSource = null;
+				MediaImplementation.completionSourceMulti = null;
                 MediaPicked = null;
             }
             base.OnDestroy();
