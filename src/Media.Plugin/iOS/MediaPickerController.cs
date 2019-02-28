@@ -5,6 +5,7 @@ using Plugin.Media.Abstractions;
 
 using UIKit;
 using Foundation;
+using System.Collections.Generic;
 
 namespace Plugin.Media
 {
@@ -33,11 +34,12 @@ namespace Plugin.Media
             }
         }
 
-        /// <summary>
-        /// Gets result of picker
-        /// </summary>
-        /// <returns></returns>
-        public Task<MediaFile> GetResultAsync() =>
+		/// <summary>
+		/// Gets result of picker
+		/// </summary>
+		/// <returns></returns>
+
+		public Task<List<MediaFile>> GetResultAsync() =>
             ((MediaPickerDelegate)Delegate).Task;
 
         bool disposed;

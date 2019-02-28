@@ -13,6 +13,7 @@ using System.Globalization;
 using ImageIO;
 using MobileCoreServices;
 using System.Drawing;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Plugin.Media
@@ -45,8 +46,8 @@ namespace Plugin.Media
 		}
 
 		public UIView View => viewController.View;
-
-		public Task<MediaFile> Task => tcs.Task;
+		
+		public Task<List<MediaFile>> Task => tcs.Task;
 
 		public override async void FinishedPickingMedia(UIImagePickerController picker, NSDictionary info)
 		{
@@ -77,7 +78,22 @@ namespace Plugin.Media
                 if (mediaFile == null)
                     tcs.SetException(new FileNotFoundException());
 				else
-					tcs.TrySetResult(mediaFile);
+					tcs.TrySetResult(new List<MediaFile> { mediaFile });
+			});
+		}
+
+		public void Canceled(UINavigationController picker)
+		{
+			RemoveOrientationChangeObserverAndNotifications();
+
+			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone)
+			{
+				UIApplication.SharedApplication.SetStatusBarStyle(MediaImplementation.StatusBarStyle, false);
+			}
+
+			Dismiss(picker, () =>
+			{
+				tcs.SetResult(null);
 			});
 		}
 
@@ -138,18 +154,18 @@ namespace Plugin.Media
 		private NSObject observer;
 		private readonly UIViewController viewController;
 		private readonly UIImagePickerControllerSourceType source;
-		private TaskCompletionSource<MediaFile> tcs = new TaskCompletionSource<MediaFile>();
+		private TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
 		private readonly StoreCameraMediaOptions options;
 
 		private bool IsCaptured =>
 			source == UIImagePickerControllerSourceType.Camera;
-
-		private void Dismiss(UIImagePickerController picker, NSAction onDismiss)
+		
+		private void Dismiss(UINavigationController picker, NSAction onDismiss)
 		{
 			if (viewController == null)
 			{
 				onDismiss();
-				tcs = new TaskCompletionSource<MediaFile>();
+				tcs = new TaskCompletionSource<List<MediaFile>>();
 			}
 			else
 			{
@@ -242,7 +258,7 @@ namespace Plugin.Media
 			if (!viewController.ShouldAutorotate())
 				return false;
 
-			UIInterfaceOrientationMask mask = UIInterfaceOrientationMask.Portrait;
+			var mask = UIInterfaceOrientationMask.Portrait;
 			switch (orientation)
 			{
 				case UIDeviceOrientation.LandscapeLeft:
@@ -431,7 +447,7 @@ namespace Plugin.Media
 			return new MediaFile(path, () => File.OpenRead(path), streamGetterForExternalStorage: () => getStreamForExternalStorage(), albumPath: aPath);
 		}
 
-		private static NSDictionary SetGpsLocation(NSDictionary meta, Location location)
+		internal static NSDictionary SetGpsLocation(NSDictionary meta, Location location)
 		{
 			var newMeta = new NSMutableDictionary();
 			newMeta.SetValuesForKeysWithDictionary(meta);
@@ -452,7 +468,7 @@ namespace Plugin.Media
 			return newMeta;
 		}
 
-		private bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)
+		internal static bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)
 		{
 			try
 			{
@@ -496,7 +512,12 @@ namespace Plugin.Media
 
 				if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
 				{
-					destinationOptions.TiffDictionary = new CGImagePropertiesTiff(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+					var newTiffDict = meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary;
+					if (newTiffDict != null)
+					{
+						newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
+						destinationOptions.TiffDictionary = new CGImagePropertiesTiff(newTiffDict);
+					}
 
 				}
 				if (meta.ContainsKey(ImageIO.CGImageProperties.GPSDictionary))
@@ -589,7 +610,7 @@ namespace Plugin.Media
 			return Path.Combine(path, nname);
 		}
 
-		private static string GetOutputPath(string type, string path, string name)
+		internal static string GetOutputPath(string type, string path, string name)
 		{
 			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), path);
 			Directory.CreateDirectory(path);
@@ -649,7 +670,7 @@ namespace Plugin.Media
 			}
 			else
 			{
-				CGAffineTransform transform = CGAffineTransform.MakeIdentity();
+				var transform = CGAffineTransform.MakeIdentity();
 
 				switch (image.Orientation)
 				{
