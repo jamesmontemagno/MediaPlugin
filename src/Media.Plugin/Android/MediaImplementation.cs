@@ -320,7 +320,7 @@ namespace Plugin.Media
         private int requestId;
 
         public static TaskCompletionSource<MediaFile> completionSource;
-		    private TaskCompletionSource<List<MediaFile>> completionSourceMulti;
+		public static TaskCompletionSource<List<MediaFile>> completionSourceMulti;
 
 
 
