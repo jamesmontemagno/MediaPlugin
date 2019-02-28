@@ -588,7 +588,7 @@ namespace Plugin.Media
 			token.Register(() =>
 			{
 
-        var tcs = Interlocked.Exchange(ref completionSource, null);
+        		var tcs = Interlocked.Exchange(ref completionSourceMulti, null);
 				MediaPickerActivity.MediaPicked -= handler;
 				CancelRequested?.Invoke(null, EventArgs.Empty);
 				CancelRequested = null;
