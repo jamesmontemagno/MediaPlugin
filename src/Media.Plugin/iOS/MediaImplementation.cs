@@ -460,7 +460,19 @@ namespace Plugin.Media
 			var permissionsToRequest = new List<Permission>();
 			foreach(var permission in permissions)
 			{
-				var permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(permission);
+				var permissionStatus = PermissionStatus.Unknown;
+				switch(permission)
+				{
+					case Permission.Camera:
+						permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<CameraPermission>();
+						break;
+					case Permission.Photos:
+						permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<PhotosPermission>();
+						break;
+					case Permission.Microphone:
+						permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<MicrophonePermission>();
+						break;
+				}
 
 				if (permissionStatus != PermissionStatus.Granted)
 					permissionsToRequest.Add(permission);
@@ -470,8 +482,22 @@ namespace Plugin.Media
 			if (permissionsToRequest.Count == 0)
 				return;
 
-			//let's request!
-			var results = await CrossPermissions.Current.RequestPermissionsAsync(permissionsToRequest.ToArray());
+			var results = new Dictionary<Permission, PermissionStatus>();
+			foreach (var permission in permissions)
+			{
+				switch (permission)
+				{
+					case Permission.Camera:
+						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<CameraPermission>());
+						break;
+					case Permission.Photos:
+						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<PhotosPermission>());
+						break;
+					case Permission.Microphone:
+						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<MicrophonePermission>());
+						break;
+				}
+			}
 
 			//check for anything not granted, if none, Awesome!
 			var notGranted = results.Where(r => r.Value != PermissionStatus.Granted);

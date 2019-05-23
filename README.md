@@ -332,14 +332,13 @@ By default, the Media Plugin will attempt to request multiple permissions, but e
 
 Here is an example:
 ```csharp
-var cameraStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Camera);
-var storageStatus = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+var cameraStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<CameraPermission>();
+var storageStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<StoragePermission>();
 
 if (cameraStatus != PermissionStatus.Granted || storageStatus != PermissionStatus.Granted)
 {
-    var results = await CrossPermissions.Current.RequestPermissionsAsync(new[] {Permission.Camera, Permission.Storage});
-    cameraStatus = results[Permission.Camera];
-    storageStatus = results[Permission.Storage];
+    cameraStatus = await CrossPermissions.Current.RequestPermissionAsync<CameraPermission>();
+    storageStatus = await CrossPermissions.Current.RequestPermissionAsync<StoragePermission>();
 }
 
 if (cameraStatus == PermissionStatus.Granted && storageStatus == PermissionStatus.Granted)

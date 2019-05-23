@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Media.Plugin.Sample.UWP", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Media.Plugin.Sample", "Media.Plugin.Sample\Media.Plugin.Sample\Media.Plugin.Sample.csproj", "{16F4EBCE-FB1A-4A06-BB5B-2876E8C2CD7A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{E9B9648A-3644-43E7-9576-A1E2E7271E91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Ad-Hoc|Any CPU = Ad-Hoc|Any CPU
@@ -363,6 +365,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A491FB8F-3E91-418C-9759-73E2A388CF2F} = {E9B9648A-3644-43E7-9576-A1E2E7271E91}
+		{516CC126-FB85-45AC-B8BD-6E55DC0F5A64} = {E9B9648A-3644-43E7-9576-A1E2E7271E91}
+		{8353B054-83F9-423C-B905-D3E4537FDDDB} = {E9B9648A-3644-43E7-9576-A1E2E7271E91}
+		{16F4EBCE-FB1A-4A06-BB5B-2876E8C2CD7A} = {E9B9648A-3644-43E7-9576-A1E2E7271E91}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CE161B4-DA68-43C2-97C8-AA097BA2FF40}

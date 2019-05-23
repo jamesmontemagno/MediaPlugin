@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Plugin.Permissions" Version="4.0.4-beta" />
-    <PackageReference Include="Xamarin.Forms" Version="3.5.0.94564-pre3" />
+    <PackageReference Include="Plugin.Permissions" Version="5.0.0-beta" />
+    <PackageReference Include="Xamarin.Forms" Version="4.0.0.425677" />
   </ItemGroup>
 
   <ItemGroup>

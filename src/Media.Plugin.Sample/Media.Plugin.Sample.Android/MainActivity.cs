@@ -12,7 +12,7 @@ using Plugin.Permissions;
 namespace Media.Plugin.Sample.Droid
 {
     [Activity(Label = "Media.Plugin.Sample", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle bundle)
         {
@@ -21,7 +21,7 @@ namespace Media.Plugin.Sample.Droid
 
             base.OnCreate(bundle);
 			CrossCurrentActivity.Current.Init(this, bundle);
-			global::Xamarin.Forms.Forms.Init(this, bundle);
+			Xamarin.Forms.Forms.Init(this, bundle);
 			Android.Glide.Forms.Init();
 			LoadApplication(new App());
         }

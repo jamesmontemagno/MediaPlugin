@@ -8,7 +8,7 @@ using CoreGraphics;
 using AssetsLibrary;
 using Foundation;
 using UIKit;
-using NSAction = global::System.Action;
+using NSAction = System.Action;
 using System.Globalization;
 using ImageIO;
 using MobileCoreServices;

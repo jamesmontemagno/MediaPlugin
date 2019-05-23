@@ -39,7 +39,7 @@ namespace Plugin.Media
 		{
 			try
 			{
-				Camera camera = new Camera(Tizen.Multimedia.CameraDevice.Rear);
+				var camera = new Camera(Tizen.Multimedia.CameraDevice.Rear);
 				if (camera.CameraCount > 0)
 					IsCameraAvailable = true;
 				else
@@ -82,7 +82,7 @@ namespace Plugin.Media
 				Log.Error(LOG_TAG, "TakePhoto is not supported");
 				throw new NotSupportedException();
 			}
-			AppControl appControl = new AppControl();
+			var appControl = new AppControl();
 			appControl.LaunchMode = AppControlLaunchMode.Group;
 			appControl.Operation = OPERATION_CREATE_CONTENT;
 			appControl.Mime = "image/jpg";
@@ -105,7 +105,7 @@ namespace Plugin.Media
 				Log.Error(LOG_TAG, "TakeVideo is not supported");
 				throw new NotSupportedException();
 			}
-			AppControl appControl= new AppControl();
+			var appControl = new AppControl();
 			appControl.Operation = OPERATION_CREATE_CONTENT;
 			appControl.Mime = "video/3gp";
 			appControl.LaunchMode = AppControlLaunchMode.Group;
@@ -128,7 +128,7 @@ namespace Plugin.Media
 				Log.Error(LOG_TAG, "PickPhoto is not supported");
 				throw new NotSupportedException();
 			}
-			AppControl appControl= new AppControl();
+			var appControl = new AppControl();
 			appControl.LaunchMode = AppControlLaunchMode.Group;
 			SetOptions(options, ref appControl);
 			var ntcs = new TaskCompletionSource<MediaFile>();
@@ -151,7 +151,7 @@ namespace Plugin.Media
 				Log.Error(LOG_TAG, "PickVideo is not supported");
 				throw new NotSupportedException();
 			}
-			AppControl appControl = new AppControl();
+			var appControl = new AppControl();
 			appControl.LaunchMode = AppControlLaunchMode.Group;
 			var ntcs = new TaskCompletionSource<MediaFile>();
 			Interlocked.CompareExchange(ref completionSource, ntcs, null);
@@ -170,10 +170,10 @@ namespace Plugin.Media
 		/// <returns>Allow operation of appcontrol or not</returns>
 		private bool CheckSupportOperation(string operation, string mime)
 		{
-			AppControl appControl = new AppControl();
+			var appControl = new AppControl();
 			appControl.Operation = operation;
 			appControl.Mime = mime;
-			IEnumerable<string> applicationIds = AppControl.GetMatchedApplicationIds(appControl);
+			var applicationIds = AppControl.GetMatchedApplicationIds(appControl);
 			if (applicationIds.Count() == 0) return false;
 			else return true;
 		}

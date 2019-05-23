@@ -21,7 +21,7 @@ namespace Media.Plugin.Sample.UWP
         {
             this.InitializeComponent();
 
-            LoadApplication(new Media.Plugin.Sample.App());
+            LoadApplication(new Sample.App());
         }
     }
 }

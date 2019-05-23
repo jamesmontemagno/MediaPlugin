@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Android.App;
 using Permission = Plugin.Permissions.Abstractions.Permission;
+using Plugin.Permissions.Abstractions;
 
 namespace Plugin.Media
 {
@@ -36,7 +37,7 @@ namespace Plugin.Media
 		public MediaImplementation()
         {
 
-            this.context = Android.App.Application.Context;
+            this.context = Application.Context;
             IsCameraAvailable = context.PackageManager.HasSystemFeature(PackageManager.FeatureCamera);
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.Gingerbread)
@@ -214,7 +215,7 @@ namespace Plugin.Media
 
                     try
                     {
-                        Android.Media.MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
+						MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
 
                         var values = new ContentValues();
                         values.Put(MediaStore.Images.Media.InterfaceConsts.Title, System.IO.Path.GetFileNameWithoutExtension(f.AbsolutePath));
@@ -319,8 +320,8 @@ namespace Plugin.Media
         private readonly Context context;
         private int requestId;
 
-        public static TaskCompletionSource<MediaFile> completionSource;
-		public static TaskCompletionSource<List<MediaFile>> completionSourceMulti;
+        internal static TaskCompletionSource<MediaFile> CompletionSource;
+		internal static TaskCompletionSource<List<MediaFile>> CompletionSourceMulti;
 
 
 
@@ -332,34 +333,46 @@ namespace Plugin.Media
 
             var checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
 
-            var hasStoragePermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
-            var hasCameraPermission = Permissions.Abstractions.PermissionStatus.Granted;
+            var hasStoragePermission = await CrossPermissions.Current.CheckPermissionStatusAsync<StoragePermission>();
+            var hasCameraPermission = PermissionStatus.Granted;
             if(checkCamera)
-                hasCameraPermission = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Camera);
+                hasCameraPermission = await CrossPermissions.Current.CheckPermissionStatusAsync<CameraPermission>();
 
 
-            var permissions = new List<Permissions.Abstractions.Permission>();
+            var permissions = new List<Permission>();
 
-            if (hasCameraPermission != Permissions.Abstractions.PermissionStatus.Granted)
-                permissions.Add(Permissions.Abstractions.Permission.Camera);
+            if (hasCameraPermission != PermissionStatus.Granted)
+                permissions.Add(Permission.Camera);
 
-            if(hasStoragePermission != Permissions.Abstractions.PermissionStatus.Granted)
-                permissions.Add(Permissions.Abstractions.Permission.Storage);
+            if(hasStoragePermission != PermissionStatus.Granted)
+                permissions.Add(Permission.Storage);
 
             if (permissions.Count == 0) //good to go!
                 return true;
 
-            var results = await CrossPermissions.Current.RequestPermissionsAsync(permissions.ToArray());
-
-			if (results.ContainsKey(Permissions.Abstractions.Permission.Storage) &&
-					results[Permissions.Abstractions.Permission.Storage] != Permissions.Abstractions.PermissionStatus.Granted)
+			var results = new Dictionary<Permission, PermissionStatus>();
+			foreach(var permission in permissions)
+			{
+				switch (permission)
+				{
+					case Permission.Camera:
+						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<CameraPermission>());
+						break;
+					case Permission.Storage:
+						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<StoragePermission>());
+						break;
+				}
+			}
+			
+			if (results.ContainsKey(Permission.Storage) &&
+					results[Permission.Storage] != PermissionStatus.Granted)
 			{
 				Console.WriteLine("Storage permission Denied.");
 				return false;
 			}
 
-			if (results.ContainsKey(Permissions.Abstractions.Permission.Camera) &&
-					results[Permissions.Abstractions.Permission.Camera] != Permissions.Abstractions.PermissionStatus.Granted)
+			if (results.ContainsKey(Permission.Camera) &&
+					results[Permission.Camera] != PermissionStatus.Granted)
 			{
 				Console.WriteLine("Camera permission Denied.");
 				return false;
@@ -374,13 +387,12 @@ namespace Plugin.Media
             if ((int)Build.VERSION.SdkInt < 23)
                 return true;
 
-            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permissions.Abstractions.Permission.Storage);
-            if (status != Permissions.Abstractions.PermissionStatus.Granted)
+			var status = await CrossPermissions.Current.CheckPermissionStatusAsync<StoragePermission>();
+            if (status != PermissionStatus.Granted)
             {
                 Console.WriteLine("Does not have storage permission granted, requesting.");
-                var results = await CrossPermissions.Current.RequestPermissionsAsync(Permissions.Abstractions.Permission.Storage);
-                if (results.ContainsKey(Permissions.Abstractions.Permission.Storage) &&
-                    results[Permissions.Abstractions.Permission.Storage] != Permissions.Abstractions.PermissionStatus.Granted)
+                var result = await CrossPermissions.Current.RequestPermissionAsync<StoragePermission>();
+                if (result != PermissionStatus.Granted)
                 {
                     Console.WriteLine("Storage permission Denied.");
                     return false;
@@ -399,7 +411,7 @@ namespace Plugin.Media
 					return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
 
 				//try to use current activity else application context
-				var permissionContext = CrossCurrentActivity.Current.Activity ?? Android.App.Application.Context;
+				var permissionContext = CrossCurrentActivity.Current.Activity ?? Application.Context;
 
 				if (context == null)
 				{
@@ -407,7 +419,7 @@ namespace Plugin.Media
 					return false;
 				}
 
-				var info = context.PackageManager.GetPackageInfo(context.PackageName, Android.Content.PM.PackageInfoFlags.Permissions);
+				var info = context.PackageManager.GetPackageInfo(context.PackageName, PackageInfoFlags.Permissions);
 
 				if (info == null)
 				{
@@ -516,14 +528,14 @@ namespace Plugin.Media
 				return Task.FromResult((MediaFile) null);
 
             var ntcs = new TaskCompletionSource<MediaFile>(id);
-            if (Interlocked.CompareExchange(ref completionSource, ntcs, null) != null)
+            if (Interlocked.CompareExchange(ref CompletionSource, ntcs, null) != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
 
 			context.StartActivity(CreateMediaIntent(id, type, action, options));
 
 			void handler(object s, MediaPickedEventArgs e)
 			{
-				var tcs = Interlocked.Exchange(ref completionSource, null);
+				var tcs = Interlocked.Exchange(ref CompletionSource, null);
 
 				MediaPickerActivity.MediaPicked -= handler;
 
@@ -540,7 +552,7 @@ namespace Plugin.Media
 
 			token.Register(() =>
 	        {
-		        var tcs = Interlocked.Exchange(ref completionSource, null);
+		        var tcs = Interlocked.Exchange(ref CompletionSource, null);
 
 		        MediaPickerActivity.MediaPicked -= handler;
 		        CancelRequested?.Invoke(null, EventArgs.Empty);
@@ -552,7 +564,7 @@ namespace Plugin.Media
 
 			MediaPickerActivity.MediaPicked += handler;
 
-			return completionSource.Task;
+			return CompletionSource.Task;
 		}
 
 		private Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
@@ -563,14 +575,14 @@ namespace Plugin.Media
 				return Task.FromResult((List<MediaFile>)null);
 
 			var ntcs = new TaskCompletionSource<List<MediaFile>>(id);
-			if (Interlocked.CompareExchange(ref completionSourceMulti, ntcs, null) != null)
+			if (Interlocked.CompareExchange(ref CompletionSourceMulti, ntcs, null) != null)
 				throw new InvalidOperationException("Only one operation can be active at a time");
 
 			context.StartActivity(CreateMediaIntent(id, type, action, options));
 
 			void handler(object s, MediaPickedEventArgs e)
 			{
-				var tcs = Interlocked.Exchange(ref completionSourceMulti, null);
+				var tcs = Interlocked.Exchange(ref CompletionSourceMulti, null);
 
 				MediaPickerActivity.MediaPicked -= handler;
 
@@ -588,7 +600,7 @@ namespace Plugin.Media
 			token.Register(() =>
 			{
 
-        		var tcs = Interlocked.Exchange(ref completionSourceMulti, null);
+        		var tcs = Interlocked.Exchange(ref CompletionSourceMulti, null);
 				MediaPickerActivity.MediaPicked -= handler;
 				CancelRequested?.Invoke(null, EventArgs.Empty);
 				CancelRequested = null;
@@ -598,7 +610,7 @@ namespace Plugin.Media
 
 			MediaPickerActivity.MediaPicked += handler;
 
-			return completionSourceMulti.Task;
+			return CompletionSourceMulti.Task;
         }
 
         /// <summary>
