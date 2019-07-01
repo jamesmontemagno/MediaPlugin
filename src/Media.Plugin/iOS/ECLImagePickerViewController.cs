@@ -139,27 +139,10 @@ namespace Plugin.Media
 			_options = options ?? new StoreCameraMediaOptions();
 		}
 
-		void SelectedAssets(List<ALAsset> assets)
+
+		void SelectedMediaFiles(List<MediaFile> mediaFiles)
 		{
-			var results = new List<MediaFile>();
-			foreach (var asset in assets)
-			{
-				var obj = asset.AssetType;
-				if (obj == default(ALAssetType))
-					continue;
-
-				var rep = asset.DefaultRepresentation;
-				if (rep != null)
-				{
-					var mediaFile = GetPictureMediaFile(asset);
-					if (mediaFile != null)
-					{
-						results.Add(mediaFile);
-					}
-				}
-			}
-
-			_TaskCompletionSource.TrySetResult(results);
+			_TaskCompletionSource.TrySetResult(mediaFiles);
 		}
 
 		private MediaFile GetPictureMediaFile(ALAsset asset)
@@ -175,6 +158,10 @@ namespace Plugin.Media
 				_options.Name);
 
 			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
+			cgImage?.Dispose();
+			cgImage = null;
+			rep?.Dispose();
+			rep = null;
 
 			var percent = 1.0f;
 			if (_options.PhotoSize != PhotoSize.Full)
@@ -257,6 +244,8 @@ namespace Plugin.Media
 			if (!savedImage)
 				image.AsJPEG(quality).Save(path, true);
 
+			image?.Dispose();
+			image = null;
 
 			string aPath = null;
 			//try to get the album path's url
@@ -577,8 +566,11 @@ namespace Plugin.Media
 				if (ImmediateReturn)
 				{
 					var asset = AssetForIndexPath(targetIndexPath);
-					var obj = new List<ALAsset> { asset };
-					Parent.SelectedAssets(obj);
+					var mediaFile = Parent?.GetPictureMediaFile(asset);
+					asset?.Dispose();
+					asset = null;
+					var selectedMediaFile = new List<MediaFile>() { mediaFile };
+					Parent?.SelectedMediaFiles(selectedMediaFile);
 				}
 			}
 
@@ -621,18 +613,22 @@ namespace Plugin.Media
 
 			private void DoneClicked(object sender = null, EventArgs e = null)
 			{
-				var selected = new List<ALAsset>();
+				var selectedMediaFile = new List<MediaFile>();
+				var parent = Parent;
 
 				foreach (var selectedIndexPath in CollectionView.GetIndexPathsForSelectedItems())
 				{
-					selected.Add(AssetForIndexPath(selectedIndexPath));
+					var alAsset = AssetForIndexPath(selectedIndexPath);
+					var mediaFile = parent?.GetPictureMediaFile(alAsset);
+					if(mediaFile != null)
+					{
+						selectedMediaFile.Add(mediaFile);
+					}
+					alAsset?.Dispose();
+					alAsset = null;
 				}
 
-				var parent = Parent;
-				if (parent != null)
-				{
-					parent.SelectedAssets(selected);
-				}
+				parent?.SelectedMediaFiles(selectedMediaFile);
 			}
 
 			class ELCAssetCell : UICollectionViewCell

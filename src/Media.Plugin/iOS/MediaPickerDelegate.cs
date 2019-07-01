@@ -407,6 +407,7 @@ namespace Plugin.Media
 
 				imageData.Save(path, true);
 				imageData.Dispose();
+				
 			}
 
 
@@ -474,6 +475,7 @@ namespace Plugin.Media
 			{
 				var finalQuality = quality;
 				var imageData = image.AsJPEG(finalQuality);
+
 				//continue to move down quality , rare instances
 				while (imageData == null && finalQuality > 0)
 				{
@@ -540,7 +542,10 @@ namespace Plugin.Media
 				if (success)
 				{
 					imageWithExif.Save(path, true);
+					imageWithExif.Dispose();
+					imageWithExif = null;
 				}
+				
 				return success;
 
 			}
@@ -761,6 +766,8 @@ namespace Plugin.Media
 			imageData.AsStream().CopyTo(stream);
 			stream.Position = 0;
 			imageData.Dispose();
+			image.Dispose();
+			image = null;
 			return stream;
 
 		}
