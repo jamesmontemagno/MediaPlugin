@@ -28,15 +28,9 @@ namespace Plugin.Media
 			// Android API 25 and up
 			intent.PutExtra(extraBackPost25, 1);
 
-			//Removed PutExtra.  LG Phones crash when setting this intent and the back camera
-			// is already enabled (UserFront=false)
-
-			//TODO: Test if we can use the GetExtra to check before setting. May still fix LG
-			//with less potential negative side-effects for other phones or for the front-facing camera
-			
-			//var val = intent.GetBooleanExtra(extraUserFront, false);
-			//if (val)
-			//	intent.PutExtra(extraUserFront, false);
+			var val = intent.GetBooleanExtra(extraUserFront, false);
+			if (val)
+				intent.PutExtra(extraUserFront, false);
 		}
 	}
 }
