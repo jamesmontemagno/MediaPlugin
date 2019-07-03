@@ -27,7 +27,12 @@ namespace Plugin.Media
 
 			// Android API 25 and up
 			intent.PutExtra(extraBackPost25, 1);
-			intent.PutExtra(extraUserFront, false);
+
+			//TODO: Test if we can use the GetExtra to check before setting. May still fix LG
+			//with less potential negative side-effects 
+			//var val = intent.GetBooleanExtra(extraUserFront, false);
+			//if (val)
+				intent.PutExtra(extraUserFront, false);
 		}
 	}
 }
