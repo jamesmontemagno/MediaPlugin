@@ -10,6 +10,7 @@ using Foundation;
 using System.Threading.Tasks;
 using CoreGraphics;
 using Plugin.Media.Abstractions;
+using System.Linq;
 
 namespace Plugin.Media
 {
@@ -139,30 +140,13 @@ namespace Plugin.Media
 			_options = options ?? new StoreCameraMediaOptions();
 		}
 
-		void SelectedAssets(List<ALAsset> assets)
+
+		void SelectedMediaFiles(List<MediaFile> mediaFiles)
 		{
-			var results = new List<MediaFile>();
-			foreach (var asset in assets)
-			{
-				var obj = asset.AssetType;
-				if (obj == default(ALAssetType))
-					continue;
-
-				var rep = asset.DefaultRepresentation;
-				if (rep != null)
-				{
-					var mediaFile = GetPictureMediaFile(asset);
-					if (mediaFile != null)
-					{
-						results.Add(mediaFile);
-					}
-				}
-			}
-
-			_TaskCompletionSource.TrySetResult(results);
+			_TaskCompletionSource.TrySetResult(mediaFiles);
 		}
 
-		private MediaFile GetPictureMediaFile(ALAsset asset)
+		private MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
 		{
 			var rep = asset.DefaultRepresentation;
 			if (rep == null)
@@ -172,9 +156,13 @@ namespace Plugin.Media
 
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				_options.Directory ?? "temp",
-				_options.Name);
+				_options.Name, index);
 
 			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
+			cgImage?.Dispose();
+			cgImage = null;
+			rep?.Dispose();
+			rep = null;
 
 			var percent = 1.0f;
 			if (_options.PhotoSize != PhotoSize.Full)
@@ -257,6 +245,8 @@ namespace Plugin.Media
 			if (!savedImage)
 				image.AsJPEG(quality).Save(path, true);
 
+			image?.Dispose();
+			image = null;
 
 			string aPath = null;
 			//try to get the album path's url
@@ -577,8 +567,11 @@ namespace Plugin.Media
 				if (ImmediateReturn)
 				{
 					var asset = AssetForIndexPath(targetIndexPath);
-					var obj = new List<ALAsset> { asset };
-					Parent.SelectedAssets(obj);
+					var mediaFile = Parent?.GetPictureMediaFile(asset);
+					asset?.Dispose();
+					asset = null;
+					var selectedMediaFile = new List<MediaFile>() { mediaFile };
+					Parent?.SelectedMediaFiles(selectedMediaFile);
 				}
 			}
 
@@ -621,18 +614,25 @@ namespace Plugin.Media
 
 			private void DoneClicked(object sender = null, EventArgs e = null)
 			{
-				var selected = new List<ALAsset>();
-
-				foreach (var selectedIndexPath in CollectionView.GetIndexPathsForSelectedItems())
-				{
-					selected.Add(AssetForIndexPath(selectedIndexPath));
-				}
-
 				var parent = Parent;
-				if (parent != null)
+				var selectedItemsIndex = CollectionView.GetIndexPathsForSelectedItems();
+				var selectedItemsCount = selectedItemsIndex.Length;
+				var selectedMediaFiles = new MediaFile[selectedItemsCount];
+
+				Parallel.For(0, selectedItemsCount, selectedIndex =>
 				{
-					parent.SelectedAssets(selected);
-				}
+					var alAsset = AssetForIndexPath(selectedItemsIndex[selectedIndex]);
+					var mediaFile = parent?.GetPictureMediaFile(alAsset, selectedIndex);
+					if (mediaFile != null)
+					{
+						selectedMediaFiles[selectedIndex] = mediaFile;
+					}
+
+					alAsset?.Dispose();
+					alAsset = null;
+				});
+
+				parent?.SelectedMediaFiles(selectedMediaFiles.ToList());
 			}
 
 			class ELCAssetCell : UICollectionViewCell
