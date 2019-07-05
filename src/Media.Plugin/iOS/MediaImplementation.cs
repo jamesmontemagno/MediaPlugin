@@ -346,7 +346,7 @@ namespace Plugin.Media
 			var ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
 			var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
 			if (od != null)
-				throw new InvalidOperationException("Only one operation can be active at at time");
+				throw new InvalidOperationException("Only one operation can be active at a time");
 			
 			var picker = ELCImagePickerViewController.Create(options, pickerOptions);
 
