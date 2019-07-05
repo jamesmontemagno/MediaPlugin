@@ -10,6 +10,7 @@ using Foundation;
 using System.Threading.Tasks;
 using CoreGraphics;
 using Plugin.Media.Abstractions;
+using System.Linq;
 
 namespace Plugin.Media
 {
@@ -145,7 +146,7 @@ namespace Plugin.Media
 			_TaskCompletionSource.TrySetResult(mediaFiles);
 		}
 
-		private MediaFile GetPictureMediaFile(ALAsset asset)
+		private MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
 		{
 			var rep = asset.DefaultRepresentation;
 			if (rep == null)
@@ -155,7 +156,7 @@ namespace Plugin.Media
 
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				_options.Directory ?? "temp",
-				_options.Name);
+				_options.Name, index);
 
 			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
 			cgImage?.Dispose();
@@ -613,22 +614,25 @@ namespace Plugin.Media
 
 			private void DoneClicked(object sender = null, EventArgs e = null)
 			{
-				var selectedMediaFile = new List<MediaFile>();
 				var parent = Parent;
+				var selectedItemsIndex = CollectionView.GetIndexPathsForSelectedItems();
+				var selectedItemsCount = selectedItemsIndex.Length;
+				var selectedMediaFiles = new MediaFile[selectedItemsCount];
 
-				foreach (var selectedIndexPath in CollectionView.GetIndexPathsForSelectedItems())
+				Parallel.For(0, selectedItemsCount, selectedIndex =>
 				{
-					var alAsset = AssetForIndexPath(selectedIndexPath);
-					var mediaFile = parent?.GetPictureMediaFile(alAsset);
-					if(mediaFile != null)
+					var alAsset = AssetForIndexPath(selectedItemsIndex[selectedIndex]);
+					var mediaFile = parent?.GetPictureMediaFile(alAsset, selectedIndex);
+					if (mediaFile != null)
 					{
-						selectedMediaFile.Add(mediaFile);
+						selectedMediaFiles[selectedIndex] = mediaFile;
 					}
+
 					alAsset?.Dispose();
 					alAsset = null;
-				}
+				});
 
-				parent?.SelectedMediaFiles(selectedMediaFile);
+				parent?.SelectedMediaFiles(selectedMediaFiles.ToList());
 			}
 
 			class ELCAssetCell : UICollectionViewCell

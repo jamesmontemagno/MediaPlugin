@@ -615,18 +615,29 @@ namespace Plugin.Media
 			return Path.Combine(path, nname);
 		}
 
-		internal static string GetOutputPath(string type, string path, string name)
+		internal static string GetOutputPath(string type, string path, string name, long index = 0)
 		{
 			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), path);
 			Directory.CreateDirectory(path);
 
+			var epoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+			var postpendName = index == 0 ? string.Empty : $"{index}";
+			postpendName += Math.Abs(epoch);
 			if (string.IsNullOrWhiteSpace(name))
 			{
-				var timestamp = DateTime.Now.ToString("yyyMMdd_HHmmss", CultureInfo.InvariantCulture);
 				if (type == MediaImplementation.TypeImage)
-					name = "IMG_" + timestamp + ".jpg";
+					name = $"IMG_{postpendName}.jpg";
 				else
-					name = "VID_" + timestamp + ".mp4";
+					name = $"VID_{postpendName}.mp4";
+			}
+			else
+			{
+				var namePart = name.Split(".");
+				name = $"{namePart[0]}_{postpendName}";
+				if(namePart.Length > 1)
+				{
+					name = name + namePart[1];
+				}
 			}
 
 			return Path.Combine(path, GetUniquePath(type, path, name));
