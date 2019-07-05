@@ -27,7 +27,10 @@ namespace Plugin.Media
 
 			// Android API 25 and up
 			intent.PutExtra(extraBackPost25, 1);
-			intent.PutExtra(extraUserFront, false);
+
+			var val = intent.GetBooleanExtra(extraUserFront, false);
+			if (val)
+				intent.PutExtra(extraUserFront, false);
 		}
 	}
 }
