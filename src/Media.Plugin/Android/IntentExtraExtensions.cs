@@ -17,7 +17,10 @@ namespace Plugin.Media
 
 			// Android API 25 and up
 			intent.PutExtra(extraFrontPost25, 1);
-			intent.PutExtra(extraUserFront, true);
+
+			var isIntentNeeded = intent.GetBooleanExtra(extraUserFront, false);
+			if (isIntentNeeded)
+				intent.PutExtra(extraUserFront, true);
 		}
 
 		public static void UseBackCamera(this Intent intent)
@@ -28,8 +31,8 @@ namespace Plugin.Media
 			// Android API 25 and up
 			intent.PutExtra(extraBackPost25, 1);
 
-			var val = intent.GetBooleanExtra(extraUserFront, false);
-			if (val)
+			var isIntentNeeded = intent.GetBooleanExtra(extraUserFront, false);
+			if (isIntentNeeded)
 				intent.PutExtra(extraUserFront, false);
 		}
 	}
