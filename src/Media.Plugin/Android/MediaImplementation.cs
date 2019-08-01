@@ -122,6 +122,9 @@ namespace Plugin.Media
 
 			var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true }, token);
 
+			if (medias == null)
+				return null;
+
 			if (options == null)
 				options = new PickMediaOptions();
 
