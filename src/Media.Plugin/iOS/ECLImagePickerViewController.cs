@@ -164,89 +164,11 @@ namespace Plugin.Media
 			rep?.Dispose();
 			rep = null;
 
-			var percent = 1.0f;
-			if (_options.PhotoSize != PhotoSize.Full)
-			{
-				try
-				{
-					switch (_options.PhotoSize)
-					{
-						case PhotoSize.Large:
-							percent = .75f;
-							break;
-						case PhotoSize.Medium:
-							percent = .5f;
-							break;
-						case PhotoSize.Small:
-							percent = .25f;
-							break;
-						case PhotoSize.Custom:
-							percent = (float)_options.CustomPhotoSize / 100f;
-							break;
-					}
-
-					if (_options.PhotoSize == PhotoSize.MaxWidthHeight && _options.MaxWidthHeight.HasValue)
-					{
-						var max = Math.Max(image.CGImage.Width, image.CGImage.Height);
-						if (max > _options.MaxWidthHeight.Value)
-						{
-							percent = (float)_options.MaxWidthHeight.Value / (float)max;
-						}
-					}
-
-					if (percent < 1.0f)
-					{
-						//begin resizing image
-						image = image.ResizeImageWithAspectRatio(percent);
-					}
-
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"Unable to compress image: {ex}");
-				}
-			}
-
-
-			NSDictionary meta = null;
-			try
-			{
-				//meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(asset.AssetUrl);
-
-				//meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
-				if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
-				{
-					var newMeta = new NSMutableDictionary();
-					newMeta.SetValuesForKeysWithDictionary(meta);
-					var newTiffDict = new NSMutableDictionary();
-					newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
-					newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
-					newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
-
-					meta = newMeta;
-				}
-				var location = _options.Location;
-				if (meta != null && location != null)
-				{
-					meta = MediaPickerDelegate.SetGpsLocation(meta, location);
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Unable to get metadata: {ex}");
-			}
-
-			//iOS quality is 0.0-1.0
-			var quality = (_options.CompressionQuality / 100f);
-			var savedImage = false;
-			if (meta != null)
-				savedImage = MediaPickerDelegate.SaveImageWithMetadata(image, quality, meta, path);
-
-			if (!savedImage)
-				image.AsJPEG(quality).Save(path, true);
+			image.AsJPEG().Save(path, true);
 
 			image?.Dispose();
 			image = null;
+			GC.Collect(GC.MaxGeneration, GCCollectionMode.Default);
 
 			string aPath = null;
 			//try to get the album path's url

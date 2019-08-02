@@ -3,6 +3,7 @@ using System;
 using System.Drawing;
 using UIKit;
 using CoreImage;
+using Foundation;
 
 namespace Plugin.Media
 {
@@ -21,34 +22,40 @@ namespace Plugin.Media
         {
             if (scale > 1.0f)
                 return imageSource;
-			
-            using (var c = CIContext.Create())
-            {
-                var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
-
-                var f = new CILanczosScaleTransform
-                {
-                    Scale = scale,
-                    Image = sourceImage,
-                    AspectRatio = 1.0f
-                };
 
 
-                var output = f.OutputImage;
+			using (var c = CIContext.Create())
+			{
+				var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
+				var orientation = imageSource.Orientation;
+				imageSource?.Dispose();
 
-                var cgi = c.CreateCGImage(output, output.Extent);
-                return UIImage.FromImage(cgi, 1.0f, imageSource.Orientation);
-            }
-        }
+				var transform = new CILanczosScaleTransform
+				{
+					Scale = scale,
+					Image = sourceImage,
+					AspectRatio = 1.0f
+				};
 
-        /// <summary>
-        /// Resize image to maximum size
-        /// keeping the aspect ratio
-        /// </summary>
-        public static UIImage ResizeImageWithAspectRatio(this UIImage sourceImage, float maxWidth, float maxHeight)
+				var output = transform.OutputImage;
+				using (var cgi = c.CreateCGImage(output, output.Extent))
+				{
+					transform?.Dispose();
+					output?.Dispose();
+					sourceImage?.Dispose();
+
+					return UIImage.FromImage(cgi, 1.0f, orientation);
+				}
+				
+			}
+		}
+
+		/// <summary>
+		/// Resize image to maximum size
+		/// keeping the aspect ratio
+		/// </summary>
+		public static UIImage ResizeImageWithAspectRatio(this UIImage sourceImage, float maxWidth, float maxHeight)
         {
-			
-
             var sourceSize = sourceImage.Size;
             var maxResizeFactor = Math.Max(maxWidth / sourceSize.Width, maxHeight / sourceSize.Height);
             if (maxResizeFactor > 1) 
