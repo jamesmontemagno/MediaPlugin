@@ -514,9 +514,11 @@ namespace Plugin.Media
 
 				if (meta.ContainsKey(ImageIO.CGImageProperties.TIFFDictionary))
 				{
-					var newTiffDict = meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary;
-					if (newTiffDict != null)
+					var existingTiffDict = meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary;
+					if (existingTiffDict != null)
 					{
+						var newTiffDict = new NSMutableDictionary();
+						newTiffDict.SetValuesForKeysWithDictionary(existingTiffDict);
 						newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
 						destinationOptions.TiffDictionary = new CGImagePropertiesTiff(newTiffDict);
 					}
