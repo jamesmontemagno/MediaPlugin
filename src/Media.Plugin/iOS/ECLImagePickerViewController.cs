@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using CoreGraphics;
 using Plugin.Media.Abstractions;
 using System.Linq;
+using System.Threading;
+using ImageIO;
 
 namespace Plugin.Media
 {
@@ -73,6 +75,7 @@ namespace Plugin.Media
 		public int MaximumImagesCount { get; set; }
 
 		private readonly StoreCameraMediaOptions _options;
+		private MediaPickerDelegate _mediaPickerDelegate;
 
 		readonly TaskCompletionSource<List<MediaFile>> _TaskCompletionSource = new TaskCompletionSource<List<MediaFile>>();
 
@@ -138,6 +141,7 @@ namespace Plugin.Media
 		ELCImagePickerViewController(UIViewController rootController, StoreCameraMediaOptions options = null) : base(rootController)
 		{
 			_options = options ?? new StoreCameraMediaOptions();
+			_mediaPickerDelegate = new MediaPickerDelegate(this, UIImagePickerControllerSourceType.PhotoLibrary, options, default(CancellationToken));
 		}
 
 
@@ -146,36 +150,13 @@ namespace Plugin.Media
 			_TaskCompletionSource.TrySetResult(mediaFiles);
 		}
 
-		private MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
+		private Task<MediaFile> GetPictureMediaFile(ALAsset asset, long index = 0)
 		{
 			var rep = asset.DefaultRepresentation;
-			if (rep == null)
-				return null;
+            if (rep == null)
+                return Task.FromResult(default(MediaFile));
 
-			var cgImage = rep.GetImage();
-
-			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
-				_options.Directory ?? "temp",
-				_options.Name, index);
-
-			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
-			cgImage?.Dispose();
-			cgImage = null;
-			rep?.Dispose();
-			rep = null;
-
-			image.AsJPEG().Save(path, true);
-
-			image?.Dispose();
-			image = null;
-			GC.Collect(GC.MaxGeneration, GCCollectionMode.Default);
-
-			string aPath = null;
-			//try to get the album path's url
-			var url = asset.AssetUrl;
-			aPath = url?.AbsoluteString;
-
-			return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
+            return _mediaPickerDelegate.GetPictureMediaFile(asset, index);
 		}
 
 		void CancelledPicker()
@@ -484,12 +465,12 @@ namespace Plugin.Media
 				return assets[path.Row];
 			}
 
-			private void AssetSelected(NSIndexPath targetIndexPath, bool selected)
+			private async void AssetSelected(NSIndexPath targetIndexPath, bool selected)
 			{
 				if (ImmediateReturn)
 				{
 					var asset = AssetForIndexPath(targetIndexPath);
-					var mediaFile = Parent?.GetPictureMediaFile(asset);
+					var mediaFile = await Parent?.GetPictureMediaFile(asset);
 					asset?.Dispose();
 					asset = null;
 					var selectedMediaFile = new List<MediaFile>() { mediaFile };
@@ -541,10 +522,10 @@ namespace Plugin.Media
 				var selectedItemsCount = selectedItemsIndex.Length;
 				var selectedMediaFiles = new MediaFile[selectedItemsCount];
 
-				Parallel.For(0, selectedItemsCount, selectedIndex =>
+				Parallel.For(0, selectedItemsCount, async selectedIndex =>
 				{
 					var alAsset = AssetForIndexPath(selectedItemsIndex[selectedIndex]);
-					var mediaFile = parent?.GetPictureMediaFile(alAsset, selectedIndex);
+					var mediaFile = await parent?.GetPictureMediaFile(alAsset, selectedIndex);
 					if (mediaFile != null)
 					{
 						selectedMediaFiles[selectedIndex] = mediaFile;

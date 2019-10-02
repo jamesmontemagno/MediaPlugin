@@ -283,11 +283,35 @@ namespace Plugin.Media
 			return viewController.GetSupportedInterfaceOrientations().HasFlag(mask);
 		}
 
+        public Task<MediaFile> GetPictureMediaFile(NSDictionary info)
+        {
+            var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
+            var meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
+            var url = info[UIImagePickerController.ReferenceUrl] as NSUrl;
+            var path = GetOutputPath(MediaImplementation.TypeImage,
+	            options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
+	            options.Name);
+            return GetPictureMediaFileInternal(image, meta, url, path);
+        }
+        
+        public async Task<MediaFile> GetPictureMediaFile(ALAsset asset, long index = 0)
+        {
+            var rep = asset.DefaultRepresentation;
+            var cgImage = rep.GetImage();
+            var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
+            var meta = asset.DefaultRepresentation.Metadata;
+            var url = asset.AssetUrl;
+            var path = GetOutputPath(MediaImplementation.TypeImage,
+	            options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
+	            options.Name, index);
+            var result = await GetPictureMediaFileInternal(image, meta, url, path);
+            image?.Dispose();
+            rep?.Dispose();
+            return result;
+        }
 
-		private async Task<MediaFile> GetPictureMediaFile(NSDictionary info)
+        private async Task<MediaFile> GetPictureMediaFileInternal(UIImage image, NSDictionary meta, NSUrl url, string outputDir)
 		{
-			var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
-
             if (image == null)
                 return null;
 
@@ -343,16 +367,14 @@ namespace Plugin.Media
 				}
 			}
 
-
-			NSDictionary meta = null;
+            
 			try
 			{
 				if (options.SaveMetaData)
 				{
 					if (source == UIImagePickerControllerSourceType.Camera)
 					{
-						meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
-						if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+                        if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
 						{
 							var newMeta = new NSMutableDictionary();
 							newMeta.SetValuesForKeysWithDictionary(meta);
@@ -371,8 +393,7 @@ namespace Plugin.Media
 					}
 					else
 					{
-						var url = info[UIImagePickerController.ReferenceUrl] as NSUrl;
-						if(url != null)
+                        if(url != null)
 							meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(url);
 					}
 				}
@@ -416,8 +437,7 @@ namespace Plugin.Media
 			{
 
 				//try to get the album path's url
-				var url = (NSUrl)info[UIImagePickerController.ReferenceUrl];
-				aPath = url?.AbsoluteString;
+                aPath = url?.AbsoluteString;
 			}
 			else
 			{
