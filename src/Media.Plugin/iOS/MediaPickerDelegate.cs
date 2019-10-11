@@ -20,6 +20,8 @@ namespace Plugin.Media
 {
 	internal class MediaPickerDelegate : UIImagePickerControllerDelegate
 	{
+		static string photoType;
+
 		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType,
 			StoreCameraMediaOptions options, CancellationToken token)
 		{
@@ -312,8 +314,12 @@ namespace Plugin.Media
 
         private async Task<MediaFile> GetPictureMediaFileInternal(UIImage image, NSDictionary meta, NSUrl url, string outputDir)
 		{
-            if (image == null)
+			var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
+
+			if (image == null)
                 return null;
+
+			photoType = ((info[UIImagePickerController.ReferenceUrl] as NSUrl).PathExtension == "PNG") ? "png" : "jpg";
 
 			var path = GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
@@ -405,7 +411,7 @@ namespace Plugin.Media
 			}
 
 			//iOS quality is 0.0-1.0
-			var quality = (options.CompressionQuality / 100f);
+			var quality = photoType == "jpg" ? (options.CompressionQuality / 100f) : 0f;
 			var savedImage = false;
 			if (meta != null)
 				savedImage = SaveImageWithMetadata(image, quality, meta, path);
@@ -413,7 +419,7 @@ namespace Plugin.Media
 			if (!savedImage)
 			{
 				var finalQuality = quality;
-				var imageData = image.AsJPEG(finalQuality);
+				var imageData = photoType == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
 
 				//continue to move down quality , rare instances
 				while (imageData == null && finalQuality > 0)
@@ -494,7 +500,7 @@ namespace Plugin.Media
 			try
 			{
 				var finalQuality = quality;
-				var imageData = image.AsJPEG(finalQuality);
+				var imageData = photoType == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
 
 				//continue to move down quality , rare instances
 				while (imageData == null && finalQuality > 0)
@@ -648,7 +654,7 @@ namespace Plugin.Media
 			if (string.IsNullOrWhiteSpace(name))
 			{
 				if (type == MediaImplementation.TypeImage)
-					name = $"IMG_{postpendName}.jpg";
+					name = photoType == "jpg" ? $"IMG_{postpendName}.jpg" : $"IMG_{postpendName}.png";
 				else
 					name = $"VID_{postpendName}.mp4";
 			}
@@ -783,8 +789,8 @@ namespace Plugin.Media
 				}
 			}
 
-			var finalQuality = compressionQuality / 100f;
-			var imageData = imageToReturn.AsJPEG(finalQuality);
+			var finalQuality = photoType == "jpg" ? (compressionQuality / 100f) : 0f;
+			var imageData = photoType == "jpg" ? imageToReturn.AsJPEG(finalQuality) : imageToReturn.AsPNG();
 			//continue to move down quality , rare instances
 			while (imageData == null && finalQuality > 0)
 			{
