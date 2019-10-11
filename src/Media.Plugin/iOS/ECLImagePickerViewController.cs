@@ -156,7 +156,7 @@ namespace Plugin.Media
 
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				_options.Directory ?? "temp",
-				_options.Name, index);
+				_options.Name, asset.AssetUrl?.PathExtension, index);
 
 			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
 			cgImage?.Dispose();
