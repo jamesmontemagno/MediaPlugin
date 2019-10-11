@@ -24,10 +24,9 @@ namespace Plugin.Media
         /// </summary>
         public static UIStatusBarStyle StatusBarStyle { get; set; }
 
-       
 
-        ///<inheritdoc/>
-        public Task<bool> Initialize() => Task.FromResult(true);
+		///<inheritdoc/>
+		public Task<bool> Initialize() => Task.FromResult(true);
 
         /// <summary>
         /// Implementation
@@ -346,7 +345,7 @@ namespace Plugin.Media
 			var ndelegate = new MediaPickerDelegate(viewController, sourceType, options, token);
 			var od = Interlocked.CompareExchange(ref pickerDelegate, ndelegate, null);
 			if (od != null)
-				throw new InvalidOperationException("Only one operation can be active at at time");
+				throw new InvalidOperationException("Only one operation can be active at a time");
 			
 			var picker = ELCImagePickerViewController.Create(options, pickerOptions);
 
@@ -379,8 +378,102 @@ namespace Plugin.Media
 					return Task.FromResult(new List<MediaFile>());
 				}
 
+				var files = t.Result;
+				Parallel.ForEach(files, mediaFile =>
+				{
+					ResizeAndCompressImage(options, mediaFile);
+				});
+
 				return t;
 			}).Unwrap();
+		}
+
+		private static void ResizeAndCompressImage(StoreCameraMediaOptions options, MediaFile mediaFile)
+		{
+			var image = UIImage.FromFile(mediaFile.Path);
+			var percent = 1.0f;
+			if (options.PhotoSize != PhotoSize.Full)
+			{
+				try
+				{
+					switch (options.PhotoSize)
+					{
+						case PhotoSize.Large:
+							percent = .75f;
+							break;
+						case PhotoSize.Medium:
+							percent = .5f;
+							break;
+						case PhotoSize.Small:
+							percent = .25f;
+							break;
+						case PhotoSize.Custom:
+							percent = (float)options.CustomPhotoSize / 100f;
+							break;
+					}
+
+					if (options.PhotoSize == PhotoSize.MaxWidthHeight && options.MaxWidthHeight.HasValue)
+					{
+						var max = Math.Max(image.Size.Width, image.Size.Height);
+						if (max > options.MaxWidthHeight.Value)
+						{
+							percent = (float)options.MaxWidthHeight.Value / (float)max;
+						}
+					}
+
+					if (percent < 1.0f)
+					{
+						//begin resizing image
+						image = image.ResizeImageWithAspectRatio(percent);
+					}
+
+					NSDictionary meta = null;
+					try
+					{
+						//meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(asset.AssetUrl);
+
+						//meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
+						if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
+						{
+							var newMeta = new NSMutableDictionary();
+							newMeta.SetValuesForKeysWithDictionary(meta);
+							var newTiffDict = new NSMutableDictionary();
+							newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
+							newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
+							newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
+
+							meta = newMeta;
+						}
+						var location = options.Location;
+						if (meta != null && location != null)
+						{
+							meta = MediaPickerDelegate.SetGpsLocation(meta, location);
+						}
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"Unable to get metadata: {ex}");
+					}
+
+					//iOS quality is 0.0-1.0
+					var quality = (options.CompressionQuality / 100f);
+					var savedImage = false;
+					if (meta != null)
+						savedImage = MediaPickerDelegate.SaveImageWithMetadata(image, quality, meta, mediaFile.Path);
+
+					if (!savedImage)
+						image.AsJPEG(quality).Save(mediaFile.Path, true);
+
+					image?.Dispose();
+					image = null;
+
+					GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Unable to compress image: {ex}");
+				}
+			}
 		}
 
 		private void Dismiss(UIPopoverController popover, UIViewController picker)
@@ -399,7 +492,7 @@ namespace Plugin.Media
 			{
 
 			}
-
+			GC.Collect(GC.MaxGeneration, GCCollectionMode.Default);
 			Interlocked.Exchange(ref pickerDelegate, null);
 		}
 		

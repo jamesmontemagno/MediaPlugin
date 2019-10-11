@@ -265,11 +265,11 @@ It is highly recommended that you use a custom Application that are outlined in 
 
 ## Android Misc Setup
 
-By adding these permissions [Google Play will automatically filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without specific hardware. You can get around this by adding the following to your AssemblyInfo.cs file in your Android project:
+By default, the library adds `android.hardware.camera` and `android.hardware.camera.autofocus` to your apps manifest as optional features. It is your responsbility to check whether your device supports the hardware before using it. If instead you'd like [Google Play to filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without the required hardware, add the following to your AssemblyInfo.cs file in your Android project:
 
 ```
-[assembly: UsesFeature("android.hardware.camera", Required = false)]
-[assembly: UsesFeature("android.hardware.camera.autofocus", Required = false)]
+[assembly: UsesFeature("android.hardware.camera", Required = true)]
+[assembly: UsesFeature("android.hardware.camera.autofocus", Required = true)]
 ```
 
 

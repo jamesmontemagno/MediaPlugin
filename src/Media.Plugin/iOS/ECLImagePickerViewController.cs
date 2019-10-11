@@ -10,6 +10,7 @@ using Foundation;
 using System.Threading.Tasks;
 using CoreGraphics;
 using Plugin.Media.Abstractions;
+using System.Linq;
 
 namespace Plugin.Media
 {
@@ -139,30 +140,13 @@ namespace Plugin.Media
 			_options = options ?? new StoreCameraMediaOptions();
 		}
 
-		void SelectedAssets(List<ALAsset> assets)
+
+		void SelectedMediaFiles(List<MediaFile> mediaFiles)
 		{
-			var results = new List<MediaFile>();
-			foreach (var asset in assets)
-			{
-				var obj = asset.AssetType;
-				if (obj == default(ALAssetType))
-					continue;
-
-				var rep = asset.DefaultRepresentation;
-				if (rep != null)
-				{
-					var mediaFile = GetPictureMediaFile(asset);
-					if (mediaFile != null)
-					{
-						results.Add(mediaFile);
-					}
-				}
-			}
-
-			_TaskCompletionSource.TrySetResult(results);
+			_TaskCompletionSource.TrySetResult(mediaFiles);
 		}
 
-		private MediaFile GetPictureMediaFile(ALAsset asset)
+		private MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
 		{
 			var rep = asset.DefaultRepresentation;
 			if (rep == null)
@@ -172,91 +156,19 @@ namespace Plugin.Media
 
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				_options.Directory ?? "temp",
-				_options.Name);
+				_options.Name, index);
 
 			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
+			cgImage?.Dispose();
+			cgImage = null;
+			rep?.Dispose();
+			rep = null;
 
-			var percent = 1.0f;
-			if (_options.PhotoSize != PhotoSize.Full)
-			{
-				try
-				{
-					switch (_options.PhotoSize)
-					{
-						case PhotoSize.Large:
-							percent = .75f;
-							break;
-						case PhotoSize.Medium:
-							percent = .5f;
-							break;
-						case PhotoSize.Small:
-							percent = .25f;
-							break;
-						case PhotoSize.Custom:
-							percent = (float)_options.CustomPhotoSize / 100f;
-							break;
-					}
+			image.AsJPEG().Save(path, true);
 
-					if (_options.PhotoSize == PhotoSize.MaxWidthHeight && _options.MaxWidthHeight.HasValue)
-					{
-						var max = Math.Max(image.CGImage.Width, image.CGImage.Height);
-						if (max > _options.MaxWidthHeight.Value)
-						{
-							percent = (float)_options.MaxWidthHeight.Value / (float)max;
-						}
-					}
-
-					if (percent < 1.0f)
-					{
-						//begin resizing image
-						image = image.ResizeImageWithAspectRatio(percent);
-					}
-
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"Unable to compress image: {ex}");
-				}
-			}
-
-
-			NSDictionary meta = null;
-			try
-			{
-				//meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(asset.AssetUrl);
-
-				//meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
-				if (meta != null && meta.ContainsKey(ImageIO.CGImageProperties.Orientation))
-				{
-					var newMeta = new NSMutableDictionary();
-					newMeta.SetValuesForKeysWithDictionary(meta);
-					var newTiffDict = new NSMutableDictionary();
-					newTiffDict.SetValuesForKeysWithDictionary(meta[ImageIO.CGImageProperties.TIFFDictionary] as NSDictionary);
-					newTiffDict.SetValueForKey(meta[ImageIO.CGImageProperties.Orientation], ImageIO.CGImageProperties.TIFFOrientation);
-					newMeta[ImageIO.CGImageProperties.TIFFDictionary] = newTiffDict;
-
-					meta = newMeta;
-				}
-				var location = _options.Location;
-				if (meta != null && location != null)
-				{
-					meta = MediaPickerDelegate.SetGpsLocation(meta, location);
-				}
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Unable to get metadata: {ex}");
-			}
-
-			//iOS quality is 0.0-1.0
-			var quality = (_options.CompressionQuality / 100f);
-			var savedImage = false;
-			if (meta != null)
-				savedImage = MediaPickerDelegate.SaveImageWithMetadata(image, quality, meta, path);
-
-			if (!savedImage)
-				image.AsJPEG(quality).Save(path, true);
-
+			image?.Dispose();
+			image = null;
+			GC.Collect(GC.MaxGeneration, GCCollectionMode.Default);
 
 			string aPath = null;
 			//try to get the album path's url
@@ -577,8 +489,11 @@ namespace Plugin.Media
 				if (ImmediateReturn)
 				{
 					var asset = AssetForIndexPath(targetIndexPath);
-					var obj = new List<ALAsset> { asset };
-					Parent.SelectedAssets(obj);
+					var mediaFile = Parent?.GetPictureMediaFile(asset);
+					asset?.Dispose();
+					asset = null;
+					var selectedMediaFile = new List<MediaFile>() { mediaFile };
+					Parent?.SelectedMediaFiles(selectedMediaFile);
 				}
 			}
 
@@ -621,18 +536,25 @@ namespace Plugin.Media
 
 			private void DoneClicked(object sender = null, EventArgs e = null)
 			{
-				var selected = new List<ALAsset>();
-
-				foreach (var selectedIndexPath in CollectionView.GetIndexPathsForSelectedItems())
-				{
-					selected.Add(AssetForIndexPath(selectedIndexPath));
-				}
-
 				var parent = Parent;
-				if (parent != null)
+				var selectedItemsIndex = CollectionView.GetIndexPathsForSelectedItems();
+				var selectedItemsCount = selectedItemsIndex.Length;
+				var selectedMediaFiles = new MediaFile[selectedItemsCount];
+
+				Parallel.For(0, selectedItemsCount, selectedIndex =>
 				{
-					parent.SelectedAssets(selected);
-				}
+					var alAsset = AssetForIndexPath(selectedItemsIndex[selectedIndex]);
+					var mediaFile = parent?.GetPictureMediaFile(alAsset, selectedIndex);
+					if (mediaFile != null)
+					{
+						selectedMediaFiles[selectedIndex] = mediaFile;
+					}
+
+					alAsset?.Dispose();
+					alAsset = null;
+				});
+
+				parent?.SelectedMediaFiles(selectedMediaFiles.ToList());
 			}
 
 			class ELCAssetCell : UICollectionViewCell
