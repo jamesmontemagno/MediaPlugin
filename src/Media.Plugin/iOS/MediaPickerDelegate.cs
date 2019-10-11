@@ -15,6 +15,7 @@ using MobileCoreServices;
 using System.Drawing;
 using System.Collections.Generic;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Plugin.Media
 {
@@ -594,8 +595,23 @@ namespace Plugin.Media
 					  options?.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
 					  options?.Name ?? Path.GetFileName(url.Path));
 
-			
-			File.Move(url.Path, path);
+			try
+			{
+				File.Move(url.Path, path);
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine($"Unable to move file, trying to copy. {ex.Message}");
+				File.Copy(url.Path, path);
+				try
+				{
+					File.Delete(url.Path);
+				}
+				catch (Exception)
+				{
+					Debug.WriteLine($"Unable to delete file, will be left around :( {ex.Message}");
+				}
+			}
 
 			string aPath = null;
 			if (source != UIImagePickerControllerSourceType.Camera)

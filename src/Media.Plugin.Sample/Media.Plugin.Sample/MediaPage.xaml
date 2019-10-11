@@ -10,6 +10,10 @@
 		<Button x:Name="pickPhotos" Text="Pick Photos"/>
 		<Button x:Name="takeVideo" Text="Take Video"/>
 		<Button x:Name="pickVideo" Text="Pick Video"/>
+		<StackLayout Orientation="Horizontal">
+			<Label Text="Compress" VerticalOptions="Center"/>
+			<CheckBox x:Name="CheckBoxCompress" VerticalOptions="Center"/>
+		</StackLayout>
 		<ScrollView>
 			<StackLayout x:Name="ImageList">
 			
