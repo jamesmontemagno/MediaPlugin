@@ -314,12 +314,10 @@ namespace Plugin.Media
 
         private async Task<MediaFile> GetPictureMediaFileInternal(UIImage image, NSDictionary meta, NSUrl url, string outputDir)
 		{
-			var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
-
 			if (image == null)
-                return null;
+				return null;
 
-			photoType = ((info[UIImagePickerController.ReferenceUrl] as NSUrl).PathExtension == "PNG") ? "png" : "jpg";
+			photoType = ((meta[UIImagePickerController.ReferenceUrl] as NSUrl).PathExtension == "PNG") ? "png" : "jpg";
 
 			var path = GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
