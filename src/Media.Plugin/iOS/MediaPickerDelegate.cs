@@ -9,7 +9,6 @@ using AssetsLibrary;
 using Foundation;
 using UIKit;
 using NSAction = System.Action;
-using System.Globalization;
 using ImageIO;
 using MobileCoreServices;
 using System.Drawing;
@@ -41,10 +40,7 @@ namespace Plugin.Media
 			set;
 		}
 
-		public void CancelTask()
-		{
-			tcs.SetResult(null);
-		}
+		public void CancelTask() => tcs.SetResult(null);
 
 		public UIView View => viewController.View;
 		
@@ -130,7 +126,7 @@ namespace Plugin.Media
 				if (IsValidInterfaceOrientation(UIDevice.CurrentDevice.Orientation))
 					orientation = UIDevice.CurrentDevice.Orientation;
 				else
-					orientation = GetDeviceOrientation(viewController.InterfaceOrientation);
+					orientation = getDeviceOrientation(viewController.InterfaceOrientation);
 			}
 
 			double x, y;
@@ -151,14 +147,14 @@ namespace Plugin.Media
 			Popover.PresentFromRect(new CGRect(x, y, width, height), View, 0, animated: true);
 		}
 
-		private UIDeviceOrientation? orientation;
-		private NSObject observer;
-		private readonly UIViewController viewController;
-		private readonly UIImagePickerControllerSourceType source;
-		private TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
-		private readonly StoreCameraMediaOptions options;
+		UIDeviceOrientation? orientation;
+		NSObject observer;
+		readonly UIViewController viewController;
+		readonly UIImagePickerControllerSourceType source;
+		TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
+		readonly StoreCameraMediaOptions options;
 
-		private bool IsCaptured =>
+		bool IsCaptured =>
 			source == UIImagePickerControllerSourceType.Camera;
 		
 		private void Dismiss(UINavigationController picker, NSAction onDismiss)
@@ -229,29 +225,29 @@ namespace Plugin.Media
 
 		private bool GetShouldRotate(UIDeviceOrientation orientation)
 		{
-			var iorientation = UIInterfaceOrientation.Portrait;
+			UIInterfaceOrientation iOrientation;
 			switch (orientation)
 			{
 				case UIDeviceOrientation.LandscapeLeft:
-					iorientation = UIInterfaceOrientation.LandscapeLeft;
+					iOrientation = UIInterfaceOrientation.LandscapeLeft;
 					break;
 
 				case UIDeviceOrientation.LandscapeRight:
-					iorientation = UIInterfaceOrientation.LandscapeRight;
+					iOrientation = UIInterfaceOrientation.LandscapeRight;
 					break;
 
 				case UIDeviceOrientation.Portrait:
-					iorientation = UIInterfaceOrientation.Portrait;
+					iOrientation = UIInterfaceOrientation.Portrait;
 					break;
 
 				case UIDeviceOrientation.PortraitUpsideDown:
-					iorientation = UIInterfaceOrientation.PortraitUpsideDown;
+					iOrientation = UIInterfaceOrientation.PortraitUpsideDown;
 					break;
 
 				default: return false;
 			}
 
-			return viewController.ShouldAutorotateToInterfaceOrientation(iorientation);
+			return viewController.ShouldAutorotateToInterfaceOrientation(iOrientation);
 		}
 
 		private bool GetShouldRotate6(UIDeviceOrientation orientation)
@@ -259,7 +255,7 @@ namespace Plugin.Media
 			if (!viewController.ShouldAutorotate())
 				return false;
 
-			var mask = UIInterfaceOrientationMask.Portrait;
+			UIInterfaceOrientationMask mask;
 			switch (orientation)
 			{
 				case UIDeviceOrientation.LandscapeLeft:
@@ -619,12 +615,12 @@ namespace Plugin.Media
 			return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
 		}
 
-		private static string GetUniquePath(string type, string path, string name, string pathExtension)
+		static string GetUniquePath(string type, string path, string name, string pathExtension)
 		{
 			var isPhoto = (type == MediaImplementation.TypeImage);
 			var ext = Path.GetExtension(name);
             if (string.IsNullOrWhiteSpace(ext))
-                ext = pathExtension;
+                ext = "." + pathExtension;
 			if(string.IsNullOrWhiteSpace(ext))
 				ext = ((isPhoto) ? ".jpg" : ".mp4");
 
@@ -683,7 +679,7 @@ namespace Plugin.Media
 			return false;
 		}
 
-		private static UIDeviceOrientation GetDeviceOrientation(UIInterfaceOrientation self)
+		private static UIDeviceOrientation getDeviceOrientation(UIInterfaceOrientation self)
 		{
 			switch (self)
 			{
