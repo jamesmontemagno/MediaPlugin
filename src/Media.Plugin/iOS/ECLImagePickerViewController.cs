@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using CoreGraphics;
 using Plugin.Media.Abstractions;
 using System.Linq;
+using Photos;
 
 namespace Plugin.Media
 {
@@ -154,11 +155,35 @@ namespace Plugin.Media
 
 			var cgImage = rep.GetImage();
 
+			UIImage image = null;
+			if (cgImage == null)
+			{
+				var fetch = PHAsset.FetchAssets(new[] { asset.AssetUrl }, null);
+				var ph = fetch.firstObject as PHAsset;
+				var manager = PHImageManager.DefaultManager;
+				var options = new PHImageRequestOptions
+				{
+					Version = PHImageRequestOptionsVersion.Original,
+					Synchronous = true
+				};
+
+				manager.RequestImageDataAndOrientation(ph, options, (data, i, orientation, k) =>
+				{
+					if (data != null)
+						image = new UIImage(data, 1.0f);
+				});
+				fetch?.Dispose();
+				ph?.Dispose();
+			}
+			else
+			{
+				image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
+			}
+
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				_options.Directory ?? "temp",
 				_options.Name, asset.AssetUrl?.PathExtension, index);
 
-			var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
 			cgImage?.Dispose();
 			cgImage = null;
 			rep?.Dispose();
