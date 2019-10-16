@@ -11,7 +11,7 @@ namespace Media.Plugin.Sample
 		{
 			InitializeComponent();
 
-			MainPage = new MediaPage();
+			MainPage = new NavigationPage(new MediaPage());
 		}
 
 		protected override void OnStart ()

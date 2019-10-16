@@ -11,10 +11,10 @@ using UIKit;
 using NSAction = System.Action;
 using ImageIO;
 using MobileCoreServices;
-using System.Drawing;
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace Plugin.Media
 {
@@ -288,7 +288,7 @@ namespace Plugin.Media
 			if (image == null)
                 return null;
 
-			var pathExtension = ((info[UIImagePickerController.ReferenceUrl] as NSUrl).PathExtension == "PNG") ? "png" : "jpg";
+			var pathExtension = ((info[UIImagePickerController.ReferenceUrl] as NSUrl)?.PathExtension == "PNG") ? "png" : "jpg";
 
 			var path = GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),

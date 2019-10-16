@@ -4,7 +4,6 @@ using System;
 using UIKit;
 using AssetsLibrary;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using Foundation;
 using System.Threading.Tasks;
