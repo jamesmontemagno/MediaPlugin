@@ -13,6 +13,7 @@ using Plugin.Media.Abstractions;
 using System.Linq;
 using System.Threading;
 using ImageIO;
+using Photos;
 
 namespace Plugin.Media
 {
@@ -155,7 +156,7 @@ namespace Plugin.Media
 			var rep = asset.DefaultRepresentation;
             if (rep == null)
                 return Task.FromResult(default(MediaFile));
-
+            
             return _mediaPickerDelegate.GetPictureMediaFile(asset, index);
 		}
 

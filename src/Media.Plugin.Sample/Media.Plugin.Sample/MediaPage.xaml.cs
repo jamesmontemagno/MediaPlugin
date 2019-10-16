@@ -25,6 +25,7 @@ namespace Media.Plugin.Sample
 
 			takePhoto.Clicked += async (sender, args) =>
 			{
+				await CrossMedia.Current.Initialize();
 				files.Clear();
 				if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
 				{
@@ -49,6 +50,7 @@ namespace Media.Plugin.Sample
 
 			pickPhoto.Clicked += async (sender, args) =>
 			{
+				await CrossMedia.Current.Initialize();
 				files.Clear();
 				if (!CrossMedia.Current.IsPickPhotoSupported)
 				{
@@ -69,6 +71,7 @@ namespace Media.Plugin.Sample
 
 			pickPhotos.Clicked += async (sender, args) =>
 			{
+				await CrossMedia.Current.Initialize();
 				files.Clear();
 				if (!CrossMedia.Current.IsPickPhotoSupported)
 				{
@@ -87,6 +90,7 @@ namespace Media.Plugin.Sample
 
 			takeVideo.Clicked += async (sender, args) =>
 			{
+				await CrossMedia.Current.Initialize();
 				files.Clear();
 				if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakeVideoSupported)
 				{
@@ -110,6 +114,7 @@ namespace Media.Plugin.Sample
 
 			pickVideo.Clicked += async (sender, args) =>
 			{
+				await CrossMedia.Current.Initialize();
 				files.Clear();
 				if (!CrossMedia.Current.IsPickVideoSupported)
 				{

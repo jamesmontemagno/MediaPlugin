@@ -9,7 +9,6 @@ using AssetsLibrary;
 using Foundation;
 using UIKit;
 using NSAction = System.Action;
-using System.Globalization;
 using ImageIO;
 using MobileCoreServices;
 using System.Drawing;
@@ -21,8 +20,6 @@ namespace Plugin.Media
 {
 	internal class MediaPickerDelegate : UIImagePickerControllerDelegate
 	{
-		static string photoType;
-
 		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType,
 			StoreCameraMediaOptions options, CancellationToken token)
 		{
@@ -43,10 +40,7 @@ namespace Plugin.Media
 			set;
 		}
 
-		public void CancelTask()
-		{
-			tcs.SetResult(null);
-		}
+		public void CancelTask() => tcs.SetResult(null);
 
 		public UIView View => viewController.View;
 		
@@ -132,7 +126,7 @@ namespace Plugin.Media
 				if (IsValidInterfaceOrientation(UIDevice.CurrentDevice.Orientation))
 					orientation = UIDevice.CurrentDevice.Orientation;
 				else
-					orientation = GetDeviceOrientation(viewController.InterfaceOrientation);
+					orientation = getDeviceOrientation(viewController.InterfaceOrientation);
 			}
 
 			double x, y;
@@ -153,14 +147,14 @@ namespace Plugin.Media
 			Popover.PresentFromRect(new CGRect(x, y, width, height), View, 0, animated: true);
 		}
 
-		private UIDeviceOrientation? orientation;
-		private NSObject observer;
-		private readonly UIViewController viewController;
-		private readonly UIImagePickerControllerSourceType source;
-		private TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
-		private readonly StoreCameraMediaOptions options;
+		UIDeviceOrientation? orientation;
+		NSObject observer;
+		readonly UIViewController viewController;
+		readonly UIImagePickerControllerSourceType source;
+		TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
+		readonly StoreCameraMediaOptions options;
 
-		private bool IsCaptured =>
+		bool IsCaptured =>
 			source == UIImagePickerControllerSourceType.Camera;
 		
 		private void Dismiss(UINavigationController picker, NSAction onDismiss)
@@ -231,29 +225,29 @@ namespace Plugin.Media
 
 		private bool GetShouldRotate(UIDeviceOrientation orientation)
 		{
-			var iorientation = UIInterfaceOrientation.Portrait;
+			UIInterfaceOrientation iOrientation;
 			switch (orientation)
 			{
 				case UIDeviceOrientation.LandscapeLeft:
-					iorientation = UIInterfaceOrientation.LandscapeLeft;
+					iOrientation = UIInterfaceOrientation.LandscapeLeft;
 					break;
 
 				case UIDeviceOrientation.LandscapeRight:
-					iorientation = UIInterfaceOrientation.LandscapeRight;
+					iOrientation = UIInterfaceOrientation.LandscapeRight;
 					break;
 
 				case UIDeviceOrientation.Portrait:
-					iorientation = UIInterfaceOrientation.Portrait;
+					iOrientation = UIInterfaceOrientation.Portrait;
 					break;
 
 				case UIDeviceOrientation.PortraitUpsideDown:
-					iorientation = UIInterfaceOrientation.PortraitUpsideDown;
+					iOrientation = UIInterfaceOrientation.PortraitUpsideDown;
 					break;
 
 				default: return false;
 			}
 
-			return viewController.ShouldAutorotateToInterfaceOrientation(iorientation);
+			return viewController.ShouldAutorotateToInterfaceOrientation(iOrientation);
 		}
 
 		private bool GetShouldRotate6(UIDeviceOrientation orientation)
@@ -261,7 +255,7 @@ namespace Plugin.Media
 			if (!viewController.ShouldAutorotate())
 				return false;
 
-			var mask = UIInterfaceOrientationMask.Portrait;
+			UIInterfaceOrientationMask mask;
 			switch (orientation)
 			{
 				case UIDeviceOrientation.LandscapeLeft:
@@ -291,10 +285,7 @@ namespace Plugin.Media
             var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
             var meta = info[UIImagePickerController.MediaMetadata] as NSDictionary;
             var url = info[UIImagePickerController.ReferenceUrl] as NSUrl;
-            var path = GetOutputPath(MediaImplementation.TypeImage,
-	            options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
-	            options.Name);
-            return GetPictureMediaFileInternal(image, meta, url, path);
+            return GetPictureMediaFileInternal(image, meta, url);
         }
         
         public async Task<MediaFile> GetPictureMediaFile(ALAsset asset, long index = 0)
@@ -304,25 +295,22 @@ namespace Plugin.Media
             var image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
             var meta = asset.DefaultRepresentation.Metadata;
             var url = asset.AssetUrl;
-            var path = GetOutputPath(MediaImplementation.TypeImage,
-	            options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
-	            options.Name, index);
-            var result = await GetPictureMediaFileInternal(image, meta, url, path);
+            var result = await GetPictureMediaFileInternal(image, meta, url);
             image?.Dispose();
             rep?.Dispose();
             return result;
         }
 
-        private async Task<MediaFile> GetPictureMediaFileInternal(UIImage image, NSDictionary meta, NSUrl url, string outputDir)
+        private async Task<MediaFile> GetPictureMediaFileInternal(UIImage image, NSDictionary meta, NSUrl url)
 		{
 			if (image == null)
                 return null;
-
-			photoType = ((meta[UIImagePickerController.ReferenceUrl] as NSUrl).PathExtension == "PNG") ? "png" : "jpg";
+			
+			var pathExtension = url.PathExtension == "PNG" ? "png" : "jpg";
 
 			var path = GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
-				options.Name);
+				options.Name, pathExtension);
 
 			var cgImage = image.CGImage;
 
@@ -410,15 +398,15 @@ namespace Plugin.Media
 			}
 
 			//iOS quality is 0.0-1.0
-			var quality = photoType == "jpg" ? (options.CompressionQuality / 100f) : 0f;
+			var quality = pathExtension == "jpg" ? (options.CompressionQuality / 100f) : 0f;
 			var savedImage = false;
 			if (meta != null)
-				savedImage = SaveImageWithMetadata(image, quality, meta, path);
+				savedImage = SaveImageWithMetadata(image, quality, meta, path, pathExtension);
 
 			if (!savedImage)
 			{
 				var finalQuality = quality;
-				var imageData = photoType == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
+				var imageData = pathExtension == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
 
 				//continue to move down quality , rare instances
 				while (imageData == null && finalQuality > 0)
@@ -465,7 +453,7 @@ namespace Plugin.Media
 			Func<Stream> getStreamForExternalStorage = () =>
 			{
 				if (options.RotateImage)
-					return RotateImage(image, options.CompressionQuality);
+					return RotateImage(image, options.CompressionQuality, pathExtension);
 				else
 					return File.OpenRead(path);
 			};
@@ -494,12 +482,13 @@ namespace Plugin.Media
 			return newMeta;
 		}
 
-		internal static bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path)
+		internal static bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path, string pathExtension)
 		{
 			try
 			{
+				pathExtension = pathExtension.ToLowerInvariant();
 				var finalQuality = quality;
-				var imageData = photoType == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
+				var imageData = pathExtension == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
 
 				//continue to move down quality , rare instances
 				while (imageData == null && finalQuality > 0)
@@ -593,7 +582,7 @@ namespace Plugin.Media
 
 			var path = GetOutputPath(MediaImplementation.TypeMovie,
 					  options?.Directory ?? ((IsCaptured) ? string.Empty : "temp"),
-					  options?.Name ?? Path.GetFileName(url.Path));
+					  options?.Name ?? Path.GetFileName(url.Path), url.PathExtension);
 
 			try
 			{
@@ -602,14 +591,14 @@ namespace Plugin.Media
 			catch (Exception ex)
 			{
 				Debug.WriteLine($"Unable to move file, trying to copy. {ex.Message}");
-				File.Copy(url.Path, path);
 				try
 				{
+					File.Copy(url.Path, path);
 					File.Delete(url.Path);
 				}
 				catch (Exception)
 				{
-					Debug.WriteLine($"Unable to delete file, will be left around :( {ex.Message}");
+					Debug.WriteLine($"Unable to copy/delete file, will be left around :( {ex.Message}");
 				}
 			}
 
@@ -640,11 +629,13 @@ namespace Plugin.Media
 			return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
 		}
 
-		private static string GetUniquePath(string type, string path, string name)
+		static string GetUniquePath(string type, string path, string name, string pathExtension)
 		{
 			var isPhoto = (type == MediaImplementation.TypeImage);
 			var ext = Path.GetExtension(name);
-			if (ext == string.Empty)
+            if (string.IsNullOrWhiteSpace(ext))
+                ext = "." + pathExtension;
+			if(string.IsNullOrWhiteSpace(ext))
 				ext = ((isPhoto) ? ".jpg" : ".mp4");
 
 			name = Path.GetFileNameWithoutExtension(name);
@@ -657,7 +648,7 @@ namespace Plugin.Media
 			return Path.Combine(path, nname);
 		}
 
-		internal static string GetOutputPath(string type, string path, string name, long index = 0)
+		internal static string GetOutputPath(string type, string path, string name, string extension, long index = 0)
 		{
 			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), path);
 			Directory.CreateDirectory(path);
@@ -668,9 +659,9 @@ namespace Plugin.Media
 			if (string.IsNullOrWhiteSpace(name))
 			{
 				if (type == MediaImplementation.TypeImage)
-					name = photoType == "jpg" ? $"IMG_{postpendName}.jpg" : $"IMG_{postpendName}.png";
+					name = extension == "jpg" ? $"IMG_{postpendName}.jpg" : $"IMG_{postpendName}.png";
 				else
-					name = $"VID_{postpendName}.mp4";
+					name = $"VID_{postpendName}.{extension ?? "mp4"}";
 			}
 			else
 			{
@@ -682,7 +673,7 @@ namespace Plugin.Media
 				}
 			}
 
-			return Path.Combine(path, GetUniquePath(type, path, name));
+			return Path.Combine(path, GetUniquePath(type, path, name, extension));
 		}
 
 		private static bool IsValidInterfaceOrientation(UIDeviceOrientation self)
@@ -702,7 +693,7 @@ namespace Plugin.Media
 			return false;
 		}
 
-		private static UIDeviceOrientation GetDeviceOrientation(UIInterfaceOrientation self)
+		private static UIDeviceOrientation getDeviceOrientation(UIInterfaceOrientation self)
 		{
 			switch (self)
 			{
@@ -719,7 +710,7 @@ namespace Plugin.Media
 			}
 		}
 
-		public static Stream RotateImage(UIImage image, int compressionQuality)
+		public static Stream RotateImage(UIImage image, int compressionQuality, string pathExtension)
 		{
 			UIImage imageToReturn = null;
 			if (image.Orientation == UIImageOrientation.Up)
@@ -803,8 +794,9 @@ namespace Plugin.Media
 				}
 			}
 
-			var finalQuality = photoType == "jpg" ? (compressionQuality / 100f) : 0f;
-			var imageData = photoType == "jpg" ? imageToReturn.AsJPEG(finalQuality) : imageToReturn.AsPNG();
+			pathExtension = pathExtension.ToLowerInvariant();
+			var finalQuality = pathExtension == "jpg" ? (compressionQuality / 100f) : 0f;
+			var imageData = pathExtension == "jpg" ? imageToReturn.AsJPEG(finalQuality) : imageToReturn.AsPNG();
 			//continue to move down quality , rare instances
 			while (imageData == null && finalQuality > 0)
 			{

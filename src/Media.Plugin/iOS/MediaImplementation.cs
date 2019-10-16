@@ -381,14 +381,14 @@ namespace Plugin.Media
 				var files = t.Result;
 				Parallel.ForEach(files, mediaFile =>
 				{
-					ResizeAndCompressImage(options, mediaFile);
+					ResizeAndCompressImage(options, mediaFile, Path.GetExtension(mediaFile.Path));
 				});
 
 				return t;
 			}).Unwrap();
 		}
 
-		private static void ResizeAndCompressImage(StoreCameraMediaOptions options, MediaFile mediaFile)
+		private static void ResizeAndCompressImage(StoreCameraMediaOptions options, MediaFile mediaFile, string pathExtension)
 		{
 			var image = UIImage.FromFile(mediaFile.Path);
 			var percent = 1.0f;
@@ -459,7 +459,7 @@ namespace Plugin.Media
 					var quality = (options.CompressionQuality / 100f);
 					var savedImage = false;
 					if (meta != null)
-						savedImage = MediaPickerDelegate.SaveImageWithMetadata(image, quality, meta, mediaFile.Path);
+						savedImage = MediaPickerDelegate.SaveImageWithMetadata(image, quality, meta, mediaFile.Path, pathExtension);
 
 					if (!savedImage)
 						image.AsJPEG(quality).Save(mediaFile.Path, true);
