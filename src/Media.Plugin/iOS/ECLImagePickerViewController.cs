@@ -1,16 +1,17 @@
 ﻿// Based off the ELCImagePicker implementation from https://github.com/bjdodson/XamarinSharpPlus
 
-using System;
-using UIKit;
 using AssetsLibrary;
-using System.Collections.Generic;
-using System.IO;
-using Foundation;
-using System.Threading.Tasks;
 using CoreGraphics;
-using Plugin.Media.Abstractions;
-using System.Linq;
+using Foundation;
 using Photos;
+using Plugin.Media.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using UIKit;
 
 namespace Plugin.Media
 {
@@ -72,15 +73,15 @@ namespace Plugin.Media
 		/// <value>The maximum images count.</value>
 		public int MaximumImagesCount { get; set; }
 
-		private readonly StoreCameraMediaOptions _options;
+		private readonly StoreCameraMediaOptions options;
 
-		readonly TaskCompletionSource<List<MediaFile>> _TaskCompletionSource = new TaskCompletionSource<List<MediaFile>>();
+		readonly TaskCompletionSource<List<MediaFile>> taskCompletionSource = new TaskCompletionSource<List<MediaFile>>();
 
 		public Task<List<MediaFile>> Completion
 		{
 			get
 			{
-				return _TaskCompletionSource.Task;
+				return taskCompletionSource.Task;
 			}
 		}
 
@@ -137,13 +138,13 @@ namespace Plugin.Media
 
 		ELCImagePickerViewController(UIViewController rootController, StoreCameraMediaOptions options = null) : base(rootController)
 		{
-			_options = options ?? new StoreCameraMediaOptions();
+			this.options = options ?? new StoreCameraMediaOptions();
 		}
 
 
 		void SelectedMediaFiles(List<MediaFile> mediaFiles)
 		{
-			_TaskCompletionSource.TrySetResult(mediaFiles);
+			taskCompletionSource.TrySetResult(mediaFiles);
 		}
 
 		private MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
@@ -160,17 +161,26 @@ namespace Plugin.Media
 				var fetch = PHAsset.FetchAssets(new[] { asset.AssetUrl }, null);
 				var ph = fetch.firstObject as PHAsset;
 				var manager = PHImageManager.DefaultManager;
-				var options = new PHImageRequestOptions
+				var phOptions = new PHImageRequestOptions
 				{
 					Version = PHImageRequestOptionsVersion.Original,
+					NetworkAccessAllowed = true,
 					Synchronous = true
 				};
 
-				manager.RequestImageData(ph, options, (data, i, orientation, k) =>
+				phOptions.ProgressHandler = (double progress, NSError error, out bool stop, NSDictionary info) =>
+				{
+					Debug.WriteLine($"Progress: {progress.ToString()}");
+					
+					stop = false;
+				};
+
+				manager.RequestImageData(ph, phOptions, (data, i, orientation, k) =>
 				{
 					if (data != null)
 						image = new UIImage(data, 1.0f);
 				});
+				phOptions?.Dispose();
 				fetch?.Dispose();
 				ph?.Dispose();
 			}
@@ -180,8 +190,8 @@ namespace Plugin.Media
 			}
 
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
-				_options.Directory ?? "temp",
-				_options.Name, asset.AssetUrl?.PathExtension, index);
+				options.Directory ?? "temp",
+				options.Name, asset.AssetUrl?.PathExtension, index);
 
 			cgImage?.Dispose();
 			cgImage = null;
@@ -204,7 +214,7 @@ namespace Plugin.Media
 
 		void CancelledPicker()
 		{
-			_TaskCompletionSource.TrySetCanceled();
+			taskCompletionSource.TrySetCanceled();
 		}
 
 		bool ShouldSelectAsset(ALAsset asset, int previousCount)
