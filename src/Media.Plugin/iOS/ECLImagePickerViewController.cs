@@ -166,7 +166,7 @@ namespace Plugin.Media
 					Synchronous = true
 				};
 
-				manager.RequestImageDataAndOrientation(ph, options, (data, i, orientation, k) =>
+				manager.RequestImageData(ph, options, (data, i, orientation, k) =>
 				{
 					if (data != null)
 						image = new UIImage(data, 1.0f);
