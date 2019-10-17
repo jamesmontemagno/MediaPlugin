@@ -19,5 +19,6 @@
 			
 			</StackLayout>
 		</ScrollView>
+		<Button Clicked="Button_Clicked" Text="Navigate"/>
 	</StackLayout>
 </ContentPage>

@@ -4,7 +4,6 @@ using System;
 using UIKit;
 using AssetsLibrary;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using Foundation;
 using System.Threading.Tasks;
@@ -154,10 +153,10 @@ namespace Plugin.Media
 		private Task<MediaFile> GetPictureMediaFile(ALAsset asset, long index = 0)
 		{
 			var rep = asset.DefaultRepresentation;
-            if (rep == null)
-                return Task.FromResult(default(MediaFile));
-            
-            return _mediaPickerDelegate.GetPictureMediaFile(asset, index);
+      if (rep == null)
+          return Task.FromResult(default(MediaFile));
+
+      return _mediaPickerDelegate.GetPictureMediaFile(asset, index);
 		}
 
 		void CancelledPicker()
