@@ -198,7 +198,16 @@ namespace Plugin.Media
 			rep?.Dispose();
 			rep = null;
 
-			image.AsJPEG().Save(path, true);
+            //There might be cases when the original image cannot be retrieved while image thumb was still present.
+            //Then no need to try to save it as we will get an exception here
+            //TODO: Ideally, we should notify the client that we failed to get original image
+            //TODO: Otherwise, it might be confusing to the user, that he saw the thumb, but did not get the image
+            if (image == null)
+            {
+	            return null;
+            }
+			
+            image.AsJPEG().Save(path, true);
 
 			image?.Dispose();
 			image = null;
@@ -314,15 +323,22 @@ namespace Plugin.Media
 					return;
 				}
 
-				// added fix for camera albums order
-				if (agroup.Name.ToString().ToLower() == "camera roll" && agroup.Type == ALAssetsGroupType.SavedPhotos)
-				{
-					assetGroups.Insert(0, agroup);
-				}
-				else
-				{
-					assetGroups.Add(agroup);
-				}
+                //We show photos only. Let's get only them
+				agroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
+
+                //do not add empty album
+                if (agroup.Count == 0)
+                {
+	                return;
+                }
+
+                //ALAssetsGroupType.All might have duplicated albums. let's skip the album if we already have it
+                if (assetGroups.Any(g => g.PersistentID == agroup.PersistentID))
+                {
+	                return;
+                }
+                
+                assetGroups.Add(agroup);
 
 				dispatcher.BeginInvokeOnMainThread(ReloadTableView);
 			}
@@ -350,7 +366,7 @@ namespace Plugin.Media
 
 				// Get count
 				var g = assetGroups[indexPath.Row];
-				g.SetAssetsFilter(ALAssetsFilter.AllPhotos);
+				
 				var gCount = g.Count;
 				cell.TextLabel.Text = string.Format("{0} ({1})", g.Name, gCount);
 				try
@@ -369,7 +385,6 @@ namespace Plugin.Media
 			public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
 			{
 				var assetGroup = assetGroups[indexPath.Row];
-				assetGroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 				var picker = new ELCAssetTablePicker(assetGroup);
 				
 				picker.LoadingTitle = LoadingTitle;
@@ -526,8 +541,14 @@ namespace Plugin.Media
 					var mediaFile = Parent?.GetPictureMediaFile(asset);
 					asset?.Dispose();
 					asset = null;
-					var selectedMediaFile = new List<MediaFile>() { mediaFile };
-					Parent?.SelectedMediaFiles(selectedMediaFile);
+					if (mediaFile != null)
+					{
+						Parent?.SelectedMediaFiles(new List<MediaFile>{ mediaFile });
+					}
+					else
+					{
+						Parent?.SelectedMediaFiles(new List<MediaFile>());
+					}
 				}
 			}
 
@@ -588,7 +609,8 @@ namespace Plugin.Media
 					alAsset = null;
 				});
 
-				parent?.SelectedMediaFiles(selectedMediaFiles.ToList());
+                //Some items in the array might be null. Let's remove them.
+				parent?.SelectedMediaFiles(selectedMediaFiles.Where(mf => mf != null).ToList());
 			}
 
 			class ELCAssetCell : UICollectionViewCell
