@@ -589,25 +589,56 @@ namespace Plugin.Media
 				}
 			}
 
-			private void DoneClicked(object sender = null, EventArgs e = null)
+			private async void DoneClicked(object sender = null, EventArgs e = null)
 			{
 				var parent = Parent;
 				var selectedItemsIndex = CollectionView.GetIndexPathsForSelectedItems();
 				var selectedItemsCount = selectedItemsIndex.Length;
 				var selectedMediaFiles = new MediaFile[selectedItemsCount];
 
-				Parallel.For(0, selectedItemsCount, selectedIndex =>
+				//Create activity indicator if we have selected items.
+                //It will give the user some visual feedback that the app is still working
+                //if the media have to be downloaded from the iCloud
+                UIView pageOverlay = null;
+                UIActivityIndicatorView activityIndicator = null;
+				if (selectedItemsCount > 0)
 				{
-					var alAsset = AssetForIndexPath(selectedItemsIndex[selectedIndex]);
-					var mediaFile = parent?.GetPictureMediaFile(alAsset, selectedIndex);
-					if (mediaFile != null)
+					InvokeOnMainThread(() =>
 					{
-						selectedMediaFiles[selectedIndex] = mediaFile;
-					}
+						pageOverlay = new UIView(View.Bounds);
+						pageOverlay.BackgroundColor = UIColor.Black.ColorWithAlpha(0.8f);
+						View.Add(pageOverlay);
 
-					alAsset?.Dispose();
-					alAsset = null;
-				});
+						activityIndicator = new UIActivityIndicatorView(View.Bounds);
+						activityIndicator.ActivityIndicatorViewStyle = UIActivityIndicatorViewStyle.WhiteLarge;
+						activityIndicator.StartAnimating();
+						View.Add(activityIndicator);
+					});
+				}
+
+				var tasks = new List<Task>();
+				for (int i = 0; i < selectedItemsCount; i++)
+				{
+					var j = i;
+					var t = Task.Run(() =>
+					{
+						var alAsset = AssetForIndexPath(selectedItemsIndex[j]);
+						var mediaFile = parent?.GetPictureMediaFile(alAsset, j);
+						if (mediaFile != null)
+						{
+							selectedMediaFiles[j] = mediaFile;
+						}
+
+						alAsset?.Dispose();
+						alAsset = null;
+					});
+					tasks.Add(t);
+				}
+
+				await Task.WhenAll(tasks);
+
+                pageOverlay?.RemoveFromSuperview();
+                activityIndicator?.RemoveFromSuperview();
 
                 //Some items in the array might be null. Let's remove them.
 				parent?.SelectedMediaFiles(selectedMediaFiles.Where(mf => mf != null).ToList());
