@@ -1,18 +1,20 @@
 ﻿// Based off the ELCImagePicker implementation from https://github.com/bjdodson/XamarinSharpPlus
 
-using System;
-using UIKit;
 using AssetsLibrary;
-using System.Collections.Generic;
-using System.IO;
-using Foundation;
-using System.Threading.Tasks;
 using CoreGraphics;
+using Foundation;
+using Photos;
 using Plugin.Media.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using ImageIO;
 using Photos;
+using UIKit;
 
 namespace Plugin.Media
 {
@@ -77,13 +79,13 @@ namespace Plugin.Media
 		private readonly StoreCameraMediaOptions _options;
 		private MediaPickerDelegate _mediaPickerDelegate;
 
-		readonly TaskCompletionSource<List<MediaFile>> _TaskCompletionSource = new TaskCompletionSource<List<MediaFile>>();
+		readonly TaskCompletionSource<List<MediaFile>> taskCompletionSource = new TaskCompletionSource<List<MediaFile>>();
 
 		public Task<List<MediaFile>> Completion
 		{
 			get
 			{
-				return _TaskCompletionSource.Task;
+				return taskCompletionSource.Task;
 			}
 		}
 
@@ -147,7 +149,7 @@ namespace Plugin.Media
 
 		void SelectedMediaFiles(List<MediaFile> mediaFiles)
 		{
-			_TaskCompletionSource.TrySetResult(mediaFiles);
+			taskCompletionSource.TrySetResult(mediaFiles);
 		}
 
 		private Task<MediaFile> GetPictureMediaFile(ALAsset asset, long index = 0)
@@ -161,7 +163,7 @@ namespace Plugin.Media
 
 		void CancelledPicker()
 		{
-			_TaskCompletionSource.TrySetCanceled();
+			taskCompletionSource.TrySetCanceled();
 		}
 
 		bool ShouldSelectAsset(ALAsset asset, int previousCount)
@@ -261,15 +263,22 @@ namespace Plugin.Media
 					return;
 				}
 
-				// added fix for camera albums order
-				if (agroup.Name.ToString().ToLower() == "camera roll" && agroup.Type == ALAssetsGroupType.SavedPhotos)
-				{
-					assetGroups.Insert(0, agroup);
-				}
-				else
-				{
-					assetGroups.Add(agroup);
-				}
+                //We show photos only. Let's get only them
+				agroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
+
+                //do not add empty album
+                if (agroup.Count == 0)
+                {
+	                return;
+                }
+
+                //ALAssetsGroupType.All might have duplicated albums. let's skip the album if we already have it
+                if (assetGroups.Any(g => g.PersistentID == agroup.PersistentID))
+                {
+	                return;
+                }
+                
+                assetGroups.Add(agroup);
 
 				dispatcher.BeginInvokeOnMainThread(ReloadTableView);
 			}
@@ -297,7 +306,7 @@ namespace Plugin.Media
 
 				// Get count
 				var g = assetGroups[indexPath.Row];
-				g.SetAssetsFilter(ALAssetsFilter.AllPhotos);
+				
 				var gCount = g.Count;
 				cell.TextLabel.Text = string.Format("{0} ({1})", g.Name, gCount);
 				try
@@ -316,7 +325,6 @@ namespace Plugin.Media
 			public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
 			{
 				var assetGroup = assetGroups[indexPath.Row];
-				assetGroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 				var picker = new ELCAssetTablePicker(assetGroup);
 				
 				picker.LoadingTitle = LoadingTitle;
@@ -473,8 +481,14 @@ namespace Plugin.Media
 					var mediaFile = await Parent?.GetPictureMediaFile(asset);
 					asset?.Dispose();
 					asset = null;
-					var selectedMediaFile = new List<MediaFile>() { mediaFile };
-					Parent?.SelectedMediaFiles(selectedMediaFile);
+					if (mediaFile != null)
+					{
+						Parent?.SelectedMediaFiles(new List<MediaFile>{ mediaFile });
+					}
+					else
+					{
+						Parent?.SelectedMediaFiles(new List<MediaFile>());
+					}
 				}
 			}
 
@@ -535,7 +549,8 @@ namespace Plugin.Media
 					alAsset = null;
 				});
 
-				parent?.SelectedMediaFiles(selectedMediaFiles.ToList());
+                //Some items in the array might be null. Let's remove them.
+				parent?.SelectedMediaFiles(selectedMediaFiles.Where(mf => mf != null).ToList());
 			}
 
 			class ELCAssetCell : UICollectionViewCell
