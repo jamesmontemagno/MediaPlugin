@@ -146,8 +146,11 @@
     <PackageReference Include="Plugin.Permissions">
       <Version>5.0.0-beta</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Forms" Version="4.2.0.848062" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.7" />
+    <PackageReference Include="Xamarin.FFImageLoading.Forms">
+      <Version>2.4.11.982</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Forms" Version="4.3.0.947036" />
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.9" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Media.Plugin\Media.Plugin.csproj">

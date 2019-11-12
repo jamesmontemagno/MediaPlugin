@@ -30,12 +30,25 @@ namespace Plugin.Media
 				var orientation = imageSource.Orientation;
 				imageSource?.Dispose();
 
-				var transform = new CILanczosScaleTransform
+				CILanczosScaleTransform transform = null;
+				if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 				{
-					Scale = scale,
-					Image = sourceImage,
-					AspectRatio = 1.0f
-				};
+					transform = new CILanczosScaleTransform
+					{
+						Scale = scale,
+						InputImage = sourceImage,
+						AspectRatio = 1.0f
+					};
+				}
+				else
+				{
+					transform = new CILanczosScaleTransform
+					{
+						Scale = scale,
+						Image = sourceImage,
+						AspectRatio = 1.0f
+					};
+				}
 
 				var output = transform.OutputImage;
 				using (var cgi = c.CreateCGImage(output, output.Extent))

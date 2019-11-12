@@ -543,7 +543,10 @@ namespace Plugin.Media
 				var success = destination.Close();
 				if (success)
 				{
-					imageWithExif.Save(path, true);
+					var saved = imageWithExif.Save(path, true, out NSError error);
+					if (error != null)
+						Debug.WriteLine($"Unable to save exif data: {error.ToString()}");
+
 					imageWithExif.Dispose();
 					imageWithExif = null;
 				}

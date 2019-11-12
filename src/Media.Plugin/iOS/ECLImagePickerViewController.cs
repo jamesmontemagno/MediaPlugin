@@ -175,11 +175,22 @@ namespace Plugin.Media
 					stop = false;
 				};
 
-				manager.RequestImageData(ph, phOptions, (data, i, orientation, k) =>
+				if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 				{
-					if (data != null)
-						image = new UIImage(data, 1.0f);
-				});
+					manager.RequestImageDataAndOrientation(ph, phOptions, (data, i, orientation, k) =>
+					{
+						if (data != null)
+							image = new UIImage(data, 1.0f);
+					});
+				}
+				else
+				{ 
+					manager.RequestImageData(ph, phOptions, (data, i, orientation, k) =>
+					{
+						if (data != null)
+							image = new UIImage(data, 1.0f);
+					});
+				}
 				phOptions?.Dispose();
 				fetch?.Dispose();
 				ph?.Dispose();

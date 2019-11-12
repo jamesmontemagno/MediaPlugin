@@ -9,6 +9,7 @@
 		<Version>1.0.0.0</Version>
 		<Authors>James Montemagno</Authors>
 		<PackageId>Xam.Plugin.Media</PackageId>
+		<LangVersion>8.0</LangVersion>
 		<PackOnBuild>true</PackOnBuild>
 		<PackageIconUrl>http://www.refractored.com/images/plugin_icon_media.png</PackageIconUrl>
 		<PackageLicenseUrl>https://github.com/jamesmontemagno/MediaPlugin/blob/master/LICENSE</PackageLicenseUrl>
@@ -29,6 +30,10 @@
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 		<DebugType>portable</DebugType>
 		<DefineConstants>$(DefineConstants);</DefineConstants>
+		
+	    
+    <!--When built in 2019 will remove extra references on pack-->
+    <DisableExtraReferences>false</DisableExtraReferences>
 
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">

@@ -54,7 +54,10 @@
     <PackageReference Include="Plugin.Permissions">
       <Version>5.0.0-beta</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Forms" Version="4.2.0.848062" />
+    <PackageReference Include="Xamarin.FFImageLoading.Forms">
+      <Version>2.4.11.982</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Forms" Version="4.3.0.947036" />
     <PackageReference Include="Xamarin.Android.Support.Design" Version="28.0.0.3" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="28.0.0.3" />
     <PackageReference Include="Xamarin.Android.Support.v4" Version="28.0.0.3" />

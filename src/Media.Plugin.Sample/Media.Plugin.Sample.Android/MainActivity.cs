@@ -20,6 +20,7 @@ namespace Media.Plugin.Sample.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(bundle);
+			FFImageLoading.Forms.Platform.CachedImageRenderer.Init(true);
 			CrossCurrentActivity.Current.Init(this, bundle);
 			Xamarin.Forms.Forms.Init(this, bundle);
 			Android.Glide.Forms.Init(this);

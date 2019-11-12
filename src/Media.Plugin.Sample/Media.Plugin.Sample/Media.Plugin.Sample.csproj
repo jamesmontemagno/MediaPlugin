@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="Plugin.Permissions" Version="5.0.0-beta" />
-    <PackageReference Include="Xamarin.Forms" Version="4.2.0.848062" />
+    <PackageReference Include="Xamarin.FFImageLoading.Forms" Version="2.4.11.982" />
+    <PackageReference Include="Xamarin.Forms" Version="4.3.0.947036" />
   </ItemGroup>
 
   <ItemGroup>
