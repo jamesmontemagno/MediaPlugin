@@ -31,7 +31,7 @@ namespace Plugin.Media
 				imageSource?.Dispose();
 
 				CILanczosScaleTransform transform = null;
-				if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+				/*if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 				{
 					transform = new CILanczosScaleTransform
 					{
@@ -40,15 +40,15 @@ namespace Plugin.Media
 						AspectRatio = 1.0f
 					};
 				}
-				else
-				{
+				else*/
+				//{
 					transform = new CILanczosScaleTransform
 					{
 						Scale = scale,
 						Image = sourceImage,
 						AspectRatio = 1.0f
 					};
-				}
+				//}
 
 				var output = transform.OutputImage;
 				using (var cgi = c.CreateCGImage(output, output.Extent))
