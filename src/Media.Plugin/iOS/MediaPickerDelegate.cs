@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
 using System.Drawing;
+using CoreImage;
 
 namespace Plugin.Media
 {
@@ -468,8 +469,47 @@ namespace Plugin.Media
 			return newMeta;
 		}
 
+		internal static bool SaveImageWithMetadataiOS13(UIImage image, float quality, NSDictionary meta, string path, string pathExtension)
+		{
+			try
+			{
+				pathExtension = pathExtension.ToLowerInvariant();
+				var finalQuality = quality;
+				var imageData = pathExtension == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
+
+				//continue to move down quality , rare instances
+				while (imageData == null && finalQuality > 0)
+				{
+					finalQuality -= 0.05f;
+					imageData = image.AsJPEG(finalQuality);
+				}
+
+				if (imageData == null)
+					throw new NullReferenceException("Unable to convert image to jpeg, please ensure file exists or lower quality level");
+
+				// Copy over meta data
+				using var ciImage = CIImage.FromData(imageData);
+				using var newImageSource = ciImage.CreateBySettingProperties(meta);
+				using var ciContext = new CIContext();
+
+				if (pathExtension == "jpg")
+					return ciContext.WriteJpegRepresentation(newImageSource, NSUrl.FromFilename(path), CGColorSpace.CreateSrgb(), new NSDictionary(), out var error);
+				
+				return ciContext.WritePngRepresentation(newImageSource, NSUrl.FromFilename(path), CIFormat.ARGB8, CGColorSpace.CreateSrgb(), new NSDictionary(), out var error2);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Unable to save image with metadata: {ex}");
+			}
+
+			return false;
+		}
+
 		internal static bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path, string pathExtension)
 		{
+			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+				return SaveImageWithMetadataiOS13(image, quality, meta, path, pathExtension);
+
 			try
 			{
 				pathExtension = pathExtension.ToLowerInvariant();
