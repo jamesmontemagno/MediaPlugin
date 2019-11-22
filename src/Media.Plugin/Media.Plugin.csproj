@@ -33,7 +33,7 @@
 		
 	    
     <!--When built in 2019 will remove extra references on pack-->
-    <DisableExtraReferences>false</DisableExtraReferences>
+    <DisableExtraReferences>true</DisableExtraReferences>
 
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">

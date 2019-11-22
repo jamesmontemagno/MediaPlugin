@@ -24,43 +24,38 @@ namespace Plugin.Media
                 return imageSource;
 
 
-			using (var c = CIContext.Create())
+			using var c = CIContext.Create();
+			var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
+			var orientation = imageSource.Orientation;
+			imageSource?.Dispose();
+
+			CILanczosScaleTransform transform = null;
+			/*if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 			{
-				var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
-				var orientation = imageSource.Orientation;
-				imageSource?.Dispose();
-
-				CILanczosScaleTransform transform = null;
-				/*if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+				transform = new CILanczosScaleTransform
 				{
-					transform = new CILanczosScaleTransform
-					{
-						Scale = scale,
-						InputImage = sourceImage,
-						AspectRatio = 1.0f
-					};
-				}
-				else*/
-				//{
-					transform = new CILanczosScaleTransform
-					{
-						Scale = scale,
-						Image = sourceImage,
-						AspectRatio = 1.0f
-					};
-				//}
-
-				var output = transform.OutputImage;
-				using (var cgi = c.CreateCGImage(output, output.Extent))
-				{
-					transform?.Dispose();
-					output?.Dispose();
-					sourceImage?.Dispose();
-
-					return UIImage.FromImage(cgi, 1.0f, orientation);
-				}
-				
+					Scale = scale,
+					InputImage = sourceImage,
+					AspectRatio = 1.0f
+				};
 			}
+			else*/
+			//{
+			transform = new CILanczosScaleTransform
+			{
+				Scale = scale,
+				Image = sourceImage,
+				AspectRatio = 1.0f
+			};
+			//}
+
+			var output = transform.OutputImage;
+			using var cgi = c.CreateCGImage(output, output.Extent);
+			transform?.Dispose();
+			output?.Dispose();
+			sourceImage?.Dispose();
+
+			return UIImage.FromImage(cgi, 1.0f, orientation);
 		}
 
 		/// <summary>

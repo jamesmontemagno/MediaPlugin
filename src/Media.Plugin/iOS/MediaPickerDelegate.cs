@@ -794,33 +794,29 @@ namespace Plugin.Media
 						break;
 				}
 
-				using (var context = new CGBitmapContext(IntPtr.Zero,
+				using var context = new CGBitmapContext(IntPtr.Zero,
 														(int)image.Size.Width,
 														(int)image.Size.Height,
 														image.CGImage.BitsPerComponent,
 														image.CGImage.BytesPerRow,
 														image.CGImage.ColorSpace,
-														image.CGImage.BitmapInfo))
+														image.CGImage.BitmapInfo);
+				context.ConcatCTM(transform);
+				switch (image.Orientation)
 				{
-					context.ConcatCTM(transform);
-					switch (image.Orientation)
-					{
-						case UIImageOrientation.Left:
-						case UIImageOrientation.LeftMirrored:
-						case UIImageOrientation.Right:
-						case UIImageOrientation.RightMirrored:
-							context.DrawImage(new RectangleF(PointF.Empty, new SizeF((float)image.Size.Height, (float)image.Size.Width)), image.CGImage);
-							break;
-						default:
-							context.DrawImage(new RectangleF(PointF.Empty, new SizeF((float)image.Size.Width, (float)image.Size.Height)), image.CGImage);
-							break;
-					}
-
-					using (var imageRef = context.ToImage())
-					{
-						imageToReturn = new UIImage(imageRef, 1, UIImageOrientation.Up);
-					}
+					case UIImageOrientation.Left:
+					case UIImageOrientation.LeftMirrored:
+					case UIImageOrientation.Right:
+					case UIImageOrientation.RightMirrored:
+						context.DrawImage(new CGRect(0, 0, image.Size.Height, image.Size.Width), image.CGImage);
+						break;
+					default:
+						context.DrawImage(new CGRect(0, 0, image.Size.Width, image.Size.Height), image.CGImage);
+						break;
 				}
+
+				using var imageRef = context.ToImage();
+				imageToReturn = new UIImage(imageRef, 1, UIImageOrientation.Up);
 			}
 
 			pathExtension = pathExtension.ToLowerInvariant();
