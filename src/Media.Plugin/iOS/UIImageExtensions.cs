@@ -30,7 +30,7 @@ namespace Plugin.Media
 			imageSource?.Dispose();
 
 			CILanczosScaleTransform transform = null;
-			/*if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+			if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 			{
 				transform = new CILanczosScaleTransform
 				{
@@ -39,15 +39,15 @@ namespace Plugin.Media
 					AspectRatio = 1.0f
 				};
 			}
-			else*/
-			//{
-			transform = new CILanczosScaleTransform
+			else
 			{
-				Scale = scale,
-				Image = sourceImage,
-				AspectRatio = 1.0f
-			};
-			//}
+				transform = new CILanczosScaleTransform
+				{
+					Scale = scale,
+					Image = sourceImage,
+					AspectRatio = 1.0f
+				};
+			}
 
 			var output = transform.OutputImage;
 			using var cgi = c.CreateCGImage(output, output.Extent);
@@ -86,8 +86,8 @@ namespace Plugin.Media
         /// <returns></returns>
         public static UIImage ResizeImage(this UIImage sourceImage, float width, float height)
         {
-            UIGraphics.BeginImageContext(new SizeF(width, height));
-            sourceImage.Draw(new RectangleF(0, 0, width, height));
+            UIGraphics.BeginImageContext(new CGSize(width, height));
+            sourceImage.Draw(new CGRect(0, 0, width, height));
             var resultImage = UIGraphics.GetImageFromCurrentImageContext();
             UIGraphics.EndImageContext();
             return resultImage;
@@ -105,9 +105,9 @@ namespace Plugin.Media
         public static UIImage CropImage(this UIImage sourceImage, int crop_x, int crop_y, int width, int height)
         {
             var imgSize = sourceImage.Size;
-            UIGraphics.BeginImageContext(new SizeF(width, height));
+            UIGraphics.BeginImageContext(new CGSize(width, height));
             var context = UIGraphics.GetCurrentContext();
-            var clippedRect = new RectangleF(0, 0, width, height);
+            var clippedRect = new CGRect(0, 0, width, height);
             context.ClipToRect(clippedRect);
             var drawRect = new CGRect(-crop_x, -crop_y, imgSize.Width, imgSize.Height);
             sourceImage.Draw(drawRect);
