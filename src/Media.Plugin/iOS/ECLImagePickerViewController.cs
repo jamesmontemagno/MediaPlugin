@@ -130,6 +130,12 @@ namespace Plugin.Media
 			return pluralTitle;
 		}
 
+		public override void ViewWillDisappear(bool animated)
+		{
+			base.ViewWillDisappear(animated);
+			CancelledPicker();
+		}
+
 		public static ELCImagePickerViewController Create(StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null)
 		{
 			pickerOptions = pickerOptions ?? new MultiPickerOptions();
