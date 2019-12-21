@@ -47,8 +47,12 @@ namespace Plugin.Media
 		
 		public Task<List<MediaFile>> Task => tcs.Task;
 
+		private bool isFinished;
 		public override async void FinishedPickingMedia(UIImagePickerController picker, NSDictionary info)
 		{
+			if (isFinished)
+				return;
+			isFinished = true;
 			RemoveOrientationChangeObserverAndNotifications();
 
 			MediaFile mediaFile;
@@ -77,6 +81,7 @@ namespace Plugin.Media
                     tcs.SetException(new FileNotFoundException());
 				else
 					tcs.TrySetResult(new List<MediaFile> { mediaFile });
+				isFinished = false;
 			});
 		}
 
