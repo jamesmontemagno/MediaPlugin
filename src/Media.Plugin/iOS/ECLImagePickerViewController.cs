@@ -177,7 +177,7 @@ namespace Plugin.Media
 				phOptions.ProgressHandler = (double progress, NSError error, out bool stop, NSDictionary info) =>
 				{
 					Debug.WriteLine($"Progress: {progress.ToString()}");
-					
+
 					stop = false;
 				};
 
@@ -190,7 +190,7 @@ namespace Plugin.Media
 					});
 				}
 				else
-				{ 
+				{
 					manager.RequestImageData(ph, phOptions, (data, i, orientation, k) =>
 					{
 						if (data != null)
@@ -206,25 +206,33 @@ namespace Plugin.Media
 				image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
 			}
 
-			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
+			string path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? "temp",
 				options.Name, asset.AssetUrl?.PathExtension, index);
+			bool isPng = Path.GetExtension(path).ToLowerInvariant() == ".png";
 
 			cgImage?.Dispose();
 			cgImage = null;
 			rep?.Dispose();
 			rep = null;
 
-            //There might be cases when the original image cannot be retrieved while image thumb was still present.
-            //Then no need to try to save it as we will get an exception here
-            //TODO: Ideally, we should notify the client that we failed to get original image
-            //TODO: Otherwise, it might be confusing to the user, that he saw the thumb, but did not get the image
-            if (image == null)
-            {
-	            return null;
-            }
-			
-            image.AsJPEG().Save(path, true);
+			//There might be cases when the original image cannot be retrieved while image thumb was still present.
+			//Then no need to try to save it as we will get an exception here
+			//TODO: Ideally, we should notify the client that we failed to get original image
+			//TODO: Otherwise, it might be confusing to the user, that he saw the thumb, but did not get the image
+			if (image == null)
+			{
+				return null;
+			}
+
+			if (isPng)
+			{
+				image.AsPNG().Save(path, true);
+			}
+			else
+			{
+				image.AsJPEG().Save(path, true);
+			}
 
 			image?.Dispose();
 			image = null;
@@ -340,22 +348,22 @@ namespace Plugin.Media
 					return;
 				}
 
-                //We show photos only. Let's get only them
+				//We show photos only. Let's get only them
 				agroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 
-                //do not add empty album
-                if (agroup.Count == 0)
-                {
-	                return;
-                }
+				//do not add empty album
+				if (agroup.Count == 0)
+				{
+					return;
+				}
 
-                //ALAssetsGroupType.All might have duplicated albums. let's skip the album if we already have it
-                if (assetGroups.Any(g => g.PersistentID == agroup.PersistentID))
-                {
-	                return;
-                }
-                
-                assetGroups.Add(agroup);
+				//ALAssetsGroupType.All might have duplicated albums. let's skip the album if we already have it
+				if (assetGroups.Any(g => g.PersistentID == agroup.PersistentID))
+				{
+					return;
+				}
+
+				assetGroups.Add(agroup);
 
 				dispatcher.BeginInvokeOnMainThread(ReloadTableView);
 			}
@@ -383,7 +391,7 @@ namespace Plugin.Media
 
 				// Get count
 				var g = assetGroups[indexPath.Row];
-				
+
 				var gCount = g.Count;
 				cell.TextLabel.Text = string.Format("{0} ({1})", g.Name, gCount);
 				try
@@ -403,7 +411,7 @@ namespace Plugin.Media
 			{
 				var assetGroup = assetGroups[indexPath.Row];
 				var picker = new ELCAssetTablePicker(assetGroup);
-				
+
 				picker.LoadingTitle = LoadingTitle;
 				picker.PickAssetTitle = PickAssetTitle;
 				picker.DoneButtonTitle = DoneButtonTitle;
@@ -470,12 +478,14 @@ namespace Plugin.Media
 				set => parent = new WeakReference(value);
 			}
 
-			public ELCAssetTablePicker(ALAssetsGroup assetGroup) : base(new UICollectionViewFlowLayout {
+			public ELCAssetTablePicker(ALAssetsGroup assetGroup) : base(new UICollectionViewFlowLayout
+			{
 				ItemSize = new CGSize(75, 75),
 				MinimumLineSpacing = 4,
 				MinimumInteritemSpacing = 4,
 				SectionInset = new UIEdgeInsets(0, 4, 0, 4),
-				ScrollDirection = UICollectionViewScrollDirection.Vertical })
+				ScrollDirection = UICollectionViewScrollDirection.Vertical
+			})
 			{
 				this.assetGroup = assetGroup;
 			}
@@ -560,7 +570,7 @@ namespace Plugin.Media
 					asset = null;
 					if (mediaFile != null)
 					{
-						Parent?.SelectedMediaFiles(new List<MediaFile>{ mediaFile });
+						Parent?.SelectedMediaFiles(new List<MediaFile> { mediaFile });
 					}
 					else
 					{
@@ -614,10 +624,10 @@ namespace Plugin.Media
 				var selectedMediaFiles = new MediaFile[selectedItemsCount];
 
 				//Create activity indicator if we have selected items.
-                //It will give the user some visual feedback that the app is still working
-                //if the media have to be downloaded from the iCloud
-                UIView pageOverlay = null;
-                UIActivityIndicatorView activityIndicator = null;
+				//It will give the user some visual feedback that the app is still working
+				//if the media have to be downloaded from the iCloud
+				UIView pageOverlay = null;
+				UIActivityIndicatorView activityIndicator = null;
 				if (selectedItemsCount > 0)
 				{
 					InvokeOnMainThread(() =>
@@ -654,10 +664,10 @@ namespace Plugin.Media
 
 				await Task.WhenAll(tasks);
 
-                pageOverlay?.RemoveFromSuperview();
-                activityIndicator?.RemoveFromSuperview();
+				pageOverlay?.RemoveFromSuperview();
+				activityIndicator?.RemoveFromSuperview();
 
-                //Some items in the array might be null. Let's remove them.
+				//Some items in the array might be null. Let's remove them.
 				parent?.SelectedMediaFiles(selectedMediaFiles.Where(mf => mf != null).ToList());
 			}
 
@@ -682,7 +692,8 @@ namespace Plugin.Media
 				public override bool Highlighted
 				{
 					get => base.Highlighted;
-					set {
+					set
+					{
 						HighlightedView.Hidden = !value;
 						base.Highlighted = value;
 					}
