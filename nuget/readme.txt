@@ -14,6 +14,7 @@ In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
         Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+This method may already exist. If so, add it after the call to Xamarin.Forms.Forms.Init(this, savedInstanceState).
 
 NB: The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. 
 Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions.
