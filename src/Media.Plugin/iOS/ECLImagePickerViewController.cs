@@ -73,7 +73,7 @@ namespace Plugin.Media
 		/// <value>The maximum images count.</value>
 		public int MaximumImagesCount { get; set; }
 
-		private readonly StoreCameraMediaOptions options;
+		readonly StoreCameraMediaOptions options;
 
 		readonly TaskCompletionSource<List<MediaFile>> taskCompletionSource = new TaskCompletionSource<List<MediaFile>>();
 
@@ -113,7 +113,7 @@ namespace Plugin.Media
 			return picker;
 		}
 
-		private static string AssetTitle(int maximumImages, string singularTitle, string pluralTitle)
+		static string AssetTitle(int maximumImages, string singularTitle, string pluralTitle)
 		{
 			if (maximumImages == 1)
 			{
@@ -153,7 +153,7 @@ namespace Plugin.Media
 			taskCompletionSource.TrySetResult(mediaFiles);
 		}
 
-		private MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
+		MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
 		{
 			var rep = asset.DefaultRepresentation;
 			if (rep == null)
@@ -206,10 +206,10 @@ namespace Plugin.Media
 				image = new UIImage(cgImage, 1.0f, (UIImageOrientation)rep.Orientation);
 			}
 
-			string path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
+			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? "temp",
 				options.Name, asset.AssetUrl?.PathExtension, index);
-			bool isPng = Path.GetExtension(path).ToLowerInvariant() == ".png";
+			var isPng = Path.GetExtension(path).ToLowerInvariant() == ".png";
 
 			cgImage?.Dispose();
 			cgImage = null;
@@ -551,16 +551,13 @@ namespace Plugin.Media
 				return cell;
 			}
 
-			#endregion
+            #endregion
 
-			#region Not interested in
+            #region Not interested in
 
-			private ALAsset AssetForIndexPath(NSIndexPath path)
-			{
-				return assets[path.Row];
-			}
+            ALAsset AssetForIndexPath(NSIndexPath path) => assets[path.Row];
 
-			private void AssetSelected(NSIndexPath targetIndexPath, bool selected)
+            void AssetSelected(NSIndexPath targetIndexPath, bool selected)
 			{
 				if (ImmediateReturn)
 				{
@@ -579,7 +576,7 @@ namespace Plugin.Media
 				}
 			}
 
-			private void PreparePhotos()
+			void PreparePhotos()
 			{
 				assetGroup.Enumerate(PhotoEnumerator);
 
@@ -599,7 +596,7 @@ namespace Plugin.Media
 				});
 			}
 
-			private void PhotoEnumerator(ALAsset result, nint index, ref bool stop)
+			void PhotoEnumerator(ALAsset result, nint index, ref bool stop)
 			{
 				if (result == null)
 				{
@@ -616,7 +613,7 @@ namespace Plugin.Media
 				}
 			}
 
-			private async void DoneClicked(object sender = null, EventArgs e = null)
+			async void DoneClicked(object sender = null, EventArgs e = null)
 			{
 				var parent = Parent;
 				var selectedItemsIndex = CollectionView.GetIndexPathsForSelectedItems();
@@ -644,7 +641,7 @@ namespace Plugin.Media
 				}
 
 				var tasks = new List<Task>();
-				for (int i = 0; i < selectedItemsCount; i++)
+				for (var i = 0; i < selectedItemsCount; i++)
 				{
 					var j = i;
 					var t = Task.Run(() =>
@@ -680,7 +677,7 @@ namespace Plugin.Media
 						try
 						{
 							var thumb = value?.Thumbnail;
-							ImageView.Image = thumb != null ? new UIImage(thumb) : null;
+							imageView.Image = thumb != null ? new UIImage(thumb) : null;
 						}
 						catch (Exception e)
 						{
@@ -694,7 +691,7 @@ namespace Plugin.Media
 					get => base.Highlighted;
 					set
 					{
-						HighlightedView.Hidden = !value;
+						highlightedView.Hidden = !value;
 						base.Highlighted = value;
 					}
 				}
@@ -704,22 +701,22 @@ namespace Plugin.Media
 					get => base.Selected;
 					set
 					{
-						SelectedView.Checked = value;
+						selectedView.Checked = value;
 						base.Selected = value;
 					}
 				}
 
-				private readonly UIImageView ImageView = new UIImageView
+				readonly UIImageView imageView = new UIImageView
 				{
 					TranslatesAutoresizingMaskIntoConstraints = false,
 				};
-				private readonly UIView HighlightedView = new UIView
+				readonly UIView highlightedView = new UIView
 				{
 					TranslatesAutoresizingMaskIntoConstraints = false,
 					BackgroundColor = UIColor.Black.ColorWithAlpha(0.3f),
 					Hidden = true,
 				};
-				private readonly CheckMarkView SelectedView = new CheckMarkView
+				readonly CheckMarkView selectedView = new CheckMarkView
 				{
 					TranslatesAutoresizingMaskIntoConstraints = false,
 				};
@@ -751,26 +748,26 @@ namespace Plugin.Media
 
 				protected void Initialize()
 				{
-					ContentView.Add(ImageView);
-					ContentView.Add(HighlightedView);
-					ContentView.Add(SelectedView);
+					ContentView.Add(imageView);
+					ContentView.Add(highlightedView);
+					ContentView.Add(selectedView);
 
 					NSLayoutConstraint.ActivateConstraints(new[]
 					{
-						ImageView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
-						ImageView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
-						ImageView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
-						ImageView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
+						imageView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
+						imageView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
+						imageView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
+						imageView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
 
-						HighlightedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
-						HighlightedView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
-						HighlightedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
-						HighlightedView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
+						highlightedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
+						highlightedView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
+						highlightedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
+						highlightedView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
 
-						SelectedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor, 2),
-						SelectedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor, 2),
-						SelectedView.WidthAnchor.ConstraintEqualTo(25),
-						SelectedView.HeightAnchor.ConstraintEqualTo(25),
+						selectedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor, 2),
+						selectedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor, 2),
+						selectedView.WidthAnchor.ConstraintEqualTo(25),
+						selectedView.HeightAnchor.ConstraintEqualTo(25),
 					});
 				}
 

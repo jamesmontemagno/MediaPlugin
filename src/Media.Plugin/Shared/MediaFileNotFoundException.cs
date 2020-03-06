@@ -2,9 +2,12 @@
 
 namespace Plugin.Media.Abstractions
 {
-	/// <summary>
-	/// 
-	/// </summary>
+    /// <summary>
+    /// 
+    /// </summary>
+#if !NETSTANDARD1_0
+    [Serializable]
+#endif
     public class MediaFileNotFoundException : Exception
     {
 		/// <summary>
@@ -35,5 +38,14 @@ namespace Plugin.Media.Abstractions
             get;
             private set;
         }
+
+        public MediaFileNotFoundException()
+        {
+        }
+#if !NETSTANDARD1_0
+        protected MediaFileNotFoundException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext)
+        {
+        }
+#endif
     }
 }

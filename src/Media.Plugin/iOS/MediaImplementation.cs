@@ -8,9 +8,9 @@ using System.Linq;
 using UIKit;
 using Foundation;
 
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
 using System.Collections.Generic;
+using Permissions = Xamarin.Essentials.Permissions;
+using PermissionStatus = Xamarin.Essentials.PermissionStatus;
 
 namespace Plugin.Media
 {
@@ -79,7 +79,7 @@ namespace Plugin.Media
 			{
 				CheckUsageDescription(photoDescription);
 
-				await CheckPermissions(Permission.Photos);
+				await CheckPermissions(nameof(Permissions.Photos));
 			}
 
 			var cameraOptions = new StoreCameraMediaOptions
@@ -108,7 +108,7 @@ namespace Plugin.Media
 			{
 				CheckUsageDescription(photoDescription);
 
-				await CheckPermissions(Permission.Photos);
+				await CheckPermissions(nameof(Permissions.Photos));
 			}
 
 			var cameraOptions = new StoreCameraMediaOptions
@@ -145,9 +145,9 @@ namespace Plugin.Media
 
 			VerifyCameraOptions(options);
 
-			var permissionsToCheck = new List<Permission> { Permission.Camera };
+			var permissionsToCheck = new List<string> { nameof(Permissions.Camera) };
 			if (options.SaveToAlbum)
-				permissionsToCheck.Add(Permission.Photos);
+				permissionsToCheck.Add(nameof(Permissions.Photos));
 
 			await CheckPermissions(permissionsToCheck.ToArray());
 
@@ -171,7 +171,7 @@ namespace Plugin.Media
 			if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
 			{
 				CheckUsageDescription(photoDescription);
-				await CheckPermissions(Permission.Photos);
+				await CheckPermissions(nameof(Permissions.Photos));
 			}
 
 			var media = await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie, token: token);
@@ -201,17 +201,17 @@ namespace Plugin.Media
 
 			VerifyCameraOptions(options);
 
-			var permissionsToCheck = new List<Permission> { Permission.Camera, Permission.Microphone };
+			var permissionsToCheck = new List<string> { nameof(Permissions.Camera), nameof(Permissions.Microphone) };
 			if (options.SaveToAlbum)
-				permissionsToCheck.Add(Permission.Photos);
+				permissionsToCheck.Add(nameof(Permissions.Photos));
 
 			await CheckPermissions(permissionsToCheck.ToArray());
 
 			return await GetMediaAsync(UIImagePickerControllerSourceType.Camera, TypeMovie, options, token);
 		}
 
-		private UIPopoverController popover;
-		private UIImagePickerControllerDelegate pickerDelegate;
+		UIPopoverController popover;
+		UIImagePickerControllerDelegate pickerDelegate;
 		/// <summary>
 		/// image type
 		/// </summary>
@@ -221,7 +221,7 @@ namespace Plugin.Media
 		/// </summary>
 		public const string TypeMovie = "public.movie";
 
-		private void VerifyOptions(StoreMediaOptions options)
+		void VerifyOptions(StoreMediaOptions options)
 		{
 			if (options == null)
 				throw new ArgumentNullException("options");
@@ -229,14 +229,14 @@ namespace Plugin.Media
 				throw new ArgumentException("options.Directory must be a relative path", "options");
 		}
 
-		private void VerifyCameraOptions(StoreCameraMediaOptions options)
+		void VerifyCameraOptions(StoreCameraMediaOptions options)
 		{
 			VerifyOptions(options);
 			if (!Enum.IsDefined(typeof(CameraDevice), options.DefaultCamera))
 				throw new ArgumentException("options.Camera is not a member of CameraDevice");
 		}
 
-		private static MediaPickerController SetupController(MediaPickerDelegate mpDelegate, UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+		static MediaPickerController SetupController(MediaPickerDelegate mpDelegate, UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
 		{
 			var picker = new MediaPickerController(mpDelegate);
 			picker.MediaTypes = new[] { mediaType };
@@ -272,7 +272,7 @@ namespace Plugin.Media
 			return picker;
 		}
 
-		private Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, CancellationToken token = default(CancellationToken))
+		Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, CancellationToken token = default(CancellationToken))
 		{
 
 			var viewController = GetHostViewController();
@@ -335,7 +335,7 @@ namespace Plugin.Media
 			});
 		}
 
-		private Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
+		Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
 		{
 			var viewController = GetHostViewController();
 
@@ -388,7 +388,7 @@ namespace Plugin.Media
 			}).Unwrap();
 		}
 
-		private static void ResizeAndCompressImage(StoreCameraMediaOptions options, MediaFile mediaFile, string pathExtension)
+		static void ResizeAndCompressImage(StoreCameraMediaOptions options, MediaFile mediaFile, string pathExtension)
 		{
 			var image = UIImage.FromFile(mediaFile.Path);
 			var percent = 1.0f;
@@ -463,7 +463,7 @@ namespace Plugin.Media
 			GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
 		}
 
-		private void Dismiss(UIPopoverController popover, UIViewController picker)
+		void Dismiss(UIPopoverController popover, UIViewController picker)
 		{
 			if (popover != null)
 			{
@@ -483,7 +483,7 @@ namespace Plugin.Media
 			Interlocked.Exchange(ref pickerDelegate, null);
 		}
 
-		private static UIViewController GetHostViewController()
+		static UIViewController GetHostViewController()
 		{
 			UIViewController viewController = null;
 			var window = UIApplication.SharedApplication.KeyWindow;
@@ -508,7 +508,7 @@ namespace Plugin.Media
 			return viewController;
 		}
 
-		private static UIImagePickerControllerCameraDevice GetUICameraDevice(CameraDevice device)
+		static UIImagePickerControllerCameraDevice GetUICameraDevice(CameraDevice device)
 		{
 			switch (device)
 			{
@@ -521,7 +521,7 @@ namespace Plugin.Media
 			}
 		}
 
-		private static UIImagePickerControllerQualityType GetQuailty(VideoQuality quality)
+		static UIImagePickerControllerQualityType GetQuailty(VideoQuality quality)
 		{
 			switch (quality)
 			{
@@ -534,23 +534,23 @@ namespace Plugin.Media
 			}
 		}
 
-		static async Task CheckPermissions(params Permission[] permissions)
+		static async Task CheckPermissions(params string[] permissions)
 		{
 			//See which ones we need to request.
-			var permissionsToRequest = new List<Permission>();
+			var permissionsToRequest = new List<string>();
 			foreach (var permission in permissions)
 			{
 				var permissionStatus = PermissionStatus.Unknown;
 				switch (permission)
 				{
-					case Permission.Camera:
-						permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<CameraPermission>();
+					case nameof(Permissions.Camera):
+						permissionStatus = await Permissions.CheckStatusAsync<Permissions.Camera>();
 						break;
-					case Permission.Photos:
-						permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<PhotosPermission>();
+					case nameof(Permissions.Photos):
+						permissionStatus = await Permissions.CheckStatusAsync<Permissions.Photos>();
 						break;
-					case Permission.Microphone:
-						permissionStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<MicrophonePermission>();
+					case nameof(Permissions.Microphone):
+						permissionStatus = await Permissions.CheckStatusAsync<Permissions.Microphone>();
 						break;
 				}
 
@@ -562,19 +562,19 @@ namespace Plugin.Media
 			if (permissionsToRequest.Count == 0)
 				return;
 
-			var results = new Dictionary<Permission, PermissionStatus>();
+			var results = new Dictionary<string, PermissionStatus>();
 			foreach (var permission in permissions)
 			{
 				switch (permission)
 				{
-					case Permission.Camera:
-						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<CameraPermission>());
+					case nameof(Permissions.Camera):
+						results.Add(permission, await Permissions.RequestAsync<Permissions.Camera>());
 						break;
-					case Permission.Photos:
-						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<PhotosPermission>());
+					case nameof(Permissions.Photos):
+						results.Add(permission, await Permissions.RequestAsync<Permissions.Photos>());
 						break;
-					case Permission.Microphone:
-						results.Add(permission, await CrossPermissions.Current.RequestPermissionAsync<MicrophonePermission>());
+					case nameof(Permissions.Microphone):
+						results.Add(permission, await Permissions.RequestAsync<Permissions.Microphone>());
 						break;
 				}
 			}
