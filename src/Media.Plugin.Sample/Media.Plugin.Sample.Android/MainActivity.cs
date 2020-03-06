@@ -6,8 +6,6 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
-using Plugin.CurrentActivity;
-using Plugin.Permissions;
 
 namespace Media.Plugin.Sample.Droid
 {
@@ -21,17 +19,18 @@ namespace Media.Plugin.Sample.Droid
 
             base.OnCreate(bundle);
 			FFImageLoading.Forms.Platform.CachedImageRenderer.Init(true);
-			CrossCurrentActivity.Current.Init(this, bundle);
+			Xamarin.Essentials.Platform.Init(this, bundle);
 			Xamarin.Forms.Forms.Init(this, bundle);
 			Android.Glide.Forms.Init(this);
 			LoadApplication(new App());
         }
 
-		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 		{
-			PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-		}
+			Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
+			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+		}
 	}
 }
 

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
 	<PropertyGroup>
-		<TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid70;MonoAndroid71;MonoAndroid80;MonoAndroid81;MonoAndroid90;Xamarin.iOS10;uap10.0.16299;Tizen40</TargetFrameworks>
+		<TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid80;MonoAndroid81;MonoAndroid90;MonoAndroid10.0;Xamarin.iOS10;uap10.0.16299;Tizen40</TargetFrameworks>
 		<AssemblyName>Plugin.Media</AssemblyName>
 		<RootNamespace>Plugin.Media</RootNamespace>
 		<Product>$(AssemblyName) ($(TargetFramework))</Product>
@@ -21,7 +21,7 @@
 		<Description>
 			Take or pick photos and videos from a cross platform API.
 		</Description>
-		<Copyright>Copyright 2019</Copyright>
+		<Copyright>Copyright 2020</Copyright>
 		<RepositoryUrl>https://github.com/jamesmontemagno/MediaPlugin</RepositoryUrl>
 		<PackageReleaseNotes>See: https://github.com/jamesmontemagno/MediaPlugin </PackageReleaseNotes>
 
@@ -50,12 +50,12 @@
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	</PropertyGroup>
 	<ItemGroup Condition=" '$(Configuration)'=='Release' ">
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 	</ItemGroup>
 	
 	<ItemGroup>
 		<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-		<PackageReference Include="Plugin.Permissions" Version="5.0.0-beta" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.5.1" />
 		<Compile Include="**\Shared\*.cs" />
 	</ItemGroup>
 
@@ -65,10 +65,18 @@
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
 		<Compile Include="**\UWP\*.cs" />
 	</ItemGroup>
-
+	
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
 		<Compile Include="**\Android\*.cs" />
+	</ItemGroup>
+	
+
+	<ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid')) And '$(TargetFramework)' != 'MonoAndroid10.0'">
 		<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="28.0.0.3" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid10.0'">
+		<PackageReference Include="Xamarin.AndroidX.Core" Version="1.1.0" />
 	</ItemGroup>
 	
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">

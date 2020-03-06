@@ -19,7 +19,7 @@ using CoreImage;
 
 namespace Plugin.Media
 {
-	internal class MediaPickerDelegate : UIImagePickerControllerDelegate
+	class MediaPickerDelegate : UIImagePickerControllerDelegate
 	{
 		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType,
 			StoreCameraMediaOptions options, CancellationToken token)
@@ -158,7 +158,7 @@ namespace Plugin.Media
 		bool IsCaptured =>
 			source == UIImagePickerControllerSourceType.Camera;
 		
-		private void Dismiss(UINavigationController picker, NSAction onDismiss)
+		void Dismiss(UINavigationController picker, NSAction onDismiss)
 		{
 			if (viewController == null)
 			{
@@ -189,7 +189,7 @@ namespace Plugin.Media
 			}
 		}
 
-		private void RemoveOrientationChangeObserverAndNotifications()
+		void RemoveOrientationChangeObserverAndNotifications()
 		{
 			if (viewController != null)
 			{
@@ -199,7 +199,7 @@ namespace Plugin.Media
 			}
 		}
 
-		private void DidRotate(NSNotification notice)
+		void DidRotate(NSNotification notice)
 		{
 			var device = (UIDevice)notice.Object;
 			if (!IsValidInterfaceOrientation(device.Orientation) || Popover == null)
@@ -224,7 +224,7 @@ namespace Plugin.Media
 			DisplayPopover(hideFirst: true);
 		}
 
-		private bool GetShouldRotate(UIDeviceOrientation orientation)
+		bool GetShouldRotate(UIDeviceOrientation orientation)
 		{
 			UIInterfaceOrientation iOrientation;
 			switch (orientation)
@@ -251,7 +251,7 @@ namespace Plugin.Media
 			return viewController.ShouldAutorotateToInterfaceOrientation(iOrientation);
 		}
 
-		private bool GetShouldRotate6(UIDeviceOrientation orientation)
+		bool GetShouldRotate6(UIDeviceOrientation orientation)
 		{
 			if (!viewController.ShouldAutorotate())
 				return false;
@@ -282,7 +282,7 @@ namespace Plugin.Media
 		}
 
 
-		private async Task<MediaFile> GetPictureMediaFile(NSDictionary info)
+		async Task<MediaFile> GetPictureMediaFile(NSDictionary info)
 		{
 			var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
 
@@ -583,7 +583,7 @@ namespace Plugin.Media
 				var success = destination.Close();
 				if (success)
 				{
-					var saved = imageWithExif.Save(path, true, out NSError error);
+					var saved = imageWithExif.Save(path, true, out var error);
 					if (error != null)
 						Debug.WriteLine($"Unable to save exif data: {error.ToString()}");
 
@@ -603,7 +603,7 @@ namespace Plugin.Media
 		}
 
 
-		private async Task<MediaFile> GetMovieMediaFile(NSDictionary info)
+		async Task<MediaFile> GetMovieMediaFile(NSDictionary info)
 		{
 			var url = info[UIImagePickerController.MediaURL] as NSUrl;
 			if (url == null)
@@ -706,12 +706,12 @@ namespace Plugin.Media
 			return Path.Combine(path, GetUniquePath(type, path, name, extension));
 		}
 
-		private static bool IsValidInterfaceOrientation(UIDeviceOrientation self)
+		static bool IsValidInterfaceOrientation(UIDeviceOrientation self)
 		{
 			return (self != UIDeviceOrientation.FaceUp && self != UIDeviceOrientation.FaceDown && self != UIDeviceOrientation.Unknown);
 		}
 
-		private static bool IsSameOrientationKind(UIDeviceOrientation o1, UIDeviceOrientation o2)
+		static bool IsSameOrientationKind(UIDeviceOrientation o1, UIDeviceOrientation o2)
 		{
 			if (o1 == UIDeviceOrientation.FaceDown || o1 == UIDeviceOrientation.FaceUp)
 				return (o2 == UIDeviceOrientation.FaceDown || o2 == UIDeviceOrientation.FaceUp);
@@ -723,7 +723,7 @@ namespace Plugin.Media
 			return false;
 		}
 
-		private static UIDeviceOrientation GetDeviceOrientation(UIInterfaceOrientation self)
+		static UIDeviceOrientation GetDeviceOrientation(UIInterfaceOrientation self)
 		{
 			switch (self)
 			{

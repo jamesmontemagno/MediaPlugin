@@ -190,7 +190,7 @@ namespace Plugin.Media
 			var tcs = Interlocked.Exchange(ref completionSource, null);
 			if (result == AppControlReplyResult.Succeeded)
 			{
-				string file = replyRequest.ExtraData.Get<IEnumerable<string>>(EX_KEY_SELECTED).FirstOrDefault();
+				var file = replyRequest.ExtraData.Get<IEnumerable<string>>(EX_KEY_SELECTED).FirstOrDefault();
 				tcs.SetResult(new MediaFile(file, () => File.OpenRead(file)));
 			}
 			else

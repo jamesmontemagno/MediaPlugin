@@ -30,7 +30,7 @@ namespace Plugin.Media
 			imageSource?.Dispose();
 
 			CILanczosScaleTransform transform = null;
-			/*if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+			if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 			{
 				transform = new CILanczosScaleTransform
 				{
@@ -39,15 +39,17 @@ namespace Plugin.Media
 					AspectRatio = 1.0f
 				};
 			}
-			else*/
-			//{
-			transform = new CILanczosScaleTransform
+			else
 			{
-				Scale = scale,
-				Image = sourceImage,
-				AspectRatio = 1.0f
-			};
-			//}
+			    transform = new CILanczosScaleTransform
+			    {
+				    Scale = scale,
+#pragma warning disable CS0618 // Type or member is obsolete
+                    Image = sourceImage,
+#pragma warning restore CS0618 // Type or member is obsolete
+                    AspectRatio = 1.0f
+			    };
+			}
 
 			var output = transform.OutputImage;
 			using var cgi = c.CreateCGImage(output, output.Extent);

@@ -1,24 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Plugin.Permissions.Abstractions;
+using System.Linq;
+using static Xamarin.Essentials.Permissions;
 
 namespace Plugin.Media.Abstractions
 {
 	/// <summary>
 	/// Permission exception.
 	/// </summary>
-    public class MediaPermissionException : Exception
+	public class MediaPermissionException : Exception
     {
 		/// <summary>
 		/// Permission required that is missing
 		/// </summary>
-		public Permission[] Permissions { get; }
+		public string[] Permissions { get; }
 		/// <summary>
 		/// Creates a media permission exception
 		/// </summary>
 		/// <param name="permissions"></param>
-		public MediaPermissionException(params Permission[] permissions)
+		public MediaPermissionException(params string[] permissions)
 			: base()
 		{	
             Permissions = permissions;

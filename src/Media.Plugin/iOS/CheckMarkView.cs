@@ -6,8 +6,8 @@ namespace Plugin.Media
 {
 	public class CheckMarkView : UIView
 	{
-		private bool _checked = false;
-		private CheckMarkStyle _checkMarkStyle = CheckMarkStyle.OpenCircle;
+		bool _checked = false;
+		CheckMarkStyle _checkMarkStyle = CheckMarkStyle.OpenCircle;
 
 		public CheckMarkView()
 		{
@@ -51,7 +51,7 @@ namespace Plugin.Media
 		}
 
 
-		private void DrawRectChecked(CGRect rect)
+		void DrawRectChecked(CGRect rect)
 		{
 			var context = UIGraphics.GetCurrentContext();
 
@@ -93,7 +93,7 @@ namespace Plugin.Media
 			bezierPath.Stroke();
 		}
 
-		private void DrawRectGrayedOut(CGRect rect)
+		void DrawRectGrayedOut(CGRect rect)
 		{
 			var context = UIGraphics.GetCurrentContext();
 
@@ -132,7 +132,7 @@ namespace Plugin.Media
 			bezierPath.Stroke();
 		}
 
-		private void DrawRectOpenCircle(CGRect rect)
+		void DrawRectOpenCircle(CGRect rect)
 		{
 			var context = UIGraphics.GetCurrentContext();
 
