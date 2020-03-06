@@ -8,7 +8,7 @@ Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a 
 
 ### Setup
 * Available on NuGet: http://www.nuget.org/packages/Xam.Plugin.Media [![NuGet](https://img.shields.io/nuget/v/Xam.Plugin.Media.svg?label=NuGet)](https://www.nuget.org/packages/Xam.Plugin.Media/)
-* Install into your PCL/.NET Standard project and Client projects.
+* Install into your .NET Standard project and Client projects.
 * Please see the additional setup for each platforms permissions.
 
 Build Status: 
@@ -253,24 +253,11 @@ public override void OnRequestPermissionsResult(int requestCode, string[] permis
 }
 ```
 
-## Android Current Activity Setup
+## Android Required Setup
 
-This plugin uses the [Current Activity Plugin](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. Please fully read through the [Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md). At an absolute minimum you must set the following in your Activity's OnCreate method:
+This plugin uses the Xamarin.Essentials, please follow the setup guide.
 
-```csharp
-CrossCurrentActivity.Current.Init(this, bundle);
-```
-
-It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation](https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md)
-
-## Android Misc Setup
-
-By default, the library adds `android.hardware.camera` and `android.hardware.camera.autofocus` to your apps manifest as optional features. It is your responsbility to check whether your device supports the hardware before using it. If instead you'd like [Google Play to filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without the required hardware, add the following to your AssemblyInfo.cs file in your Android project:
-
-```
-[assembly: UsesFeature("android.hardware.camera", Required = true)]
-[assembly: UsesFeature("android.hardware.camera.autofocus", Required = true)]
-```
+Xamarin.Essentials.Platform.Init(this, bundle);
 
 
 #### Android File Provider Setup
@@ -302,6 +289,15 @@ Add the following code:
 
 You can read more at: https://developer.android.com/training/camera/photobasics.html
 
+## Android Optional Setup
+
+By default, the library adds `android.hardware.camera` and `android.hardware.camera.autofocus` to your apps manifest as optional features. It is your responsbility to check whether your device supports the hardware before using it. If instead you'd like [Google Play to filter out devices](http://developer.android.com/guide/topics/manifest/uses-feature-element.html#permissions-features) without the required hardware, add the following to your AssemblyInfo.cs file in your Android project:
+
+```
+[assembly: UsesFeature("android.hardware.camera", Required = true)]
+[assembly: UsesFeature("android.hardware.camera.autofocus", Required = true)]
+```
+
 
 #### iOS
 
@@ -328,34 +324,9 @@ Set `Webcam` permission.
 
 
 ### Permission Recommendations
-By default, the Media Plugin will attempt to request multiple permissions, but each platform handles this a bit differently, such as iOS which will only pop up permissions once. I recommend adding the [Permissions Plugin](http://github.com/jamesmontemagno/PermissionsPlugin) into your application and before taking any photo or picking photos that you check permissions ahead of time. 
+By default, the Media Plugin will attempt to request multiple permissions, but each platform handles this a bit differently, such as iOS which will only pop up permissions once.
 
-Here is an example:
-```csharp
-var cameraStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<CameraPermission>();
-var storageStatus = await CrossPermissions.Current.CheckPermissionStatusAsync<StoragePermission>();
-
-if (cameraStatus != PermissionStatus.Granted || storageStatus != PermissionStatus.Granted)
-{
-    cameraStatus = await CrossPermissions.Current.RequestPermissionAsync<CameraPermission>();
-    storageStatus = await CrossPermissions.Current.RequestPermissionAsync<StoragePermission>();
-}
-
-if (cameraStatus == PermissionStatus.Granted && storageStatus == PermissionStatus.Granted)
-{
-     var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
-    {
-        Directory = "Sample",
-        Name = "test.jpg"
-    });
-}
-else
-{
-    await DisplayAlert("Permissions Denied", "Unable to take photos.", "OK");
-    //On iOS you may want to send your user to the settings screen.
-    //CrossPermissions.Current.OpenAppSettings();
-}
-```
+You can use Xamarin.Essentials to request and check permissions manually.
 
 #### FAQ
 Here are some common answers to questions:

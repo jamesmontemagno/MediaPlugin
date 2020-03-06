@@ -363,7 +363,7 @@ namespace Plugin.Media
 
         private void OnDeviceUpdated(DeviceWatcher sender, DeviceInformationUpdate update)
         {
-			if (!update.Properties.TryGetValue("System.Devices.InterfaceEnabled", out object value))
+			if (!update.Properties.TryGetValue("System.Devices.InterfaceEnabled", out var value))
 				return;
 
 			lock (devices)
