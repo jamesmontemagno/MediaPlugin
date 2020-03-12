@@ -5,14 +5,10 @@ Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 Additional Required Setup (Please Read!)
 
 Android 
-In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
-     Add to Activity:
+This library uses Xamarin.Essentials for permissions and other funcationality. Please ensure that you have sset it up correctly:
 
-    public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
-    {
-        Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
+https://docs.microsoft.com/xamarin/essentials/get-started?
 
 
 NB: The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. 
