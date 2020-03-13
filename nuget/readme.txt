@@ -8,7 +8,25 @@ Android
 
 This library uses Xamarin.Essentials for permissions and other funcationality. Please ensure that you have sset it up correctly:
 
-https://docs.microsoft.com/xamarin/essentials/get-started?
+https://docs.microsoft.com/xamarin/essentials/get-started
+
+```csharp
+protected override void OnCreate(Bundle savedInstanceState) {
+    //...
+    base.OnCreate(savedInstanceState);
+    Xamarin.Essentials.Platform.Init(this, savedInstanceState); // add this line to your code, it may also be called: bundle
+    //...
+```
+And for permissions:
+
+```csharp
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
+{
+    Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+}
+```
 
 
 NB: The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. 
