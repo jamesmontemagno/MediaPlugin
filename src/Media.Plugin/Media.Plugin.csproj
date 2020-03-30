@@ -55,7 +55,7 @@
 	
 	<ItemGroup>
 		<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.5.1" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.5.2" />
 		<Compile Include="**\Shared\*.cs" />
 	</ItemGroup>
 
