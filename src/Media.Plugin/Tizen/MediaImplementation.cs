@@ -66,8 +66,10 @@ namespace Plugin.Media
 		/// <inheritdoc/>
 		public bool IsPickVideoSupported { get; }
 
-		/// <inheritdoc/>
-		public Task<bool> Initialize() => Task.FromResult(true);
+        public bool IsVideoThumbnailSupported => false;
+
+        /// <inheritdoc/>
+        public Task<bool> Initialize() => Task.FromResult(true);
 
 		/// <summary>
 		/// Take a photo async with specified options
@@ -289,5 +291,10 @@ namespace Plugin.Media
 
 			return new List<MediaFile> { result };
 		}
-	}
+
+        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

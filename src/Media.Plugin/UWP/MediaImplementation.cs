@@ -88,6 +88,8 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsPickVideoSupported => true;
 
+        public bool IsVideoThumbnailSupported => false;
+
         /// <summary>
         /// Take a photo async with specified options
         /// </summary>
@@ -397,6 +399,11 @@ namespace Plugin.Media
                 devices.Add(device.Id);
                 isCameraAvailable = true;
             }
+        }
+
+        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

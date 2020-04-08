@@ -38,12 +38,14 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         bool IsPickVideoSupported { get; }
 
-		/// <summary>
-		/// Picks a photo from the default gallery
-		/// </summary>
-		/// <param name="token">Cancellation token</param>
-		/// <returns>Media file or null if canceled</returns>
-		Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken));
+        bool IsVideoThumbnailSupported { get; }
+
+        /// <summary>
+        /// Picks a photo from the default gallery
+        /// </summary>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>Media file or null if canceled</returns>
+        Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken));
 
 		/// <summary>
 		/// Picks a photo from the default gallery
@@ -73,5 +75,7 @@ namespace Plugin.Media.Abstractions
 		/// <returns>Media file of new video or null if canceled</returns>
 		Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken));
 
-	}
+        Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default(CancellationToken));
+
+    }
 }

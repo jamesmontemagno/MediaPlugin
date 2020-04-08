@@ -63,12 +63,14 @@ namespace Plugin.Media
 		/// <inheritdoc/>
 		public bool IsPickVideoSupported { get; }
 
+        public bool IsVideoThumbnailSupported { get; }
 
-		/// <summary>
-		/// Picks a photo from the default gallery
-		/// </summary>
-		/// <returns>Media file or null if canceled</returns>
-		public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
+
+        /// <summary>
+        /// Picks a photo from the default gallery
+        /// </summary>
+        /// <returns>Media file or null if canceled</returns>
+        public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
 		{
 			if (!IsPickPhotoSupported)
 				throw new NotSupportedException();
@@ -608,5 +610,10 @@ namespace Plugin.Media
 
 			}
 		}
-	}
+
+        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
