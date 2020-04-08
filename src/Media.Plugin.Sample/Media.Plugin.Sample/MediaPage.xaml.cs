@@ -111,7 +111,13 @@ namespace Media.Plugin.Sample
 
 				await DisplayAlert("Video Recorded", "Location: " + file.Path, "OK");
 
-				file.Dispose();
+                var thumbnail = await CrossMedia.Current.CreateVideoThumbnailAsync(file, 1);
+
+                var image = new CachedImage { WidthRequest = 300, HeightRequest = 300, Aspect = Aspect.AspectFit };
+                image.Source = ImageSource.FromStream(thumbnail.GetStream);
+                ImageList.Children.Add(image);
+
+                file.Dispose();
 			};
 
 			pickVideo.Clicked += async (sender, args) =>
@@ -129,7 +135,19 @@ namespace Media.Plugin.Sample
 					return;
 
 				await DisplayAlert("Video Selected", "Location: " + file.Path, "OK");
-				file.Dispose();
+
+                var thumbnail =  await CrossMedia.Current.CreateVideoThumbnailAsync(file, 5);
+
+                var image = new CachedImage
+                {
+                    WidthRequest = 300,
+                    HeightRequest = 300,
+                    Aspect = Aspect.AspectFit,
+                    Source = ImageSource.FromStream(thumbnail.GetStream)
+                }; // { };
+                ImageList.Children.Add(image);
+
+                file.Dispose();
 			};
 		}
 
@@ -146,11 +164,7 @@ namespace Media.Plugin.Sample
 			var file = e.NewItems[0] as MediaFile;
 			var image = new Image { WidthRequest = 300, HeightRequest = 300, Aspect = Aspect.AspectFit };
 			image.Source = ImageSource.FromFile(file.Path);
-			/*image.Source = ImageSource.FromStream(() =>
-			{
-				var stream = file.GetStream();
-				return stream;
-			});*/
+
 			ImageList.Children.Add(image);
 
 			var image2 = new CachedImage { WidthRequest = 300, HeightRequest = 300, Aspect = Aspect.AspectFit };

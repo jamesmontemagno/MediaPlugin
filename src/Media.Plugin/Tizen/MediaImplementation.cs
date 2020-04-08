@@ -292,7 +292,7 @@ namespace Plugin.Media
 			return new List<MediaFile> { result };
 		}
 
-        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default)
+        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, long frameTime, PickMediaOptions options = null, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

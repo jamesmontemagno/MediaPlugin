@@ -1025,9 +1025,24 @@ namespace Plugin.Media
             }
         }
 
-        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default)
+        public async Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, long frameTime, PickMediaOptions options = null, CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            if (token.IsCancellationRequested)
+                return null;
+
+            var retriever = new MediaMetadataRetriever();
+            retriever.SetDataSource(mediaFile.Path);
+            var bitmap = retriever.GetFrameAtTime(frameTime);
+            if (bitmap != null)
+            {
+                var stream = new MemoryStream();
+                await bitmap.CompressAsync(Bitmap.CompressFormat.Jpeg, 0, stream);
+                var bitmapData = stream.ToArray();
+                var thumbnail = new MediaFile(string.Empty, () => new MemoryStream(bitmapData));
+                return thumbnail;
+            }
+
+            return null;
         }
     }
 

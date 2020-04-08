@@ -75,7 +75,7 @@ namespace Plugin.Media.Abstractions
 		/// <returns>Media file of new video or null if canceled</returns>
 		Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken));
 
-        Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default(CancellationToken));
+        Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, long frameTime, PickMediaOptions options = null, CancellationToken token = default(CancellationToken));
 
     }
 }

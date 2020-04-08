@@ -401,7 +401,7 @@ namespace Plugin.Media
             }
         }
 
-        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, PickMediaOptions options = null, CancellationToken token = default)
+        public Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, long frameTime, PickMediaOptions options = null, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
