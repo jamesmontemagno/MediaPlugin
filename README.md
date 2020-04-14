@@ -264,9 +264,25 @@ Xamarin.Essentials.Platform.Init(this, bundle);
 
 You must also add a few additional configuration files to adhere to the new strict mode:
 
-1.) Add the following to your AndroidManifest.xml inside the `<application>` tags:
+1a.) (Non AndroidX) Add the following to your AndroidManifest.xml inside the `<application>` tags:
 ```xml
 <provider android:name="android.support.v4.content.FileProvider" 
+          android:authorities="${applicationId}.fileprovider" 
+          android:exported="false" 
+          android:grantUriPermissions="true">
+          
+	  <meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
+                     android:resource="@xml/file_paths"></meta-data>
+</provider>
+```
+
+**Note:** If you receive the following error, it is because you are using AndroidX. To resolve this error, follow the instructions in Step `1b.)`.
+> Unable to get provider android.support.v4.content.FileProvider: java.lang.ClassNotFoundException: Didn't find class "android.support.v4.content.FileProvider" on path: DexPathList
+
+
+1b.) (AndroidX) Add the following to your AndroidManifest.xml inside the `<application>` tags:
+```xml
+<provider android:name="androidx.core.content.FileProvider" 
           android:authorities="${applicationId}.fileprovider" 
           android:exported="false" 
           android:grantUriPermissions="true">
@@ -279,6 +295,7 @@ You must also add a few additional configuration files to adhere to the new stri
 2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`. Make sure that this XML file has a Build Action of: `AndroidResource`.
 
 Add the following code:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
