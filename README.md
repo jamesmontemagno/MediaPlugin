@@ -242,22 +242,21 @@ var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 Please read these as they must be implemented for all platforms.
 
 #### Android 
-The `WRITE_EXTERNAL_STORAGE` & `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add the Permission Plugin code into your Main or Base Activities:
+The `WRITE_EXTERNAL_STORAGE` & `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add `Xamarin.Essentials.Platform.OnRequestPermissionsResult` code into your Main or Base Activities:
 
 Add to Activity:
 
 ```csharp
 public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 {
-    Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 }
 ```
 
 ## Android Required Setup
 
-This plugin uses the Xamarin.Essentials, please follow the setup guide.
-
-Xamarin.Essentials.Platform.Init(this, bundle);
+This plugin uses the Xamarin.Essentials, please follow the setup guide: http://aka.ms/essentials-getstarted
 
 
 #### Android File Provider Setup
