@@ -6,7 +6,7 @@ Additional Required Setup (Please Read!)
 
 Android 
 
-This library uses Xamarin.Essentials for permissions and other funcationality. Please ensure that you have sset it up correctly:
+This library uses Xamarin.Essentials for permissions and other functionality. Please ensure that you have set it up correctly:
 
 https://docs.microsoft.com/xamarin/essentials/get-started
 
