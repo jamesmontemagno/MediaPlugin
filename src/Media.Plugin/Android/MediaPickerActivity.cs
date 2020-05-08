@@ -651,7 +651,7 @@ namespace Plugin.Media
 		/// </summary>
         protected override void OnDestroy()
         {
-            if(!completed)
+            if(completed)
             {
                 DeleteOutputFile();
 				MediaImplementation.CompletionSource = null;
