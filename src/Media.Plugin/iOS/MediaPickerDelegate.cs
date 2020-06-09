@@ -41,7 +41,7 @@ namespace Plugin.Media
 			set;
 		}
 
-		public void CancelTask() => tcs.SetResult(null);
+		public void CancelTask() => tcs.TrySetResult(null);
 
 		public UIView View => viewController.View;
 		
@@ -91,7 +91,7 @@ namespace Plugin.Media
 
 			Dismiss(picker, () =>
 			{
-				tcs.SetResult(null);
+				tcs.TrySetResult(null);
 			});
 		}
 
@@ -106,7 +106,7 @@ namespace Plugin.Media
 
 			Dismiss(picker, () =>
 			{
-				tcs.SetResult(null);
+				tcs.TrySetResult(null);
 			});
 		}
 
