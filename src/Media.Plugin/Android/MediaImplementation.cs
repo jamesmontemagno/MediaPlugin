@@ -24,15 +24,15 @@ namespace Plugin.Media
     [Android.Runtime.Preserve(AllMembers = true)]
     public class MediaImplementation : IMedia
     {
-		const string pixelXDimens = "PixelXDimension";
-		const string pixelYDimens = "PixelYDimension";
+        const string pixelXDimens = "PixelXDimension";
+        const string pixelYDimens = "PixelYDimension";
 
-	    internal static event EventHandler CancelRequested;
+        internal static event EventHandler CancelRequested;
 
-		/// <summary>
-		/// Implementation
-		/// </summary>
-		public MediaImplementation()
+        /// <summary>
+        /// Implementation
+        /// </summary>
+        public MediaImplementation()
         {
 
             this.context = Application.Context;
@@ -65,17 +65,17 @@ namespace Plugin.Media
             if (exif == null)
                 return false;
 
-			try
-			{
-				//if has thumb, but is <= 0, then not valid
-				if (exif.HasThumbnail && (exif.GetThumbnail()?.Length ?? 0) <= 0)
-					return false;
-			}
-			catch(Exception ex)
-			{
-				System.Diagnostics.Debug.WriteLine("Unable to get thumbnail exif: " + ex);
-				return false;
-			}
+            try
+            {
+                //if has thumb, but is <= 0, then not valid
+                if (exif.HasThumbnail && (exif.GetThumbnail()?.Length ?? 0) <= 0)
+                    return false;
+            }
+            catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Unable to get thumbnail exif: " + ex);
+                return false;
+            }
 
             return true;
         }
@@ -100,7 +100,7 @@ namespace Plugin.Media
             {
                 try
                 {
-	                await FixOrientationAndResize(options, media);
+                    await FixOrientationAndResize(options, media);
                 }
                 catch (Exception ex)
                 {
@@ -111,75 +111,75 @@ namespace Plugin.Media
             return media;
         }
 
-	    public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
-		{
-			if (!await RequestStoragePermission())
-			{
-				return null;
-			}
+        public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
+        {
+            if (!await RequestStoragePermission())
+            {
+                return null;
+            }
 
-			var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true }, token);
+            var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true }, token);
 
-			if (medias == null)
-				return null;
+            if (medias == null)
+                return null;
 
-			if (options == null)
-				options = new PickMediaOptions();
+            if (options == null)
+                options = new PickMediaOptions();
 
-			foreach (var media in medias)
-			{
-				//check to see if we picked a file, and if so then try to fix orientation and resize
-				if (!string.IsNullOrWhiteSpace(media?.Path))
-				{
-					try
-					{
-						await FixOrientationAndResize(options, media);
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine("Unable to check orientation: " + ex);
-					}
-				}
-			}
+            foreach (var media in medias)
+            {
+                //check to see if we picked a file, and if so then try to fix orientation and resize
+                if (!string.IsNullOrWhiteSpace(media?.Path))
+                {
+                    try
+                    {
+                        await FixOrientationAndResize(options, media);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Unable to check orientation: " + ex);
+                    }
+                }
+            }
 
-			return medias;
-		}
+            return medias;
+        }
+        
+        async Task FixOrientationAndResize(PickMediaOptions options, MediaFile media)
+        {
+            var originalMetadata = new ExifInterface(media.Path);
 
-	    async Task FixOrientationAndResize(PickMediaOptions options, MediaFile media)
-	    {
-		    var originalMetadata = new ExifInterface(media.Path);
+            if (options.RotateImage)
+            {
+                await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
+            }
+            else
+            {
+                await ResizeAsync(media.Path, options, originalMetadata);
+            }
 
-		    if (options.RotateImage)
-		    {
-			    await FixOrientationAndResizeAsync(media.Path, options, originalMetadata);
-		    }
-		    else
-		    {
-			    await ResizeAsync(media.Path, options, originalMetadata);
-		    }
+            if (options.SaveMetaData && IsValidExif(originalMetadata))
+            {
+                try
+                {
+                    originalMetadata?.SaveAttributes();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Unable to save exif {ex}");
+                }
+            }
 
-		    if (options.SaveMetaData && IsValidExif(originalMetadata))
-		    {
-			    try
-			    {
-				    originalMetadata?.SaveAttributes();
-			    }
-			    catch (Exception ex)
-			    {
-				    Console.WriteLine($"Unable to save exif {ex}");
-			    }
-		    }
+            originalMetadata?.Dispose();
+        }
 
-		    originalMetadata?.Dispose();
-	    }
-
-		/// <summary>
-		/// Take a photo async with specified options
-		/// </summary>
-		/// <param name="options">Camera Media Options</param>
-		/// <param name="token">Cancellation token</param>
-		/// <returns>Media file of photo or null if canceled</returns>
-		public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
+        /// <summary>
+        /// Take a photo async with specified options
+        /// </summary>
+        /// <param name="options">Camera Media Options</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>Media file of photo or null if canceled</returns>
+        public async Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken))
         {
             if (!IsCameraAvailable)
                 throw new NotSupportedException();
@@ -204,8 +204,8 @@ namespace Plugin.Media
                     var fileName = System.IO.Path.GetFileName(media.Path);
                     var publicUri = MediaPickerActivity.GetOutputMediaFile(context, options.Directory ?? "temp", fileName, true, true);
                     using (System.IO.Stream input = File.OpenRead(media.Path))
-                        using (System.IO.Stream output = File.Create(publicUri.Path))
-                            input.CopyTo(output);
+                    using (System.IO.Stream output = File.Create(publicUri.Path))
+                        input.CopyTo(output);
 
                     media.AlbumPath = publicUri.Path;
 
@@ -216,7 +216,7 @@ namespace Plugin.Media
 
                     try
                     {
-						MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
+                        MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
 
                         var values = new ContentValues();
                         values.Put(MediaStore.Images.Media.InterfaceConsts.Title, System.IO.Path.GetFileNameWithoutExtension(f.AbsolutePath));
@@ -260,20 +260,20 @@ namespace Plugin.Media
                 }
 
                 if (options.SaveMetaData && IsValidExif(exif))
-				{
-					SetMissingMetadata(exif, options.Location);
+                {
+                    SetMissingMetadata(exif, options.Location);
 
-					try
-					{
-						exif?.SaveAttributes();
-					}
-					catch(Exception ex)
-					{
-						Console.WriteLine($"Unable to save exif {ex}");
-					}
-				}
+                    try
+                    {
+                        exif?.SaveAttributes();
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine($"Unable to save exif {ex}");
+                    }
+                }
 
-				exif?.Dispose();
+                exif?.Dispose();
             }
             catch(Exception ex)
             {
@@ -297,6 +297,26 @@ namespace Plugin.Media
 
             return await TakeMediaAsync("video/*", Intent.ActionPick, null, token);
         }
+        
+        /// <summary>
+        /// Picks multiple videos from the default gallery
+        /// </summary>
+        /// <returns>MediaFile list or null if canceled</returns>
+        public async Task<List<MediaFile>> PickVideosAsync(CancellationToken token = default(CancellationToken))
+        {
+            if (!await RequestStoragePermission())
+            {
+                throw new MediaPermissionException(nameof(StoragePermission));
+            }
+
+            var medias = await TakeMediasAsync("video/*", Intent.ActionPick, new StorePickerMediaOptions {MultiPicker = true}, token);
+
+            if (medias == null)
+                return null;
+
+            return medias;
+        }
+
 
         /// <summary>
         /// Take a video with specified options
@@ -322,32 +342,32 @@ namespace Plugin.Media
         int requestId;
 
         internal static TaskCompletionSource<MediaFile> CompletionSource;
-		internal static TaskCompletionSource<List<MediaFile>> CompletionSourceMulti;
+        internal static TaskCompletionSource<List<MediaFile>> CompletionSourceMulti;
 
 
 
-		async Task<bool> RequestCameraPermissions()
-		{
-			//We always have permission on anything lower than marshmallow.
-			if ((int)Build.VERSION.SdkInt < 23)
-				return true;
+        async Task<bool> RequestCameraPermissions()
+        {
+            //We always have permission on anything lower than marshmallow.
+            if ((int)Build.VERSION.SdkInt < 23)
+                return true;
 
             var checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
 
-			var hasStoragePermission = await Permissions.CheckStatusAsync<StoragePermission>();
+            var hasStoragePermission = await Permissions.CheckStatusAsync<StoragePermission>();
 
-			var hasCameraPermission = PermissionStatus.Granted;
-			if (checkCamera)
-				hasCameraPermission = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            var hasCameraPermission = PermissionStatus.Granted;
+            if (checkCamera)
+                hasCameraPermission = await Permissions.CheckStatusAsync<Permissions.Camera>();
 
 
             var permissions = new List<string>();
 
-			var camera = nameof(Permissions.Camera);
-			var storage = nameof(StoragePermission);
+            var camera = nameof(Permissions.Camera);
+            var storage = nameof(StoragePermission);
 
 
-			if (hasCameraPermission != PermissionStatus.Granted)
+            if (hasCameraPermission != PermissionStatus.Granted)
                 permissions.Add(camera);
 
             if(hasStoragePermission != PermissionStatus.Granted)
@@ -356,36 +376,36 @@ namespace Plugin.Media
             if (permissions.Count == 0) //good to go!
                 return true;
 
-			var results = new Dictionary<string, PermissionStatus>();
-			foreach(var permission in permissions)
-			{
-				switch (permission)
-				{
-					case nameof(Permissions.Camera):
-						results.Add(permission, await Permissions.RequestAsync<Permissions.Camera>());
-						break;
-					case nameof(StoragePermission):
-						results.Add(permission, await Permissions.RequestAsync<StoragePermission>());
-						break;
-				}
-			}
-			
-			if (results.ContainsKey(storage) &&
-					results[storage] != PermissionStatus.Granted)
-			{
-				Console.WriteLine("Storage permission Denied.");
-				return false;
-			}
+            var results = new Dictionary<string, PermissionStatus>();
+            foreach(var permission in permissions)
+            {
+                switch (permission)
+                {
+                    case nameof(Permissions.Camera):
+                        results.Add(permission, await Permissions.RequestAsync<Permissions.Camera>());
+                        break;
+                    case nameof(StoragePermission):
+                        results.Add(permission, await Permissions.RequestAsync<StoragePermission>());
+                        break;
+                }
+            }
 
-			if (results.ContainsKey(camera) &&
-					results[camera] != PermissionStatus.Granted)
-			{
-				Console.WriteLine("Camera permission Denied.");
-				return false;
-			}
+            if (results.ContainsKey(storage) &&
+                results[storage] != PermissionStatus.Granted)
+            {
+                Console.WriteLine("Storage permission Denied.");
+                return false;
+            }
 
-			return true;
-		}
+            if (results.ContainsKey(camera) &&
+                results[camera] != PermissionStatus.Granted)
+            {
+                Console.WriteLine("Camera permission Denied.");
+                return false;
+            }
+
+            return true;
+        }
 
         async Task<bool> RequestStoragePermission()
         {
@@ -393,7 +413,7 @@ namespace Plugin.Media
             if ((int)Build.VERSION.SdkInt < 23)
                 return true;
 
-			var status = await Permissions.CheckStatusAsync<StoragePermission>();
+            var status = await Permissions.CheckStatusAsync<StoragePermission>();
             if (status != PermissionStatus.Granted)
             {
                 Console.WriteLine("Does not have storage permission granted, requesting.");
@@ -409,46 +429,46 @@ namespace Plugin.Media
         }
 
         IList<string> requestedPermissions;
-		bool HasPermissionInManifest(string permission)
-		{
-			try
-			{
-				if (requestedPermissions != null)
-					return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
+        bool HasPermissionInManifest(string permission)
+        {
+            try
+            {
+                if (requestedPermissions != null)
+                    return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
 
-				//try to use current activity else application context
-				var permissionContext = Xamarin.Essentials.Platform.CurrentActivity ?? Application.Context;
+                //try to use current activity else application context
+                var permissionContext = Xamarin.Essentials.Platform.CurrentActivity ?? Application.Context;
 
-				if (context == null)
-				{
+                if (context == null)
+                {
                     System.Diagnostics.Debug.WriteLine("Unable to detect current Activity or App Context. Please ensure Xamarin.Essentials is installed and initialized.");
-					return false;
-				}
+                    return false;
+                }
 
-				var info = context.PackageManager.GetPackageInfo(context.PackageName, PackageInfoFlags.Permissions);
+                var info = context.PackageManager.GetPackageInfo(context.PackageName, PackageInfoFlags.Permissions);
 
-				if (info == null)
-				{
-					System.Diagnostics.Debug.WriteLine("Unable to get Package info, will not be able to determine permissions to request.");
-					return false;
-				}
+                if (info == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Unable to get Package info, will not be able to determine permissions to request.");
+                    return false;
+                }
 
-				requestedPermissions = info.RequestedPermissions;
+                requestedPermissions = info.RequestedPermissions;
 
-				if (requestedPermissions == null)
-				{
-					System.Diagnostics.Debug.WriteLine("There are no requested permissions, please check to ensure you have marked permissions you want to request.");
-					return false;
-				}
+                if (requestedPermissions == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("There are no requested permissions, please check to ensure you have marked permissions you want to request.");
+                    return false;
+                }
 
-				return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
-			}
-			catch (Exception ex)
-			{
-				Console.Write("Unable to check manifest for permission: " + ex);
-			}
-			return false;
-		}
+                return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
+            }
+            catch (Exception ex)
+            {
+                Console.Write("Unable to check manifest for permission: " + ex);
+            }
+            return false;
+        }
 
 
         const string illegalCharacters = "[|\\?*<\":>/']";
@@ -480,13 +500,13 @@ namespace Plugin.Media
                 pickerIntent.PutExtra(MediaPickerActivity.ExtraPath, options.Directory);
                 pickerIntent.PutExtra(MediaStore.Images.ImageColumns.Title, options.Name);
 
-				var pickerOptions = (options as StorePickerMediaOptions);
-				if (pickerOptions != null)
-				{
-					pickerIntent.PutExtra(MediaPickerActivity.ExtraMultiSelect, pickerOptions.MultiPicker);
-				}
+                var pickerOptions = (options as StorePickerMediaOptions);
+                if (pickerOptions != null)
+                {
+                    pickerIntent.PutExtra(MediaPickerActivity.ExtraMultiSelect, pickerOptions.MultiPicker);
+                }
 
-				var cameraOptions = (options as StoreCameraMediaOptions);
+                var cameraOptions = (options as StoreCameraMediaOptions);
                 if (cameraOptions != null)
                 {
                     if (cameraOptions.DefaultCamera == CameraDevice.Front)
@@ -530,93 +550,93 @@ namespace Plugin.Media
         {
             var id = GetRequestId();
 
-	        if (token.IsCancellationRequested)
-				return Task.FromResult((MediaFile) null);
+            if (token.IsCancellationRequested)
+                return Task.FromResult((MediaFile) null);
 
             var ntcs = new TaskCompletionSource<MediaFile>(id);
             if (Interlocked.CompareExchange(ref CompletionSource, ntcs, null) != null)
                 throw new InvalidOperationException("Only one operation can be active at a time");
 
-			context.StartActivity(CreateMediaIntent(id, type, action, options));
+            context.StartActivity(CreateMediaIntent(id, type, action, options));
 
-			void handler(object s, MediaPickedEventArgs e)
-			{
-				var tcs = Interlocked.Exchange(ref CompletionSource, null);
+            void handler(object s, MediaPickedEventArgs e)
+            {
+                var tcs = Interlocked.Exchange(ref CompletionSource, null);
 
-				MediaPickerActivity.MediaPicked -= handler;
+                MediaPickerActivity.MediaPicked -= handler;
 
-				if (e.RequestId != id)
-					return;
+                if (e.RequestId != id)
+                    return;
 
-				if (e.IsCanceled)
-					tcs.SetResult(null);
-				else if (e.Error != null)
-					tcs.SetException(e.Error);
-				else
-					tcs.SetResult(e.Media.FirstOrDefault());
-			}
+                if (e.IsCanceled)
+                    tcs.SetResult(null);
+                else if (e.Error != null)
+                    tcs.SetException(e.Error);
+                else
+                    tcs.SetResult(e.Media.FirstOrDefault());
+            }
 
-			token.Register(() =>
-	        {
-		        var tcs = Interlocked.Exchange(ref CompletionSource, null);
+            token.Register(() =>
+            {
+                var tcs = Interlocked.Exchange(ref CompletionSource, null);
 
-		        MediaPickerActivity.MediaPicked -= handler;
-		        CancelRequested?.Invoke(null, EventArgs.Empty);
-		        CancelRequested = null;
+                MediaPickerActivity.MediaPicked -= handler;
+                CancelRequested?.Invoke(null, EventArgs.Empty);
+                CancelRequested = null;
 
-		        tcs.SetResult(null);
-	        });
+                tcs.SetResult(null);
+            });
 
 
-			MediaPickerActivity.MediaPicked += handler;
+            MediaPickerActivity.MediaPicked += handler;
 
-			return CompletionSource.Task;
-		}
+            return CompletionSource.Task;
+        }
 
-		Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
-		{
-			var id = GetRequestId();
+        Task<List<MediaFile>> TakeMediasAsync(string type, string action, StoreMediaOptions options, CancellationToken token = default(CancellationToken))
+        {
+            var id = GetRequestId();
 
-			if (token.IsCancellationRequested)
-				return Task.FromResult((List<MediaFile>)null);
+            if (token.IsCancellationRequested)
+                return Task.FromResult((List<MediaFile>)null);
 
-			var ntcs = new TaskCompletionSource<List<MediaFile>>(id);
-			if (Interlocked.CompareExchange(ref CompletionSourceMulti, ntcs, null) != null)
-				throw new InvalidOperationException("Only one operation can be active at a time");
+            var ntcs = new TaskCompletionSource<List<MediaFile>>(id);
+            if (Interlocked.CompareExchange(ref CompletionSourceMulti, ntcs, null) != null)
+                throw new InvalidOperationException("Only one operation can be active at a time");
 
-			context.StartActivity(CreateMediaIntent(id, type, action, options));
+            context.StartActivity(CreateMediaIntent(id, type, action, options));
 
-			void handler(object s, MediaPickedEventArgs e)
-			{
-				var tcs = Interlocked.Exchange(ref CompletionSourceMulti, null);
+            void handler(object s, MediaPickedEventArgs e)
+            {
+                var tcs = Interlocked.Exchange(ref CompletionSourceMulti, null);
 
-				MediaPickerActivity.MediaPicked -= handler;
+                MediaPickerActivity.MediaPicked -= handler;
 
-				if (e.RequestId != id)
-					return;
+                if (e.RequestId != id)
+                    return;
 
-				if (e.IsCanceled)
-					tcs.SetResult(null);
-				else if (e.Error != null)
-					tcs.SetException(e.Error);
-				else
-					tcs.SetResult(e.Media);
-			}
+                if (e.IsCanceled)
+                    tcs.SetResult(null);
+                else if (e.Error != null)
+                    tcs.SetException(e.Error);
+                else
+                    tcs.SetResult(e.Media);
+            }
 
-			token.Register(() =>
-			{
+            token.Register(() =>
+            {
 
-        		var tcs = Interlocked.Exchange(ref CompletionSourceMulti, null);
-				MediaPickerActivity.MediaPicked -= handler;
-				CancelRequested?.Invoke(null, EventArgs.Empty);
-				CancelRequested = null;
+                var tcs = Interlocked.Exchange(ref CompletionSourceMulti, null);
+                MediaPickerActivity.MediaPicked -= handler;
+                CancelRequested?.Invoke(null, EventArgs.Empty);
+                CancelRequested = null;
 
-				tcs.SetResult(null);
-			});
+                tcs.SetResult(null);
+            });
 
-			MediaPickerActivity.MediaPicked += handler;
+            MediaPickerActivity.MediaPicked += handler;
 
-			return CompletionSourceMulti.Task;
+            return CompletionSourceMulti.Task;
         }
 
         /// <summary>
@@ -637,7 +657,7 @@ namespace Plugin.Media
                     CustomPhotoSize = mediaOptions.CustomPhotoSize,
                     MaxWidthHeight = mediaOptions.MaxWidthHeight,
                     RotateImage = mediaOptions.RotateImage,
-					SaveMetaData = mediaOptions.SaveMetaData
+                    SaveMetaData = mediaOptions.SaveMetaData
                 },
                 exif);
         }
@@ -706,7 +726,7 @@ namespace Plugin.Media
 
                         //calculate sample size
                         options.InSampleSize = CalculateInSampleSize(options, finalWidth, finalHeight);
-                        
+
                         //turn off decode
                         options.InJustDecodeBounds = false;
 
@@ -714,9 +734,9 @@ namespace Plugin.Media
                         //this now will return the requested width/height from file, so no longer need to scale
                         var originalImage = BitmapFactory.DecodeFile(filePath, options);
 
-						if (originalImage == null)
-							return false;
-                        
+                        if (originalImage == null)
+                            return false;
+
                         if (finalWidth != originalImage.Width || finalHeight != originalImage.Height)
                         {
                             originalImage = Bitmap.CreateScaledBitmap(originalImage, finalWidth, finalHeight, true);
@@ -767,7 +787,7 @@ namespace Plugin.Media
                         // Dispose of the Java side bitmap.
                         GC.Collect();
                         return true;
-                        
+                    
                     }
                     catch (Exception ex)
                     {
@@ -806,7 +826,7 @@ namespace Plugin.Media
                 // Calculate the largest inSampleSize value that is a power of 2 and keeps both
                 // height and width larger than the requested height and width.
                 while ((halfHeight / inSampleSize) >= reqHeight
-                        && (halfWidth / inSampleSize) >= reqWidth)
+                       && (halfWidth / inSampleSize) >= reqWidth)
                 {
                     inSampleSize *= 2;
                 }
@@ -816,48 +836,48 @@ namespace Plugin.Media
         }
 
 
-		/// <summary>
-		///  Rotate an image if required and saves it back to disk.
-		/// </summary>
-		/// <param name="filePath">The file image path</param>
-		/// <param name="mediaOptions">The options.</param>
-		/// <param name="exif">original metadata</param>
-		/// <returns>True if rotation or compression occured, else false</returns>
-		public Task<bool> ResizeAsync(string filePath, PickMediaOptions mediaOptions, ExifInterface exif)
-		{
-			return ResizeAsync(
-				filePath,
-				new StoreCameraMediaOptions
-				{
-					PhotoSize = mediaOptions.PhotoSize,
-					CompressionQuality = mediaOptions.CompressionQuality,
-					CustomPhotoSize = mediaOptions.CustomPhotoSize,
-					MaxWidthHeight = mediaOptions.MaxWidthHeight,
-					RotateImage = mediaOptions.RotateImage,
-					SaveMetaData = mediaOptions.SaveMetaData
-				},
-				exif);
-		}
+        /// <summary>
+        ///  Rotate an image if required and saves it back to disk.
+        /// </summary>
+        /// <param name="filePath">The file image path</param>
+        /// <param name="mediaOptions">The options.</param>
+        /// <param name="exif">original metadata</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        public Task<bool> ResizeAsync(string filePath, PickMediaOptions mediaOptions, ExifInterface exif)
+        {
+            return ResizeAsync(
+                filePath,
+                new StoreCameraMediaOptions
+                {
+                    PhotoSize = mediaOptions.PhotoSize,
+                    CompressionQuality = mediaOptions.CompressionQuality,
+                    CustomPhotoSize = mediaOptions.CustomPhotoSize,
+                    MaxWidthHeight = mediaOptions.MaxWidthHeight,
+                    RotateImage = mediaOptions.RotateImage,
+                    SaveMetaData = mediaOptions.SaveMetaData
+                },
+                exif);
+        }
 
-		/// <summary>
-		/// Resize Image Async
-		/// </summary>
-		/// <param name="filePath">The file image path</param>
-		/// <param name="photoSize">Photo size to go to.</param>
-		/// <param name="quality">Image quality (1-100)</param>
-		/// <param name="customPhotoSize">Custom size in percent</param>
-		/// <param name="exif">original metadata</param>
-		/// <returns>True if rotation or compression occured, else false</returns>
-		public Task<bool> ResizeAsync(string filePath, StoreCameraMediaOptions mediaOptions, ExifInterface exif)
+        /// <summary>
+        /// Resize Image Async
+        /// </summary>
+        /// <param name="filePath">The file image path</param>
+        /// <param name="photoSize">Photo size to go to.</param>
+        /// <param name="quality">Image quality (1-100)</param>
+        /// <param name="customPhotoSize">Custom size in percent</param>
+        /// <param name="exif">original metadata</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        public Task<bool> ResizeAsync(string filePath, StoreCameraMediaOptions mediaOptions, ExifInterface exif)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return Task.FromResult(false);
 
             try
             {
-				var photoSize = mediaOptions.PhotoSize;
-				var customPhotoSize = mediaOptions.CustomPhotoSize;
-				var quality = mediaOptions.CompressionQuality;
+                var photoSize = mediaOptions.PhotoSize;
+                var customPhotoSize = mediaOptions.CustomPhotoSize;
+                var quality = mediaOptions.CompressionQuality;
                 return Task.Run(() =>
                 {
                     try
@@ -884,7 +904,7 @@ namespace Plugin.Media
 
 
                         //First decode to just get dimensions
-                        var options = new BitmapFactory.Options
+                        var options = new BitmapFactory.Options 
                         {
                             InJustDecodeBounds = true
                         };
@@ -892,16 +912,16 @@ namespace Plugin.Media
                         //already on background task
                         BitmapFactory.DecodeFile(filePath, options);
 
-						if (mediaOptions.PhotoSize == PhotoSize.MaxWidthHeight && mediaOptions.MaxWidthHeight.HasValue)
-						{
-							var max = Math.Max(options.OutWidth, options.OutHeight);
-							if (max > mediaOptions.MaxWidthHeight)
-							{
-								percent = (float)mediaOptions.MaxWidthHeight / (float)max;
-							}
-						}
+                        if (mediaOptions.PhotoSize == PhotoSize.MaxWidthHeight && mediaOptions.MaxWidthHeight.HasValue)
+                        {
+                            var max = Math.Max(options.OutWidth, options.OutHeight);
+                            if (max > mediaOptions.MaxWidthHeight)
+                            {
+                                percent = (float)mediaOptions.MaxWidthHeight / (float)max;
+                            }
+                        }
 
-						var finalWidth = (int)(options.OutWidth * percent);
+                        var finalWidth = (int)(options.OutWidth * percent);
                         var finalHeight = (int)(options.OutHeight * percent);
 
                         //set scaled image dimensions
@@ -926,7 +946,7 @@ namespace Plugin.Media
                                 originalImage.Compress(Bitmap.CompressFormat.Jpeg, quality, stream);
                                 stream.Close();
                             }
-                            
+
                             originalImage.Recycle();
 
                             // Dispose of the Java side bitmap.
@@ -958,7 +978,7 @@ namespace Plugin.Media
         {
             if (exif == null)
                 return;
-            
+
             var position = new float[6];
             if (!exif.GetLatLong(position) && location != null)
             {
@@ -978,8 +998,8 @@ namespace Plugin.Media
             {
                 exif.SetAttribute(ExifInterface.TagModel, Build.Model);
             }
-			
-			
+
+
         }
 
         string CoordinateToRational(double coord)

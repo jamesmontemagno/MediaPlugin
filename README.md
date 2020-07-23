@@ -75,6 +75,13 @@ bool IsPickVideoSupported { get; }
 Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null);
 
 /// <summary>
+/// Choose one or more photos from the default gallery
+/// </summary>
+/// <param name="options">Pick Photo Media Options</param>
+/// <returns>List media file or null if canceled</returns>
+Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null);
+
+/// <summary>
 /// Take a photo async with specified options
 /// </summary>
 /// <param name="options">Camera Media Options</param>
@@ -89,6 +96,13 @@ Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options);
 /// </summary>
 /// <returns>Media file of video or null if canceled</returns>
 Task<MediaFile> PickVideoAsync();
+
+/// <summary>
+/// Choose one or more videos from the default gallery
+/// </summary>
+/// <returns>List media file or null if canceled</returns>
+Task<List<MediaFile>> PickVideosAsync();
+
 
 /// <summary>
 /// Take a video with specified options

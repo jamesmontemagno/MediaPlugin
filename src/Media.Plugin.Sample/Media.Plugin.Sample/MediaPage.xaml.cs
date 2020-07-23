@@ -131,6 +131,23 @@ namespace Media.Plugin.Sample
 				await DisplayAlert("Video Selected", "Location: " + file.Path, "OK");
 				file.Dispose();
 			};
+            
+            pickVideos.Clicked += async (sender, args) =>
+            {
+                await CrossMedia.Current.Initialize();
+                files.Clear();
+                if (!CrossMedia.Current.IsPickVideoSupported)
+                {
+                    await DisplayAlert("Videos Not Supported", ":( Permission not granted to videos.", "OK");
+                    return;
+                }
+                var picked = await CrossMedia.Current.PickVideosAsync();
+                
+                if (picked == null)
+                    return;
+                foreach (var file in picked)
+                    files.Add(file);
+            };
 		}
 
 		private void Files_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

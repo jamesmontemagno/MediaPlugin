@@ -180,8 +180,32 @@ namespace Plugin.Media
 
 			return media;
 		}
+        
+        /// <summary>
+        /// Picks multiple videos from the default gallery
+        /// </summary>
+        /// <returns>MediaFile list or null if canceled</returns>
+        public async Task<List<MediaFile>> PickVideosAsync(CancellationToken token = default(CancellationToken))
+        {
+            if (!IsPickVideoSupported)
+                throw new NotSupportedException();
 
+            var backgroundTask = UIApplication.SharedApplication.BeginBackgroundTask(() => { });
+            
+            //Does not need permission on iOS 11
+            if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+            {
+                CheckUsageDescription(photoDescription);
+                await CheckPermissions(nameof(Permissions.Photos));
+            }
 
+            var medias = await GetMediasAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie, token: token);
+            
+            UIApplication.SharedApplication.EndBackgroundTask(backgroundTask);
+
+            return medias;
+        }
+        
 		/// <summary>
 		/// Take a video with specified options
 		/// </summary>

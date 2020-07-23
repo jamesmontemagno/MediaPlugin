@@ -162,7 +162,7 @@ namespace Plugin.Media
 		}
 
 
-		/// <summary>
+        /// <summary>
 		/// Check that it is an operation of usable Appcontrol.
 		/// </summary>
 		/// <param name="operation">Appcontrol operation</param>
@@ -289,5 +289,13 @@ namespace Plugin.Media
 
 			return new List<MediaFile> { result };
 		}
+        
+        public async Task<List<MediaFile>> PickVideosAsync(CancellationToken token = default(CancellationToken))
+        {
+            // TODO: complete Tizen implementation
+            var result = await PickVideoAsync(token);
+
+            return new List<MediaFile> { result };
+        }
 	}
 }
