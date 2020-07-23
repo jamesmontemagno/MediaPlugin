@@ -145,8 +145,14 @@ namespace Media.Plugin.Sample
                 
                 if (picked == null)
                     return;
-                foreach (var file in picked)
-                    files.Add(file);
+
+                var paths = new StringBuilder();
+                foreach (var mediaFile in picked)
+                {
+                    paths.AppendLine($"Location: {mediaFile.Path}");
+                }
+                
+                await DisplayAlert("Videos Selected", paths.ToString(), "OK");
             };
 		}
 
