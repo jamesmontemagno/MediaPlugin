@@ -35,7 +35,13 @@ namespace Plugin.Media
 			}
 		}
 
-		public UIPopoverController Popover
+        protected override void Dispose(bool disposing)
+        {
+            this.viewController = null;
+            base.Dispose(disposing);
+        }
+
+        public UIPopoverController Popover
 		{
 			get;
 			set;
@@ -150,15 +156,15 @@ namespace Plugin.Media
 
 		UIDeviceOrientation? orientation;
 		NSObject observer;
-		readonly UIViewController viewController;
+		UIViewController viewController;
 		readonly UIImagePickerControllerSourceType source;
 		TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
 		readonly StoreCameraMediaOptions options;
 
 		bool IsCaptured =>
 			source == UIImagePickerControllerSourceType.Camera;
-		
-		void Dismiss(UINavigationController picker, NSAction onDismiss)
+
+        void Dismiss(UINavigationController picker, NSAction onDismiss)
 		{
 			if (viewController == null)
 			{
@@ -253,7 +259,7 @@ namespace Plugin.Media
 
 		bool GetShouldRotate6(UIDeviceOrientation orientation)
 		{
-			if (!viewController.ShouldAutorotate())
+			if (viewController?.ShouldAutorotate() == false)
 				return false;
 
 			UIInterfaceOrientationMask mask;
@@ -278,7 +284,10 @@ namespace Plugin.Media
 				default: return false;
 			}
 
-			return viewController.GetSupportedInterfaceOrientations().HasFlag(mask);
+			if (viewController != null)
+				return viewController.GetSupportedInterfaceOrientations().HasFlag(mask);
+			else
+				return false;
 		}
 
 
