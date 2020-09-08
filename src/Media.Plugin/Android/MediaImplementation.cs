@@ -492,6 +492,8 @@ namespace Plugin.Media
                     if (cameraOptions.DefaultCamera == CameraDevice.Front)
                     {
                         pickerIntent.PutExtra("android.intent.extras.CAMERA_FACING", 1);
+                        pickerIntent.PutExtra("android.intent.extras.LENS_FACING_FRONT", 1);
+                        pickerIntent.PutExtra("android.intent.extra.USE_FRONT_CAMERA", true);
                     }
                     pickerIntent.PutExtra(MediaPickerActivity.ExtraSaveToAlbum, cameraOptions.SaveToAlbum);
                 }
@@ -501,6 +503,8 @@ namespace Plugin.Media
                     if (vidOptions.DefaultCamera == CameraDevice.Front)
                     {
                         pickerIntent.PutExtra("android.intent.extras.CAMERA_FACING", 1);
+                        pickerIntent.PutExtra("android.intent.extras.LENS_FACING_FRONT", 1);
+                        pickerIntent.PutExtra("android.intent.extra.USE_FRONT_CAMERA", true);
                     }
                     pickerIntent.PutExtra(MediaStore.ExtraDurationLimit, (int)vidOptions.DesiredLength.TotalSeconds);
                     pickerIntent.PutExtra(MediaStore.ExtraVideoQuality, (int)vidOptions.Quality);
