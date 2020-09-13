@@ -189,7 +189,6 @@ namespace Plugin.Media
                 throw new MediaPermissionException(nameof(Permissions.Camera));
             }
 
-
             VerifyOptions(options);
 
             var media = await TakeMediaAsync("image/*", MediaStore.ActionImageCapture, options, token);
@@ -199,54 +198,34 @@ namespace Plugin.Media
 
             if (options.SaveToAlbum)
             {
+                var fileName = System.IO.Path.GetFileName(media.Path);
+                var uri = MediaPickerActivity.GetOutputMediaFile(context, options.Directory ?? "temp", fileName, true, true);
+                var f = new Java.IO.File(uri.Path);
+
                 try
                 {
-                    var fileName = System.IO.Path.GetFileName(media.Path);
-                    var publicUri = MediaPickerActivity.GetOutputMediaFile(context, options.Directory ?? "temp", fileName, true, true);
+                    var values = new ContentValues();
+                    values.Put(MediaStore.Audio.Media.InterfaceConsts.DisplayName, System.IO.Path.GetFileNameWithoutExtension(f.AbsolutePath));
+                    values.Put(MediaStore.Audio.Media.InterfaceConsts.MimeType, "image/jpeg");
+                    values.Put(MediaStore.Images.Media.InterfaceConsts.Description, string.Empty);
+                    values.Put(MediaStore.Images.Media.InterfaceConsts.DateTaken, Java.Lang.JavaSystem.CurrentTimeMillis());
+                    values.Put(MediaStore.Images.ImageColumns.BucketId, f.ToString().ToLowerInvariant().GetHashCode());
+                    values.Put(MediaStore.Images.ImageColumns.BucketDisplayName, f.Name.ToLowerInvariant());
+
+                    var cr = context.ContentResolver;
+                    var albumUri = cr.Insert(MediaStore.Images.Media.ExternalContentUri, values);
+
                     using (System.IO.Stream input = File.OpenRead(media.Path))
-                        using (System.IO.Stream output = File.Create(publicUri.Path))
+                        using (System.IO.Stream output = cr.OpenOutputStream(albumUri))
                             input.CopyTo(output);
-
-                    media.AlbumPath = publicUri.Path;
-
-                    var f = new Java.IO.File(publicUri.Path);
-
-                    //MediaStore.Images.Media.InsertImage(context.ContentResolver,
-                    //    f.AbsolutePath, f.Name, null);
-
-                    try
-                    {
-						MediaScannerConnection.ScanFile(context, new[] { f.AbsolutePath }, null, context as MediaPickerActivity);
-
-                        var values = new ContentValues();
-                        values.Put(MediaStore.Images.Media.InterfaceConsts.Title, System.IO.Path.GetFileNameWithoutExtension(f.AbsolutePath));
-                        values.Put(MediaStore.Images.Media.InterfaceConsts.Description, string.Empty);
-                        values.Put(MediaStore.Images.Media.InterfaceConsts.DateTaken, Java.Lang.JavaSystem.CurrentTimeMillis());
-                        values.Put(MediaStore.Images.ImageColumns.BucketId, f.ToString().ToLowerInvariant().GetHashCode());
-                        values.Put(MediaStore.Images.ImageColumns.BucketDisplayName, f.Name.ToLowerInvariant());
-                        values.Put("_data", f.AbsolutePath);
-
-                        var cr = context.ContentResolver;
-                        cr.Insert(MediaStore.Images.Media.ExternalContentUri, values);
-                    }
-                    catch (Exception ex1)
-                    {
-                        Console.WriteLine("Unable to save to scan file: " + ex1);
-                    }
-
-                    var contentUri = Android.Net.Uri.FromFile(f);
-                    var mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile, contentUri);
-                    context.SendBroadcast(mediaScanIntent);
                 }
-                catch (Exception ex2)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Unable to save to gallery: " + ex2);
+                    Console.WriteLine("Unable to save to gallery: " + ex);
                 }
             }
 
             //check to see if we need to rotate if success
-
-
             try
             {
                 var exif = new ExifInterface(media.Path);
