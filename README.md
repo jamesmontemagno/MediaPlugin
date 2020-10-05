@@ -12,7 +12,7 @@ Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a 
 * Please see the additional setup for each platforms permissions.
 
 Build Status: 
-* ![](https://jamesmontemagno.visualstudio.com/_apis/public/build/definitions/6b79a378-ddd6-4e31-98ac-a12fcd68644c/24/badge?WT.mc_id=mediaplugin-github-jamont)
+* ![](https://jamesmontemagno.visualstudio.com/_apis/public/build/definitions/6b79a378-ddd6-4e31-98ac-a12fcd68644c/24/badge)
 * CI NuGet Feed: http://myget.org/F/xamarin-plugins
 
 **Platform Support**
