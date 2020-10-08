@@ -162,10 +162,12 @@ namespace Plugin.Media
 			var cgImage = rep.GetImage();
 
 			UIImage image = null;
+			string originalFilename = null;
 			if (cgImage == null)
 			{
 				var fetch = PHAsset.FetchAssets(new[] { asset.AssetUrl }, null);
 				var ph = fetch.firstObject as PHAsset;
+				originalFilename = PHAssetResource.GetAssetResources(ph)?.FirstOrDefault()?.OriginalFilename;
 				var manager = PHImageManager.DefaultManager;
 				var phOptions = new PHImageRequestOptions
 				{
@@ -243,7 +245,7 @@ namespace Plugin.Media
 			var url = asset.AssetUrl;
 			aPath = url?.AbsoluteString;
 
-			return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath);
+			return new MediaFile(path, () => File.OpenRead(path), albumPath: aPath, originalFilename: originalFilename);
 		}
 
 		void CancelledPicker()

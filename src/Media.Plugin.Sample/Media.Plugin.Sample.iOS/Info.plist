@@ -38,5 +38,7 @@
 	<string>We need access to the photo library</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need to be able to take photos</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need to be able to take videos</string>
 </dict>
 </plist>
