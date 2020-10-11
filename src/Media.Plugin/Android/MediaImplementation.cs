@@ -201,6 +201,7 @@ namespace Plugin.Media
                 var fileName = System.IO.Path.GetFileName(media.Path);
                 var uri = MediaPickerActivity.GetOutputMediaFile(context, options.Directory ?? "temp", fileName, true, true);
                 var f = new Java.IO.File(uri.Path);
+                media.AlbumPath = uri.ToString();
 
                 try
                 {
