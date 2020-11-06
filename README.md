@@ -1,3 +1,9 @@
+## Update Novemeber 2020
+
+[Xamarin.Essentials](https://github.com/xamarin/essentials?WT.mc_id=docs-github-jamont) 1.6 introduced official support for [picking/taking photos and videos](https://docs.microsoft.com/xamarin/essentials/media-picker?WT.mc_id=docs-github-jamont) with the new Media Picker API. 
+
+This library has a lot of legacy code that is extremely hard to maintain and update to support the latest OSes without a major re-write. I will officially be archiving this library in December 2020 unless anyone from the community wants to adopt the project.
+
 ## Media Plugin for Xamarin and Windows
 
 Simple cross platform plugin to take photos and video or pick them from a gallery from shared code.
