@@ -1,4 +1,5 @@
-﻿using Plugin.Media;
+﻿using FFImageLoading.Forms;
+using Plugin.Media;
 using Plugin.Media.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -59,7 +60,8 @@ namespace Media.Plugin.Sample
 				}
 				var file = await CrossMedia.Current.PickPhotoAsync(new PickMediaOptions
 				{
-					PhotoSize = PhotoSize.Medium
+					PhotoSize = PhotoSize.Full,
+					SaveMetaData = true
 				});
 
 
@@ -143,12 +145,17 @@ namespace Media.Plugin.Sample
 
 			var file = e.NewItems[0] as MediaFile;
 			var image = new Image { WidthRequest = 300, HeightRequest = 300, Aspect = Aspect.AspectFit };
-			image.Source = ImageSource.FromStream(() =>
+			image.Source = ImageSource.FromFile(file.Path);
+			/*image.Source = ImageSource.FromStream(() =>
 			{
 				var stream = file.GetStream();
 				return stream;
-			});
+			});*/
 			ImageList.Children.Add(image);
+
+			var image2 = new CachedImage { WidthRequest = 300, HeightRequest = 300, Aspect = Aspect.AspectFit };
+			image2.Source = ImageSource.FromFile(file.Path);
+			ImageList.Children.Add(image2);
 		}
 
 		private async void Button_Clicked(object sender, EventArgs e)

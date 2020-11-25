@@ -15,10 +15,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
 using System.Drawing;
+using CoreImage;
 
 namespace Plugin.Media
 {
-	internal class MediaPickerDelegate : UIImagePickerControllerDelegate
+	class MediaPickerDelegate : UIImagePickerControllerDelegate
 	{
 		internal MediaPickerDelegate(UIViewController viewController, UIImagePickerControllerSourceType sourceType,
 			StoreCameraMediaOptions options, CancellationToken token)
@@ -40,7 +41,7 @@ namespace Plugin.Media
 			set;
 		}
 
-		public void CancelTask() => tcs.SetResult(null);
+		public void CancelTask() => tcs.TrySetResult(null);
 
 		public UIView View => viewController.View;
 		
@@ -90,7 +91,7 @@ namespace Plugin.Media
 
 			Dismiss(picker, () =>
 			{
-				tcs.SetResult(null);
+				tcs.TrySetResult(null);
 			});
 		}
 
@@ -105,7 +106,7 @@ namespace Plugin.Media
 
 			Dismiss(picker, () =>
 			{
-				tcs.SetResult(null);
+				tcs.TrySetResult(null);
 			});
 		}
 
@@ -126,7 +127,7 @@ namespace Plugin.Media
 				if (IsValidInterfaceOrientation(UIDevice.CurrentDevice.Orientation))
 					orientation = UIDevice.CurrentDevice.Orientation;
 				else
-					orientation = getDeviceOrientation(viewController.InterfaceOrientation);
+					orientation = GetDeviceOrientation(viewController.InterfaceOrientation);
 			}
 
 			double x, y;
@@ -157,7 +158,7 @@ namespace Plugin.Media
 		bool IsCaptured =>
 			source == UIImagePickerControllerSourceType.Camera;
 		
-		private void Dismiss(UINavigationController picker, NSAction onDismiss)
+		void Dismiss(UINavigationController picker, NSAction onDismiss)
 		{
 			if (viewController == null)
 			{
@@ -188,7 +189,7 @@ namespace Plugin.Media
 			}
 		}
 
-		private void RemoveOrientationChangeObserverAndNotifications()
+		void RemoveOrientationChangeObserverAndNotifications()
 		{
 			if (viewController != null)
 			{
@@ -198,7 +199,7 @@ namespace Plugin.Media
 			}
 		}
 
-		private void DidRotate(NSNotification notice)
+		void DidRotate(NSNotification notice)
 		{
 			var device = (UIDevice)notice.Object;
 			if (!IsValidInterfaceOrientation(device.Orientation) || Popover == null)
@@ -223,7 +224,7 @@ namespace Plugin.Media
 			DisplayPopover(hideFirst: true);
 		}
 
-		private bool GetShouldRotate(UIDeviceOrientation orientation)
+		bool GetShouldRotate(UIDeviceOrientation orientation)
 		{
 			UIInterfaceOrientation iOrientation;
 			switch (orientation)
@@ -250,7 +251,7 @@ namespace Plugin.Media
 			return viewController.ShouldAutorotateToInterfaceOrientation(iOrientation);
 		}
 
-		private bool GetShouldRotate6(UIDeviceOrientation orientation)
+		bool GetShouldRotate6(UIDeviceOrientation orientation)
 		{
 			if (!viewController.ShouldAutorotate())
 				return false;
@@ -281,7 +282,7 @@ namespace Plugin.Media
 		}
 
 
-		private async Task<MediaFile> GetPictureMediaFile(NSDictionary info)
+		async Task<MediaFile> GetPictureMediaFile(NSDictionary info)
 		{
 			var image = (UIImage)info[UIImagePickerController.EditedImage] ?? (UIImage)info[UIImagePickerController.OriginalImage];
 
@@ -391,7 +392,7 @@ namespace Plugin.Media
 			if (!savedImage)
 			{
 				var finalQuality = quality;
-				var imageData = pathExtension == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
+				var imageData = pathExtension == "png" ? image.AsPNG() : image.AsJPEG(finalQuality);
 
 				//continue to move down quality , rare instances
 				while (imageData == null && finalQuality > 0)
@@ -468,13 +469,52 @@ namespace Plugin.Media
 			return newMeta;
 		}
 
-		internal static bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path, string pathExtension)
+		internal static bool SaveImageWithMetadataiOS13(UIImage image, float quality, NSDictionary meta, string path, string pathExtension)
 		{
 			try
 			{
 				pathExtension = pathExtension.ToLowerInvariant();
 				var finalQuality = quality;
-				var imageData = pathExtension == "jpg" ? image.AsJPEG(finalQuality) : image.AsPNG();
+				var imageData = pathExtension == "png" ? image.AsPNG(): image.AsJPEG(finalQuality);
+
+				//continue to move down quality , rare instances
+				while (imageData == null && finalQuality > 0)
+				{
+					finalQuality -= 0.05f;
+					imageData = image.AsJPEG(finalQuality);
+				}
+
+				if (imageData == null)
+					throw new NullReferenceException("Unable to convert image to jpeg, please ensure file exists or lower quality level");
+
+				// Copy over meta data
+				using var ciImage = CIImage.FromData(imageData);
+				using var newImageSource = ciImage.CreateBySettingProperties(meta);
+				using var ciContext = new CIContext();
+
+				if (pathExtension == "png")
+					return ciContext.WritePngRepresentation(newImageSource, NSUrl.FromFilename(path), CIFormat.ARGB8, CGColorSpace.CreateSrgb(), new NSDictionary(), out var error2);
+				
+				return ciContext.WriteJpegRepresentation(newImageSource, NSUrl.FromFilename(path), CGColorSpace.CreateSrgb(), new NSDictionary(), out var error);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Unable to save image with metadata: {ex}");
+			}
+
+			return false;
+		}
+
+		internal static bool SaveImageWithMetadata(UIImage image, float quality, NSDictionary meta, string path, string pathExtension)
+		{
+			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+				return SaveImageWithMetadataiOS13(image, quality, meta, path, pathExtension);
+
+			try
+			{
+				pathExtension = pathExtension.ToLowerInvariant();
+				var finalQuality = quality;
+				var imageData = pathExtension == "png" ? image.AsPNG() : image.AsJPEG(finalQuality);
 
 				//continue to move down quality , rare instances
 				while (imageData == null && finalQuality > 0)
@@ -543,7 +583,10 @@ namespace Plugin.Media
 				var success = destination.Close();
 				if (success)
 				{
-					imageWithExif.Save(path, true);
+					var saved = imageWithExif.Save(path, true, out var error);
+					if (error != null)
+						Debug.WriteLine($"Unable to save exif data: {error.ToString()}");
+
 					imageWithExif.Dispose();
 					imageWithExif = null;
 				}
@@ -560,7 +603,7 @@ namespace Plugin.Media
 		}
 
 
-		private async Task<MediaFile> GetMovieMediaFile(NSDictionary info)
+		async Task<MediaFile> GetMovieMediaFile(NSDictionary info)
 		{
 			var url = info[UIImagePickerController.MediaURL] as NSUrl;
 			if (url == null)
@@ -636,6 +679,7 @@ namespace Plugin.Media
 
 		internal static string GetOutputPath(string type, string path, string name, string extension, long index = 0)
 		{
+			extension = extension.ToLowerInvariant();
 			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), path);
 			Directory.CreateDirectory(path);
 
@@ -645,7 +689,7 @@ namespace Plugin.Media
 			if (string.IsNullOrWhiteSpace(name))
 			{
 				if (type == MediaImplementation.TypeImage)
-					name = extension == "jpg" ? $"IMG_{postpendName}.jpg" : $"IMG_{postpendName}.png";
+					name = extension == "png" ? $"IMG_{postpendName}.png" : $"IMG_{postpendName}.jpg";
 				else
 					name = $"VID_{postpendName}.{extension ?? "mp4"}";
 			}
@@ -662,12 +706,12 @@ namespace Plugin.Media
 			return Path.Combine(path, GetUniquePath(type, path, name, extension));
 		}
 
-		private static bool IsValidInterfaceOrientation(UIDeviceOrientation self)
+		static bool IsValidInterfaceOrientation(UIDeviceOrientation self)
 		{
 			return (self != UIDeviceOrientation.FaceUp && self != UIDeviceOrientation.FaceDown && self != UIDeviceOrientation.Unknown);
 		}
 
-		private static bool IsSameOrientationKind(UIDeviceOrientation o1, UIDeviceOrientation o2)
+		static bool IsSameOrientationKind(UIDeviceOrientation o1, UIDeviceOrientation o2)
 		{
 			if (o1 == UIDeviceOrientation.FaceDown || o1 == UIDeviceOrientation.FaceUp)
 				return (o2 == UIDeviceOrientation.FaceDown || o2 == UIDeviceOrientation.FaceUp);
@@ -679,7 +723,7 @@ namespace Plugin.Media
 			return false;
 		}
 
-		private static UIDeviceOrientation getDeviceOrientation(UIInterfaceOrientation self)
+		static UIDeviceOrientation GetDeviceOrientation(UIInterfaceOrientation self)
 		{
 			switch (self)
 			{
@@ -751,38 +795,34 @@ namespace Plugin.Media
 						break;
 				}
 
-				using (var context = new CGBitmapContext(IntPtr.Zero,
+				using var context = new CGBitmapContext(IntPtr.Zero,
 														(int)image.Size.Width,
 														(int)image.Size.Height,
 														image.CGImage.BitsPerComponent,
 														image.CGImage.BytesPerRow,
 														image.CGImage.ColorSpace,
-														image.CGImage.BitmapInfo))
+														image.CGImage.BitmapInfo);
+				context.ConcatCTM(transform);
+				switch (image.Orientation)
 				{
-					context.ConcatCTM(transform);
-					switch (image.Orientation)
-					{
-						case UIImageOrientation.Left:
-						case UIImageOrientation.LeftMirrored:
-						case UIImageOrientation.Right:
-						case UIImageOrientation.RightMirrored:
-							context.DrawImage(new RectangleF(PointF.Empty, new SizeF((float)image.Size.Height, (float)image.Size.Width)), image.CGImage);
-							break;
-						default:
-							context.DrawImage(new RectangleF(PointF.Empty, new SizeF((float)image.Size.Width, (float)image.Size.Height)), image.CGImage);
-							break;
-					}
-
-					using (var imageRef = context.ToImage())
-					{
-						imageToReturn = new UIImage(imageRef, 1, UIImageOrientation.Up);
-					}
+					case UIImageOrientation.Left:
+					case UIImageOrientation.LeftMirrored:
+					case UIImageOrientation.Right:
+					case UIImageOrientation.RightMirrored:
+						context.DrawImage(new CGRect(0, 0, image.Size.Height, image.Size.Width), image.CGImage);
+						break;
+					default:
+						context.DrawImage(new CGRect(0, 0, image.Size.Width, image.Size.Height), image.CGImage);
+						break;
 				}
+
+				using var imageRef = context.ToImage();
+				imageToReturn = new UIImage(imageRef, 1, UIImageOrientation.Up);
 			}
 
 			pathExtension = pathExtension.ToLowerInvariant();
 			var finalQuality = pathExtension == "jpg" ? (compressionQuality / 100f) : 0f;
-			var imageData = pathExtension == "jpg" ? imageToReturn.AsJPEG(finalQuality) : imageToReturn.AsPNG();
+			var imageData = pathExtension == "png" ? imageToReturn.AsPNG() : imageToReturn.AsJPEG(finalQuality);
 			//continue to move down quality , rare instances
 			while (imageData == null && finalQuality > 0)
 			{

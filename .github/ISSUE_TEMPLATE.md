@@ -1,3 +1,5 @@
+## **ONLY Post issues against Latest Beta!!!**
+
 Make sure you follow all of the setup directions before posting an issue: https://github.com/jamesmontemagno/MediaPlugin#important-permission-information
 
 

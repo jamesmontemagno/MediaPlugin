@@ -73,7 +73,7 @@ namespace Plugin.Media
 		/// <value>The maximum images count.</value>
 		public int MaximumImagesCount { get; set; }
 
-		private readonly StoreCameraMediaOptions options;
+		readonly StoreCameraMediaOptions options;
 
 		readonly TaskCompletionSource<List<MediaFile>> taskCompletionSource = new TaskCompletionSource<List<MediaFile>>();
 
@@ -113,7 +113,7 @@ namespace Plugin.Media
 			return picker;
 		}
 
-		private static string AssetTitle(int maximumImages, string singularTitle, string pluralTitle)
+		static string AssetTitle(int maximumImages, string singularTitle, string pluralTitle)
 		{
 			if (maximumImages == 1)
 			{
@@ -128,6 +128,12 @@ namespace Plugin.Media
 				return NSBundle.MainBundle.GetLocalizedString("Pick Photos", "Pick Photos");
 
 			return pluralTitle;
+		}
+
+		public override void ViewWillDisappear(bool animated)
+		{
+			base.ViewWillDisappear(animated);
+			CancelledPicker();
 		}
 
 		public static ELCImagePickerViewController Create(StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null)
@@ -147,7 +153,7 @@ namespace Plugin.Media
 			taskCompletionSource.TrySetResult(mediaFiles);
 		}
 
-		private MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
+		MediaFile GetPictureMediaFile(ALAsset asset, long index = 0)
 		{
 			var rep = asset.DefaultRepresentation;
 			if (rep == null)
@@ -171,15 +177,26 @@ namespace Plugin.Media
 				phOptions.ProgressHandler = (double progress, NSError error, out bool stop, NSDictionary info) =>
 				{
 					Debug.WriteLine($"Progress: {progress.ToString()}");
-					
+
 					stop = false;
 				};
 
-				manager.RequestImageData(ph, phOptions, (data, i, orientation, k) =>
+				if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
 				{
-					if (data != null)
-						image = new UIImage(data, 1.0f);
-				});
+					manager.RequestImageDataAndOrientation(ph, phOptions, (data, i, orientation, k) =>
+					{
+						if (data != null)
+							image = new UIImage(data, 1.0f);
+					});
+				}
+				else
+				{
+					manager.RequestImageData(ph, phOptions, (data, i, orientation, k) =>
+					{
+						if (data != null)
+							image = new UIImage(data, 1.0f);
+					});
+				}
 				phOptions?.Dispose();
 				fetch?.Dispose();
 				ph?.Dispose();
@@ -192,22 +209,30 @@ namespace Plugin.Media
 			var path = MediaPickerDelegate.GetOutputPath(MediaImplementation.TypeImage,
 				options.Directory ?? "temp",
 				options.Name, asset.AssetUrl?.PathExtension, index);
+			var isPng = Path.GetExtension(path).ToLowerInvariant() == ".png";
 
 			cgImage?.Dispose();
 			cgImage = null;
 			rep?.Dispose();
 			rep = null;
 
-            //There might be cases when the original image cannot be retrieved while image thumb was still present.
-            //Then no need to try to save it as we will get an exception here
-            //TODO: Ideally, we should notify the client that we failed to get original image
-            //TODO: Otherwise, it might be confusing to the user, that he saw the thumb, but did not get the image
-            if (image == null)
-            {
-	            return null;
-            }
-			
-            image.AsJPEG().Save(path, true);
+			//There might be cases when the original image cannot be retrieved while image thumb was still present.
+			//Then no need to try to save it as we will get an exception here
+			//TODO: Ideally, we should notify the client that we failed to get original image
+			//TODO: Otherwise, it might be confusing to the user, that he saw the thumb, but did not get the image
+			if (image == null)
+			{
+				return null;
+			}
+
+			if (isPng)
+			{
+				image.AsPNG().Save(path, true);
+			}
+			else
+			{
+				image.AsJPEG().Save(path, true);
+			}
 
 			image?.Dispose();
 			image = null;
@@ -323,22 +348,22 @@ namespace Plugin.Media
 					return;
 				}
 
-                //We show photos only. Let's get only them
+				//We show photos only. Let's get only them
 				agroup.SetAssetsFilter(ALAssetsFilter.AllPhotos);
 
-                //do not add empty album
-                if (agroup.Count == 0)
-                {
-	                return;
-                }
+				//do not add empty album
+				if (agroup.Count == 0)
+				{
+					return;
+				}
 
-                //ALAssetsGroupType.All might have duplicated albums. let's skip the album if we already have it
-                if (assetGroups.Any(g => g.PersistentID == agroup.PersistentID))
-                {
-	                return;
-                }
-                
-                assetGroups.Add(agroup);
+				//ALAssetsGroupType.All might have duplicated albums. let's skip the album if we already have it
+				if (assetGroups.Any(g => g.PersistentID == agroup.PersistentID))
+				{
+					return;
+				}
+
+				assetGroups.Add(agroup);
 
 				dispatcher.BeginInvokeOnMainThread(ReloadTableView);
 			}
@@ -366,7 +391,7 @@ namespace Plugin.Media
 
 				// Get count
 				var g = assetGroups[indexPath.Row];
-				
+
 				var gCount = g.Count;
 				cell.TextLabel.Text = string.Format("{0} ({1})", g.Name, gCount);
 				try
@@ -386,7 +411,7 @@ namespace Plugin.Media
 			{
 				var assetGroup = assetGroups[indexPath.Row];
 				var picker = new ELCAssetTablePicker(assetGroup);
-				
+
 				picker.LoadingTitle = LoadingTitle;
 				picker.PickAssetTitle = PickAssetTitle;
 				picker.DoneButtonTitle = DoneButtonTitle;
@@ -453,12 +478,14 @@ namespace Plugin.Media
 				set => parent = new WeakReference(value);
 			}
 
-			public ELCAssetTablePicker(ALAssetsGroup assetGroup) : base(new UICollectionViewFlowLayout {
+			public ELCAssetTablePicker(ALAssetsGroup assetGroup) : base(new UICollectionViewFlowLayout
+			{
 				ItemSize = new CGSize(75, 75),
 				MinimumLineSpacing = 4,
 				MinimumInteritemSpacing = 4,
 				SectionInset = new UIEdgeInsets(0, 4, 0, 4),
-				ScrollDirection = UICollectionViewScrollDirection.Vertical })
+				ScrollDirection = UICollectionViewScrollDirection.Vertical
+			})
 			{
 				this.assetGroup = assetGroup;
 			}
@@ -524,16 +551,13 @@ namespace Plugin.Media
 				return cell;
 			}
 
-			#endregion
+            #endregion
 
-			#region Not interested in
+            #region Not interested in
 
-			private ALAsset AssetForIndexPath(NSIndexPath path)
-			{
-				return assets[path.Row];
-			}
+            ALAsset AssetForIndexPath(NSIndexPath path) => assets[path.Row];
 
-			private void AssetSelected(NSIndexPath targetIndexPath, bool selected)
+            void AssetSelected(NSIndexPath targetIndexPath, bool selected)
 			{
 				if (ImmediateReturn)
 				{
@@ -543,7 +567,7 @@ namespace Plugin.Media
 					asset = null;
 					if (mediaFile != null)
 					{
-						Parent?.SelectedMediaFiles(new List<MediaFile>{ mediaFile });
+						Parent?.SelectedMediaFiles(new List<MediaFile> { mediaFile });
 					}
 					else
 					{
@@ -552,7 +576,7 @@ namespace Plugin.Media
 				}
 			}
 
-			private void PreparePhotos()
+			void PreparePhotos()
 			{
 				assetGroup.Enumerate(PhotoEnumerator);
 
@@ -572,7 +596,7 @@ namespace Plugin.Media
 				});
 			}
 
-			private void PhotoEnumerator(ALAsset result, nint index, ref bool stop)
+			void PhotoEnumerator(ALAsset result, nint index, ref bool stop)
 			{
 				if (result == null)
 				{
@@ -589,27 +613,58 @@ namespace Plugin.Media
 				}
 			}
 
-			private void DoneClicked(object sender = null, EventArgs e = null)
+			async void DoneClicked(object sender = null, EventArgs e = null)
 			{
 				var parent = Parent;
 				var selectedItemsIndex = CollectionView.GetIndexPathsForSelectedItems();
 				var selectedItemsCount = selectedItemsIndex.Length;
 				var selectedMediaFiles = new MediaFile[selectedItemsCount];
 
-				Parallel.For(0, selectedItemsCount, selectedIndex =>
+				//Create activity indicator if we have selected items.
+				//It will give the user some visual feedback that the app is still working
+				//if the media have to be downloaded from the iCloud
+				UIView pageOverlay = null;
+				UIActivityIndicatorView activityIndicator = null;
+				if (selectedItemsCount > 0)
 				{
-					var alAsset = AssetForIndexPath(selectedItemsIndex[selectedIndex]);
-					var mediaFile = parent?.GetPictureMediaFile(alAsset, selectedIndex);
-					if (mediaFile != null)
+					InvokeOnMainThread(() =>
 					{
-						selectedMediaFiles[selectedIndex] = mediaFile;
-					}
+						pageOverlay = new UIView(View.Bounds);
+						pageOverlay.BackgroundColor = UIColor.Black.ColorWithAlpha(0.8f);
+						View.Add(pageOverlay);
 
-					alAsset?.Dispose();
-					alAsset = null;
-				});
+						activityIndicator = new UIActivityIndicatorView(View.Bounds);
+						activityIndicator.ActivityIndicatorViewStyle = UIActivityIndicatorViewStyle.WhiteLarge;
+						activityIndicator.StartAnimating();
+						View.Add(activityIndicator);
+					});
+				}
 
-                //Some items in the array might be null. Let's remove them.
+				var tasks = new List<Task>();
+				for (var i = 0; i < selectedItemsCount; i++)
+				{
+					var j = i;
+					var t = Task.Run(() =>
+					{
+						var alAsset = AssetForIndexPath(selectedItemsIndex[j]);
+						var mediaFile = parent?.GetPictureMediaFile(alAsset, j);
+						if (mediaFile != null)
+						{
+							selectedMediaFiles[j] = mediaFile;
+						}
+
+						alAsset?.Dispose();
+						alAsset = null;
+					});
+					tasks.Add(t);
+				}
+
+				await Task.WhenAll(tasks);
+
+				pageOverlay?.RemoveFromSuperview();
+				activityIndicator?.RemoveFromSuperview();
+
+				//Some items in the array might be null. Let's remove them.
 				parent?.SelectedMediaFiles(selectedMediaFiles.Where(mf => mf != null).ToList());
 			}
 
@@ -622,7 +677,7 @@ namespace Plugin.Media
 						try
 						{
 							var thumb = value?.Thumbnail;
-							ImageView.Image = thumb != null ? new UIImage(thumb) : null;
+							imageView.Image = thumb != null ? new UIImage(thumb) : null;
 						}
 						catch (Exception e)
 						{
@@ -634,8 +689,9 @@ namespace Plugin.Media
 				public override bool Highlighted
 				{
 					get => base.Highlighted;
-					set {
-						HighlightedView.Hidden = !value;
+					set
+					{
+						highlightedView.Hidden = !value;
 						base.Highlighted = value;
 					}
 				}
@@ -645,22 +701,22 @@ namespace Plugin.Media
 					get => base.Selected;
 					set
 					{
-						SelectedView.Checked = value;
+						selectedView.Checked = value;
 						base.Selected = value;
 					}
 				}
 
-				private readonly UIImageView ImageView = new UIImageView
+				readonly UIImageView imageView = new UIImageView
 				{
 					TranslatesAutoresizingMaskIntoConstraints = false,
 				};
-				private readonly UIView HighlightedView = new UIView
+				readonly UIView highlightedView = new UIView
 				{
 					TranslatesAutoresizingMaskIntoConstraints = false,
 					BackgroundColor = UIColor.Black.ColorWithAlpha(0.3f),
 					Hidden = true,
 				};
-				private readonly CheckMarkView SelectedView = new CheckMarkView
+				readonly CheckMarkView selectedView = new CheckMarkView
 				{
 					TranslatesAutoresizingMaskIntoConstraints = false,
 				};
@@ -692,26 +748,26 @@ namespace Plugin.Media
 
 				protected void Initialize()
 				{
-					ContentView.Add(ImageView);
-					ContentView.Add(HighlightedView);
-					ContentView.Add(SelectedView);
+					ContentView.Add(imageView);
+					ContentView.Add(highlightedView);
+					ContentView.Add(selectedView);
 
 					NSLayoutConstraint.ActivateConstraints(new[]
 					{
-						ImageView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
-						ImageView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
-						ImageView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
-						ImageView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
+						imageView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
+						imageView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
+						imageView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
+						imageView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
 
-						HighlightedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
-						HighlightedView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
-						HighlightedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
-						HighlightedView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
+						highlightedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor),
+						highlightedView.TrailingAnchor.ConstraintEqualTo(ContentView.TrailingAnchor),
+						highlightedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor),
+						highlightedView.BottomAnchor.ConstraintEqualTo(ContentView.BottomAnchor),
 
-						SelectedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor, 2),
-						SelectedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor, 2),
-						SelectedView.WidthAnchor.ConstraintEqualTo(25),
-						SelectedView.HeightAnchor.ConstraintEqualTo(25),
+						selectedView.LeadingAnchor.ConstraintEqualTo(ContentView.LeadingAnchor, 2),
+						selectedView.TopAnchor.ConstraintEqualTo(ContentView.TopAnchor, 2),
+						selectedView.WidthAnchor.ConstraintEqualTo(25),
+						selectedView.HeightAnchor.ConstraintEqualTo(25),
 					});
 				}
 

@@ -5,14 +5,28 @@ Find the latest at: https://github.com/jamesmontemagno/MediaPlugin
 Additional Required Setup (Please Read!)
 
 Android 
-In  your BaseActivity or MainActivity (for Xamarin.Forms) add this code:
 
-     Add to Activity:
+This library uses Xamarin.Essentials for permissions and other functionality. Please ensure that you have set it up correctly:
 
-    public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
-    {
-        Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
+https://docs.microsoft.com/xamarin/essentials/get-started
+
+```csharp
+protected override void OnCreate(Bundle savedInstanceState) {
+    //...
+    base.OnCreate(savedInstanceState);
+    Xamarin.Essentials.Platform.Init(this, savedInstanceState); // add this line to your code, it may also be called: bundle
+    //...
+```
+And for permissions:
+
+```csharp
+public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
+{
+    Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+}
+```
 
 
 NB: The `WRITE_EXTERNAL_STORAGE`, `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. 
@@ -46,18 +60,12 @@ You must also add a few additional configuration files to adhere to the new stri
 
 You can read more at: https://developer.android.com/training/camera/photobasics.html
 
-Android Current Activity Setup
+Android: 
 
-This plugin uses the Current Activity Plugin (https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md) to get access to the current Android Activity. 
-Be sure to complete the full setup if a MainApplication.cs file was not automatically added to your application. 
+This plugin uses the Xamarin.Essentials, please follow the setup guide.
 
-Please fully read through the Current Activity Plugin Documentation at https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md. 
-At an absolute MINIMUM you must set the following in your Activity's OnCreate method:
+Xamarin.Essentials.Platform.Init(this, bundle);
 
-CrossCurrentActivity.Current.Init(this, bundle);
-
-
-It is highly recommended that you use a custom Application that are outlined in the Current Activity Plugin Documentation https://github.com/jamesmontemagno/CurrentActivityPlugin/blob/master/README.md
 
 iOS
 

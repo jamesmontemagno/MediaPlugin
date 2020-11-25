@@ -13,7 +13,11 @@ using Uri = Android.Net.Uri;
 using Plugin.Media.Abstractions;
 using Android.Content.PM;
 using System.Globalization;
+#if __ANDROID_29__
+using AndroidX.Core.Content;
+#else
 using Android.Support.V4.Content;
+#endif
 using System.Collections.Generic;
 using System.Linq;
 
@@ -38,26 +42,26 @@ namespace Plugin.Media
 
         internal static event EventHandler<MediaPickedEventArgs> MediaPicked;
 
-        private int id;
-        private int front;
-        private string title;
-        private string description;
-        private string type;
+        int id;
+        int front;
+        string title;
+        string description;
+        string type;
 
         /// <summary>
         /// The user's destination path.
         /// </summary>
-        private Uri path;
-        private bool isPhoto;
-        private bool saveToAlbum;
-        private string action;
-		private bool multiSelect;
+        Uri path;
+        bool isPhoto;
+        bool saveToAlbum;
+        string action;
+		bool multiSelect;
 
-		private int seconds;
-        private long size;
-        private VideoQuality quality;
+		int seconds;
+        long size;
+        VideoQuality quality;
 
-        private bool tasked;
+        bool tasked;
         /// <summary>
         /// OnSaved
         /// </summary>
@@ -84,7 +88,7 @@ namespace Plugin.Media
             base.OnSaveInstanceState(outState);
         }
 
-		const string HuaweiManufacturer = "Huawei";
+		const string huaweiManufacturer = "Huawei";
 
         /// <summary>
         /// OnCreate
@@ -185,7 +189,7 @@ namespace Plugin.Media
 							catch (Java.Lang.IllegalArgumentException iae)
 							{
 								//Using a Huawei device on pre-N. Increased likelihood of failure...
-								if (HuaweiManufacturer.Equals(Build.Manufacturer, StringComparison.CurrentCultureIgnoreCase) && (int)Build.VERSION.SdkInt < 24)
+								if (huaweiManufacturer.Equals(Build.Manufacturer, StringComparison.CurrentCultureIgnoreCase) && (int)Build.VERSION.SdkInt < 24)
 								{
 									pickIntent.PutExtra(MediaStore.ExtraOutput, path);
 								}
@@ -230,14 +234,14 @@ namespace Plugin.Media
             }
         }
 
-	    private void CancellationRequested(object sender, EventArgs e)
+	    void CancellationRequested(object sender, EventArgs e)
 	    {
 			FinishActivity(id);
 			DeleteOutputFile();
 			Finish();
 		}
 		
-		private void Touch()
+		void Touch()
         {
             if (path.Scheme != "file")
                 return;
@@ -257,7 +261,7 @@ namespace Plugin.Media
             }
         }
 
-        private void DeleteOutputFile()
+        void DeleteOutputFile()
         {
             try
             {
@@ -277,7 +281,7 @@ namespace Plugin.Media
             }
         }
 
-		private void GrantUriPermissionsForIntent(Intent intent, Uri uri)
+		void GrantUriPermissionsForIntent(Intent intent, Uri uri)
 		{
 			var resInfoList = PackageManager.QueryIntentActivities(intent, PackageInfoFlags.MatchDefaultOnly);
 			foreach (var resolveInfo in resInfoList)
@@ -388,7 +392,9 @@ namespace Plugin.Media
 
                     Finish();
                     await Task.Delay(50);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     future.ContinueWith(t => OnMediaPicked(t.Result));
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
                 else
                 {
@@ -464,7 +470,7 @@ namespace Plugin.Media
             }, TaskScheduler.Default);
         }
 
-        private static int GetVideoQuality(VideoQuality videoQuality)
+        static int GetVideoQuality(VideoQuality videoQuality)
         {
             switch (videoQuality)
             {
@@ -477,7 +483,7 @@ namespace Plugin.Media
             }
         }
 
-        private static string GetUniquePath(string folder, string name, bool isPhoto)
+        static string GetUniquePath(string folder, string name, bool isPhoto)
         {
             var ext = Path.GetExtension(name);
             if (ext == string.Empty)
@@ -618,17 +624,17 @@ namespace Plugin.Media
             return tcs.Task;
         }
 
-        private static string GetLocalPath(Uri uri) =>  new System.Uri(uri.ToString()).LocalPath;
+        static string GetLocalPath(Uri uri) =>  new System.Uri(uri.ToString()).LocalPath;
         
 
-        private static Task<T> TaskFromResult<T>(T result)
+        static Task<T> TaskFromResult<T>(T result)
         {
             var tcs = new TaskCompletionSource<T>();
             tcs.SetResult(result);
             return tcs.Task;
         }
 
-        private static void OnMediaPicked(MediaPickedEventArgs e) =>
+        static void OnMediaPicked(MediaPickedEventArgs e) =>
 			MediaPicked?.Invoke(null, e);
         
 
@@ -656,16 +662,13 @@ namespace Plugin.Media
         }
     }
 
-    internal class MediaPickedEventArgs
+    class MediaPickedEventArgs
         : EventArgs
     {
         public MediaPickedEventArgs(int id, Exception error)
         {
-            if (error == null)
-                throw new ArgumentNullException("error");
-
             RequestId = id;
-            Error = error;
+            Error = error ?? throw new ArgumentNullException("error");
         }
 
         public MediaPickedEventArgs(int id, bool isCanceled, MediaFile media = null)

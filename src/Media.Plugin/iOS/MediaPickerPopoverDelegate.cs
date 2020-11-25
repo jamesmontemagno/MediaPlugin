@@ -2,7 +2,7 @@ using UIKit;
 
 namespace Plugin.Media
 {
-    internal class MediaPickerPopoverDelegate
+    class MediaPickerPopoverDelegate
         : UIPopoverControllerDelegate
 	{
 		internal MediaPickerPopoverDelegate(MediaPickerDelegate pickerDelegate, UINavigationController picker)
@@ -16,8 +16,8 @@ namespace Plugin.Media
         public override void DidDismiss(UIPopoverController popoverController) =>
             pickerDelegate.Canceled(picker);
 
-        private readonly MediaPickerDelegate pickerDelegate;
-		private readonly UINavigationController picker;
+        readonly MediaPickerDelegate pickerDelegate;
+		readonly UINavigationController picker;
 	}
 }
 
