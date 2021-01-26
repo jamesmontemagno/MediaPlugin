@@ -734,6 +734,8 @@ namespace Plugin.Media
 
                         //if we need to rotate then go for it.
                         //then compresse it if needed
+                        var photoType = System.IO.Path.GetExtension(filePath)?.ToLower();
+                        var compressFormat = photoType == ".png" ? Bitmap.CompressFormat.Png : Bitmap.CompressFormat.Jpeg;
                         if (rotation != 0)
                         {
                             var matrix = new Matrix();
@@ -743,7 +745,7 @@ namespace Plugin.Media
                                 //always need to compress to save back to disk
                                 using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                                 {
-                                    rotatedImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
+                                    rotatedImage.Compress(compressFormat, mediaOptions.CompressionQuality, stream);
                                     stream.Close();
                                 }
                                 rotatedImage.Recycle();
@@ -757,7 +759,7 @@ namespace Plugin.Media
                             //always need to compress to save back to disk
                             using (var stream = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite))
                             {
-                                originalImage.Compress(Bitmap.CompressFormat.Jpeg, mediaOptions.CompressionQuality, stream);
+                                originalImage.Compress(compressFormat, mediaOptions.CompressionQuality, stream);
                                 stream.Close();
                             }
                         }
