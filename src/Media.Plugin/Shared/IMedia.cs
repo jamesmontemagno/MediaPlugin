@@ -65,6 +65,14 @@ namespace Plugin.Media.Abstractions
 		/// <returns>Media file of video or null if canceled</returns>
 		Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken));
 
+        /// <summary>
+        /// Picks a video from the default gallery
+        /// </summary>
+        /// <param name="options">Video Media Options. Ignored on Android currently.</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>Media file of video or null if canceled</returns>
+        Task<MediaFile> PickVideoAsync(PickVideoOptions options, CancellationToken token = default(CancellationToken));
+
 		/// <summary>
 		/// Take a video with specified options
 		/// </summary>
