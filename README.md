@@ -114,7 +114,7 @@ takePhoto.Clicked += async (sender, args) =>
     
     if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
     {
-        DisplayAlert("No Camera", ":( No camera available.", "OK");
+        await DisplayAlert("No Camera", ":( No camera available.", "OK");
         return;
     }
 
@@ -247,7 +247,10 @@ var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 ###  Important Permission Information
 Please read these as they must be implemented for all platforms.
 
-#### Android 
+#### Android
+
+Before changing the manifest, please make sure that you are working with the correct manifest file. It is possible to have two manifest files, one for Release build (AndroidManifest.xml), and another for Debug build (AndroidManifest.debug.xml) and in some projects this option is turned on in xxxxAndroid.csproj file.
+
 The `WRITE_EXTERNAL_STORAGE` & `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add `Xamarin.Essentials.Platform.OnRequestPermissionsResult` code into your Main or Base Activities:
 
 Add to Activity:
