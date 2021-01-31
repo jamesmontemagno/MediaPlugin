@@ -123,12 +123,13 @@ namespace Media.Plugin.Sample
 					await DisplayAlert("Videos Not Supported", ":( Permission not granted to videos.", "OK");
 					return;
 				}
-				var file = await CrossMedia.Current.PickVideoAsync();
+				var file = await CrossMedia.Current.PickVideoAsync(new PickVideoOptions{ShouldDisableCompression = !CheckBoxCompress.IsChecked});
 
 				if (file == null)
 					return;
 
-				await DisplayAlert("Video Selected", "Location: " + file.Path, "OK");
+				await DisplayAlert("Video Selected", $"Location: {file.Path}\r\nFile size: {file.GetStream().Length}", "OK");
+
 				file.Dispose();
 			};
 		}

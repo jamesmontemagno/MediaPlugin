@@ -9,6 +9,7 @@ using UIKit;
 using Foundation;
 
 using System.Collections.Generic;
+using AVFoundation;
 using Permissions = Xamarin.Essentials.Permissions;
 using PermissionStatus = Xamarin.Essentials.PermissionStatus;
 
@@ -159,30 +160,32 @@ namespace Plugin.Media
 		/// Picks a video from the default gallery
 		/// </summary>
 		/// <returns>Media file of video or null if canceled</returns>
-		public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
-		{
-			if (!IsPickVideoSupported)
-				throw new NotSupportedException();
+		public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken)) => await PickVideoAsync(null, token);
 
-			var backgroundTask = UIApplication.SharedApplication.BeginBackgroundTask(() => { });
+        public async Task<MediaFile> PickVideoAsync(PickVideoOptions options, CancellationToken token = default(CancellationToken))
+        {
+            if (!IsPickVideoSupported)
+                throw new NotSupportedException();
 
-
-			//Not needed on iOS 11 since it runs in different process
-			if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
-			{
-				CheckUsageDescription(photoDescription);
-				await CheckPermissions(nameof(Permissions.Photos));
-			}
-
-			var media = await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie, token: token);
-
-			UIApplication.SharedApplication.EndBackgroundTask(backgroundTask);
-
-			return media;
-		}
+            var backgroundTask = UIApplication.SharedApplication.BeginBackgroundTask(() => { });
 
 
-		/// <summary>
+            //Not needed on iOS 11 since it runs in different process
+            if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+            {
+                CheckUsageDescription(photoDescription);
+                await CheckPermissions(nameof(Permissions.Photos));
+            }
+
+            var media = await GetMediaAsync(UIImagePickerControllerSourceType.PhotoLibrary, TypeMovie,  null, token, options);
+
+            UIApplication.SharedApplication.EndBackgroundTask(backgroundTask);
+
+            return media;
+        }
+
+
+        /// <summary>
 		/// Take a video with specified options
 		/// </summary>
 		/// <param name="options">Video Media Options</param>
@@ -236,12 +239,16 @@ namespace Plugin.Media
 				throw new ArgumentException("options.Camera is not a member of CameraDevice");
 		}
 
-		static MediaPickerController SetupController(MediaPickerDelegate mpDelegate, UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+		static MediaPickerController SetupController(MediaPickerDelegate mpDelegate, UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, PickVideoOptions pickVideoOptions = null)
 		{
 			var picker = new MediaPickerController(mpDelegate);
 			picker.MediaTypes = new[] { mediaType };
 			picker.SourceType = sourceType;
-
+            if (pickVideoOptions != null && pickVideoOptions.ShouldDisableCompression && UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+            {
+                picker.VideoExportPreset = AVAssetExportSessionPreset.Passthrough.GetConstant();
+            }
+            
 			if (sourceType == UIImagePickerControllerSourceType.Camera)
 			{
 				picker.CameraDevice = GetUICameraDevice(options.DefaultCamera);
@@ -272,7 +279,7 @@ namespace Plugin.Media
 			return picker;
 		}
 
-		Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, CancellationToken token = default(CancellationToken))
+		Task<MediaFile> GetMediaAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, CancellationToken token = default(CancellationToken), PickVideoOptions pickVideoOptions = null)
 		{
 
 			var viewController = GetHostViewController();
@@ -285,7 +292,7 @@ namespace Plugin.Media
 			if (od != null)
 				throw new InvalidOperationException("Only one operation can be active at a time");
 
-			var picker = SetupController(ndelegate, sourceType, mediaType, options);
+			var picker = SetupController(ndelegate, sourceType, mediaType, options, pickVideoOptions);
 
 			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
 			{

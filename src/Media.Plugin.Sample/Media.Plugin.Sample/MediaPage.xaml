@@ -12,7 +12,7 @@
 		<Button x:Name="pickVideo" Text="Pick Video"/>
 		<StackLayout Orientation="Horizontal">
 			<Label Text="Compress" VerticalOptions="Center"/>
-			<CheckBox x:Name="CheckBoxCompress" VerticalOptions="Center"/>
+			<CheckBox x:Name="CheckBoxCompress" VerticalOptions="Center" IsChecked="True"/>
 		</StackLayout>
 		<ScrollView>
 			<StackLayout x:Name="ImageList">

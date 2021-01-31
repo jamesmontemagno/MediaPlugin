@@ -423,4 +423,27 @@ namespace Plugin.Media.Abstractions
             set;
         }
     }
+
+    /// <summary>
+    /// Pick Video options
+    /// </summary>
+    public class PickVideoOptions
+    {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public PickVideoOptions()
+        {
+        }
+
+        /// <summary>
+        /// Applies to iOS. Starting from iOS 11, if true, tries to get the best possible quality
+        /// of the picked video. Default: false.
+        /// </summary>
+        public bool ShouldDisableCompression
+        {
+            get;
+            set;
+        }
+    }
 }

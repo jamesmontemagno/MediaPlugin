@@ -299,6 +299,12 @@ namespace Plugin.Media
         }
 
         /// <summary>
+        /// Picks a video from the default gallery. PickVideoOptions are ignored on Android currently.
+        /// </summary>
+        /// <returns>Media file of video or null if canceled</returns>
+        public async Task<MediaFile> PickVideoAsync(PickVideoOptions options, CancellationToken token = default(CancellationToken)) => await PickVideoAsync(token);
+
+        /// <summary>
         /// Take a video with specified options
         /// </summary>
         /// <param name="options">Video Media Options</param>
