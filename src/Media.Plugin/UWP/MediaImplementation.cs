@@ -341,6 +341,28 @@ namespace Plugin.Media
             }, albumPath: aPath);
         }
 
+        public async Task<List<MediaFile>> PickVideosAsync(CancellationToken token = default(CancellationToken))
+        {
+            var picker = new FileOpenPicker();
+            picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            picker.ViewMode = PickerViewMode.Thumbnail;
+
+            foreach (var filter in SupportedImageFileTypes)
+                picker.FileTypeFilter.Add(filter);
+
+            var result = await picker.PickMultipleFilesAsync();
+            if (result == null)
+                return null;
+
+            var ret = new List<MediaFile>();
+            foreach (var file in result)
+            {
+                ret.Add(await MediaFileFromFile(file));
+            }
+
+            return ret;
+        }
+        
         private readonly HashSet<string> devices = new HashSet<string>();
         private readonly DeviceWatcher watcher;
         private bool isCameraAvailable;
