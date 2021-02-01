@@ -84,7 +84,14 @@ Such as:
 <string>This app needs access to the photo gallery.</string>
 
 UWP
-Set Webcam permission.
+Set Webcam, Pictures Library and Videos Library permissions.
+
+To enable the new media implementation, set the flag "UwpUseNewMediaImplementation" in the App.xaml.cs like this:
+
+```c#
+CrossMedia.SetFlags("UwpUseNewMediaImplementation");
+Xamarin.Forms.Forms.Init(e);
+```
 
 Tizen
 Please add the following Privileges in tizen-manifest.xml file:

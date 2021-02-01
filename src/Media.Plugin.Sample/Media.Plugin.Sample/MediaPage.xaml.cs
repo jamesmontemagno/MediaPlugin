@@ -103,7 +103,7 @@ namespace Media.Plugin.Sample
 				var file = await CrossMedia.Current.TakeVideoAsync(new StoreVideoOptions
 				{
 					Name = "video.mp4",
-					Directory = "DefaultVideos",
+					Directory = "DefaultVideos"
 				});
 
 				if (file == null)

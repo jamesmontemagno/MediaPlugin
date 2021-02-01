@@ -36,6 +36,11 @@
     <DisableExtraReferences>false</DisableExtraReferences>
 
 	</PropertyGroup>
+  
+	<PropertyGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+		<DefineConstants>$(DefineConstants);UWP</DefineConstants>
+  </PropertyGroup>
+  
 	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
 		<DebugSymbols>true</DebugSymbols>
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
