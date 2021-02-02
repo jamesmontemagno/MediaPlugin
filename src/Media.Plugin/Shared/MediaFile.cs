@@ -19,7 +19,7 @@ namespace Plugin.Media.Abstractions
 		public MediaFile(string path, Func<Stream> streamGetter, Func<Stream> streamGetterForExternalStorage = null, string albumPath = null)
         {
             this.streamGetter = streamGetter;
-						this.streamGetterForExternalStorage = streamGetterForExternalStorage;
+			this.streamGetterForExternalStorage = streamGetterForExternalStorage;
             this.path = path;
             this.albumPath = albumPath;
         }
@@ -67,7 +67,7 @@ namespace Plugin.Media.Abstractions
             if (isDisposed)
                 throw new ObjectDisposedException(null);
 
-						return streamGetter();
+            return streamGetter();
         }
 
 				/// <summary>

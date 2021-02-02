@@ -58,6 +58,7 @@ namespace Plugin.Media
         /// <inheritdoc/>
         public bool IsPickVideoSupported => true;
 
+        public bool IsVideoThumbnailSupported => true;
 
         bool IsValidExif(ExifInterface exif)
         {
@@ -1026,6 +1027,25 @@ namespace Plugin.Media
             }
         }
 
+        public async Task<MediaFile> CreateVideoThumbnailAsync(MediaFile mediaFile, long frameTime, PickMediaOptions options = null, CancellationToken token = default)
+        {
+            if (token.IsCancellationRequested)
+                return null;
+
+            var retriever = new MediaMetadataRetriever();
+            retriever.SetDataSource(mediaFile.Path);
+            var bitmap = retriever.GetFrameAtTime(frameTime);
+            if (bitmap != null)
+            {
+                var stream = new MemoryStream();
+                await bitmap.CompressAsync(Bitmap.CompressFormat.Jpeg, 0, stream);
+                var bitmapData = stream.ToArray();
+                var thumbnail = new MediaFile(string.Empty, () => new MemoryStream(bitmapData));
+                return thumbnail;
+            }
+
+            return null;
+        }
     }
 
 
