@@ -499,18 +499,19 @@ namespace Plugin.Media
             return Path.Combine(folder, nname);
         }
 
-		/// <summary>
-		/// Try go get output file
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="subdir"></param>
-		/// <param name="name"></param>
-		/// <param name="isPhoto"></param>
-		/// <param name="saveToAlbum"></param>
-		/// <returns></returns>
+        /// <summary>
+        /// Try go get output file
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="subdir"></param>
+        /// <param name="name"></param>
+        /// <param name="isPhoto"></param>
+        /// <param name="saveToAlbum"></param>
+        /// <returns></returns>
         public static Uri GetOutputMediaFile(Context context, string subdir, string name, bool isPhoto, bool saveToAlbum)
         {
             subdir = subdir ?? string.Empty;
+            Uri uri;
 
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -521,14 +522,37 @@ namespace Plugin.Media
                     name = "VID_" + timestamp + ".mp4";
             }
 
-            var mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
-            var directory = saveToAlbum ? Environment.GetExternalStoragePublicDirectory(mediaType) : context.GetExternalFilesDir(mediaType);
-            using (var mediaStorageDir = new Java.IO.File(directory, subdir))
+            if ((int)Build.VERSION.SdkInt < 29)
             {
-                if (!mediaStorageDir.Exists())
+                var mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
+                var directory = saveToAlbum ? Environment.GetExternalStoragePublicDirectory(mediaType) : context.GetExternalFilesDir(mediaType);
+
+                using (var mediaStorageDir = new Java.IO.File(directory, subdir))
                 {
-                    if (!mediaStorageDir.Mkdirs())
-                        throw new IOException("Couldn't create directory, have you added the WRITE_EXTERNAL_STORAGE permission?");
+                    if (!mediaStorageDir.Exists())
+                    {
+                        if (!mediaStorageDir.Mkdirs())
+                            throw new IOException("Couldn't create directory, have you added the WRITE_EXTERNAL_STORAGE permission?");
+
+                        if (!saveToAlbum)
+                        {
+                            // Ensure this media doesn't show up in gallery apps
+                            using (var nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
+                                nomedia.CreateNewFile();
+                        }
+                    }
+
+                    uri = Uri.FromFile(new Java.IO.File(GetUniquePath(mediaStorageDir.Path, name, isPhoto)));
+                }
+            }
+            else
+            {
+                var mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
+                var directory = context.GetExternalFilesDir(mediaType);
+
+                using (var mediaStorageDir = new Java.IO.File(directory, subdir))
+                {
+                    mediaStorageDir.Mkdirs();
 
                     if (!saveToAlbum)
                     {
@@ -536,10 +560,18 @@ namespace Plugin.Media
                         using (var nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
                             nomedia.CreateNewFile();
                     }
+
+                    uri = Uri.FromFile(new Java.IO.File(GetUniquePath(mediaStorageDir.Path, name, isPhoto)));
                 }
 
-                return Uri.FromFile(new Java.IO.File(GetUniquePath(mediaStorageDir.Path, name, isPhoto)));
+                if (saveToAlbum)
+                {
+                    uri = (isPhoto) ? MediaStore.Images.Media.ExternalContentUri : MediaStore.Video.Media.ExternalContentUri;
+                    uri = Uri.WithAppendedPath(uri, name);
+                }
             }
+
+            return uri;
         }
 
         internal static Task<Tuple<string, bool>> GetFileForUriAsync(Context context, Uri uri, bool isPhoto, bool saveToAlbum)
