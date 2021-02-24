@@ -16,13 +16,29 @@ namespace Plugin.Media.Abstractions
 		/// <param name="path"></param>
 		/// <param name="streamGetter"></param>
 		/// <param name="albumPath"></param>
-		public MediaFile(string path, Func<Stream> streamGetter, Func<Stream> streamGetterForExternalStorage = null, string albumPath = null)
+		public MediaFile(string path, Func<Stream> streamGetter, Func<Stream> streamGetterForExternalStorage = null, string albumPath = null, string originalFilename = null)
         {
             this.streamGetter = streamGetter;
 						this.streamGetterForExternalStorage = streamGetterForExternalStorage;
             this.path = path;
             this.albumPath = albumPath;
+            this.originalFilename = originalFilename;
         }
+
+        /// <summary>
+        /// The original filename
+        /// </summary>
+        public string OriginalFilename
+        {
+            get
+            {
+                if (isDisposed)
+                    throw new ObjectDisposedException(null);
+
+                return originalFilename;
+            }
+        }
+
         /// <summary>
         /// Path to file
         /// </summary>
@@ -96,6 +112,7 @@ namespace Plugin.Media.Abstractions
 				bool isDisposed;
 				Func<Stream> streamGetter;
 				Func<Stream> streamGetterForExternalStorage;
+        string originalFilename;
         string path;
         string albumPath;
 
