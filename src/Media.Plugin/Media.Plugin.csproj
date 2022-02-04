@@ -1,96 +1,89 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
-	<PropertyGroup>
-		<TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid80;MonoAndroid81;MonoAndroid90;MonoAndroid10.0;Xamarin.iOS10;uap10.0.16299;Tizen40</TargetFrameworks>
-		<AssemblyName>Plugin.Media</AssemblyName>
-		<RootNamespace>Plugin.Media</RootNamespace>
-		<Product>$(AssemblyName) ($(TargetFramework))</Product>
-		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
-		<Version>1.0.0.0</Version>
-		<Authors>James Montemagno</Authors>
-		<PackageId>Xam.Plugin.Media</PackageId>
-		<LangVersion>8.0</LangVersion>
-		<PackOnBuild>true</PackOnBuild>
-		<PackageIconUrl>http://www.refractored.com/images/plugin_icon_media.png</PackageIconUrl>
-		<PackageLicenseUrl>https://github.com/jamesmontemagno/MediaPlugin/blob/master/LICENSE</PackageLicenseUrl>
-		<Owners>JamesMontemagno</Owners>
-		<PackageProjectUrl>https://github.com/jamesmontemagno/MediaPlugin</PackageProjectUrl>
-		<Summary>Take or pick photos and videos from a cross platform API.</Summary>
-		<PackageTags>xamarin, pcl, xam.pcl, media, photo, video, plugin, plugin for xamarin, windows phone, winphone, wp8, winrt, android, xamarin.forms, ios</PackageTags>
-		<Title>Media Plugin for Xamarin and Windows</Title>
-		<Description>
-			Take or pick photos and videos from a cross platform API.
-		</Description>
-		<Copyright>Copyright 2020</Copyright>
-		<RepositoryUrl>https://github.com/jamesmontemagno/MediaPlugin</RepositoryUrl>
-		<PackageReleaseNotes>See: https://github.com/jamesmontemagno/MediaPlugin </PackageReleaseNotes>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid10.0;Xamarin.iOS10;uap10.0.19041;Tizen40</TargetFrameworks>
+    <AssemblyName>Plugin.Media</AssemblyName>
+    <RootNamespace>Plugin.Media</RootNamespace>
+    <Product>$(AssemblyName) ($(TargetFramework))</Product>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
+    <Version>1.0.0.0</Version>
+    <Authors>James Montemagno</Authors>
+    <PackageId>Xam.Plugin.Media</PackageId>
+    <LangVersion>8.0</LangVersion>
+    <PackOnBuild>true</PackOnBuild>
+    <PackageIconUrl>http://www.refractored.com/images/plugin_icon_media.png</PackageIconUrl>
+    <PackageLicenseUrl>https://github.com/jamesmontemagno/MediaPlugin/blob/master/LICENSE</PackageLicenseUrl>
+    <Owners>JamesMontemagno</Owners>
+    <PackageProjectUrl>https://github.com/jamesmontemagno/MediaPlugin</PackageProjectUrl>
+    <Summary>Take or pick photos and videos from a cross platform API.</Summary>
+    <PackageTags>xamarin, pcl, xam.pcl, media, photo, video, plugin, plugin for xamarin, windows phone, winphone, wp8, winrt, android, xamarin.forms, ios</PackageTags>
+    <Title>Media Plugin for Xamarin and Windows</Title>
+    <Description>
+      Take or pick photos and videos from a cross platform API.
+    </Description>
+    <Copyright>Copyright 2022</Copyright>
+    <RepositoryUrl>https://github.com/jamesmontemagno/MediaPlugin</RepositoryUrl>
+    <PackageReleaseNotes>See: https://github.com/jamesmontemagno/MediaPlugin </PackageReleaseNotes>
 
-		<NeutralLanguage>en</NeutralLanguage>
-		<LangVersion>default</LangVersion>
-		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-		<DebugType>portable</DebugType>
-		<DefineConstants>$(DefineConstants);</DefineConstants>
-		
-	    
+    <NeutralLanguage>en</NeutralLanguage>
+    <LangVersion>default</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DebugType>portable</DebugType>
+    <DefineConstants>$(DefineConstants);</DefineConstants>
+
+
     <!--When built in 2019 will remove extra references on pack-->
     <DisableExtraReferences>false</DisableExtraReferences>
 
-	</PropertyGroup>
-  
-	<PropertyGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
-		<DefineConstants>$(DefineConstants);UWP</DefineConstants>
   </PropertyGroup>
-  
-	<PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
-		<DebugSymbols>true</DebugSymbols>
-		<GenerateDocumentationFile>false</GenerateDocumentationFile>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)'=='Release' ">
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		<!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
-		<EmbedUntrackedSources>true</EmbedUntrackedSources>
-		<!-- sourcelink: Include PDB in the built .nupkg -->
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-	</PropertyGroup>
-	<ItemGroup Condition=" '$(Configuration)'=='Release' ">
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-		<PackageReference Include="Xamarin.Essentials" Version="1.5.2" />
-		<Compile Include="**\Shared\*.cs" />
-	</ItemGroup>
 
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-	</ItemGroup>
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+    <DefineConstants>$(DefineConstants);UWP</DefineConstants>
+  </PropertyGroup>
 
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
-		<Compile Include="**\UWP\*.cs" />
-	</ItemGroup>
-	
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-		<Compile Include="**\Android\*.cs" />
-	</ItemGroup>
-	
+  <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- sourcelink: Include PDB in the built .nupkg -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(Configuration)'=='Release' ">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
 
-	<ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid')) And '$(TargetFramework)' != 'MonoAndroid10.0'">
-		<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="28.0.0.3" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
+    <Compile Include="**\Shared\*.cs" />
+  </ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid10.0'">
-		<PackageReference Include="Xamarin.AndroidX.Core" Version="1.1.0" />
-	</ItemGroup>
-	
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
-		<Compile Include="**\iOS\*.cs" />
-	</ItemGroup>
-	<ItemGroup Condition=" $(TargetFramework.StartsWith('Tizen')) ">
-		<Compile Include="**\Tizen\*.cs" />
-		<PackageReference Include="Tizen.NET" Version="4.0.0">
-			<ExcludeAssets>Runtime</ExcludeAssets>
-		</PackageReference>
-	</ItemGroup>
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+    <Compile Include="**\UWP\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.6.0.1" />
+    <Compile Include="**\Android\*.cs" />
+  </ItemGroup>
+
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+    <Compile Include="**\iOS\*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('Tizen')) ">
+    <Compile Include="**\Tizen\*.cs" />
+    <PackageReference Include="Tizen.NET" Version="4.0.0">
+      <ExcludeAssets>Runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

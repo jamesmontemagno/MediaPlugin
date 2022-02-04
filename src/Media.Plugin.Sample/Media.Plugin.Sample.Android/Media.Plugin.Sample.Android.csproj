@@ -49,15 +49,15 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="glidex.forms">
-      <Version>2.0.1.394</Version>
+      <Version>2.1.1.648</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials">
-      <Version>1.5.2</Version>
+      <Version>1.7.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.FFImageLoading.Forms">
       <Version>2.4.11.982</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2337" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
