@@ -16,6 +16,8 @@ using System.Threading;
 using System.Diagnostics;
 using System.Drawing;
 using CoreImage;
+using Photos;
+using System.Linq;
 
 namespace Plugin.Media
 {
@@ -41,7 +43,7 @@ namespace Plugin.Media
 			set;
 		}
 
-		public void CancelTask() => tcs.SetResult(null);
+		public void CancelTask() => tcs.TrySetResult(null);
 
 		public UIView View => viewController.View;
 		
@@ -91,7 +93,7 @@ namespace Plugin.Media
 
 			Dismiss(picker, () =>
 			{
-				tcs.SetResult(null);
+				tcs.TrySetResult(null);
 			});
 		}
 
@@ -106,7 +108,7 @@ namespace Plugin.Media
 
 			Dismiss(picker, () =>
 			{
-				tcs.SetResult(null);
+				tcs.TrySetResult(null);
 			});
 		}
 
@@ -191,12 +193,25 @@ namespace Plugin.Media
 
 		void RemoveOrientationChangeObserverAndNotifications()
 		{
-			if (viewController != null)
-			{
-				UIDevice.CurrentDevice.EndGeneratingDeviceOrientationNotifications();
-				NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
-				observer.Dispose();
-			}
+            if (viewController == null)
+                return;
+
+			
+			UIDevice.CurrentDevice.EndGeneratingDeviceOrientationNotifications();
+
+            if(observer != null)
+            {
+                try
+                {
+                    NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+
+            }
+			observer?.Dispose();			
 		}
 
 		void DidRotate(NSNotification notice)
@@ -445,7 +460,17 @@ namespace Plugin.Media
 					return File.OpenRead(path);
 			};
 
-			return new MediaFile(path, () => File.OpenRead(path), streamGetterForExternalStorage: () => getStreamForExternalStorage(), albumPath: aPath);
+			string originalFilename = null;
+			if (info.TryGetValue(UIImagePickerController.PHAsset, out var assetObj))
+			{
+				var asset = (PHAsset)assetObj;
+				if (asset != null)
+				{
+					originalFilename = PHAssetResource.GetAssetResources(asset)?.FirstOrDefault()?.OriginalFilename;
+				}
+			}
+
+			return new MediaFile(path, () => File.OpenRead(path), streamGetterForExternalStorage: () => getStreamForExternalStorage(), albumPath: aPath, originalFilename: originalFilename);
 		}
 
 		internal static NSDictionary SetGpsLocation(NSDictionary meta, Location location)

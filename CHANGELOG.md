@@ -1,4 +1,8 @@
 ## Changelog
+### 5.0.1
+* Main release with Xamarin.Essentials at the core
+* Fix a lot of iOS issues and other misc.
+
 ### 4.0.0-pre
 * Fix for #496: Special case for Huawei devices on pre-N devices
 * Fix for #452: Large images on iPhone X don't save sometimes at 100% (thanks @christophedelanghe)

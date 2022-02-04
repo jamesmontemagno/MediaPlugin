@@ -1,3 +1,9 @@
+## Update Novemeber 2020
+
+[Xamarin.Essentials](https://github.com/xamarin/essentials?WT.mc_id=docs-github-jamont) 1.6 introduced official support for [picking/taking photos and videos](https://docs.microsoft.com/xamarin/essentials/media-picker?WT.mc_id=friends-0000-jamont) with the new Media Picker API. 
+
+This library has a lot of legacy code that is extremely hard to maintain and update to support the latest OSes without a major re-write. I will officially be archiving this library in December 2020 unless anyone from the community wants to adopt the project.
+
 ## Media Plugin for Xamarin and Windows
 
 Simple cross platform plugin to take photos and video or pick them from a gallery from shared code.
@@ -242,31 +248,46 @@ var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
 Please read these as they must be implemented for all platforms.
 
 #### Android 
-The `WRITE_EXTERNAL_STORAGE` & `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add the Permission Plugin code into your Main or Base Activities:
+The `WRITE_EXTERNAL_STORAGE` & `READ_EXTERNAL_STORAGE` permissions are required, but the library will automatically add this for you. Additionally, if your users are running Marshmallow the Plugin will automatically prompt them for runtime permissions. You must add `Xamarin.Essentials.Platform.OnRequestPermissionsResult` code into your Main or Base Activities:
 
 Add to Activity:
 
 ```csharp
 public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 {
-    Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+    base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 }
 ```
 
 ## Android Required Setup
 
-This plugin uses the Xamarin.Essentials, please follow the setup guide.
-
-Xamarin.Essentials.Platform.Init(this, bundle);
+This plugin uses the Xamarin.Essentials, please follow the setup guide: http://aka.ms/essentials-getstarted
 
 
 #### Android File Provider Setup
 
 You must also add a few additional configuration files to adhere to the new strict mode:
 
-1.) Add the following to your AndroidManifest.xml inside the `<application>` tags:
+1a.) (Non AndroidX) Add the following to your AndroidManifest.xml inside the `<application>` tags:
 ```xml
 <provider android:name="android.support.v4.content.FileProvider" 
+          android:authorities="${applicationId}.fileprovider" 
+          android:exported="false" 
+          android:grantUriPermissions="true">
+          
+	  <meta-data android:name="android.support.FILE_PROVIDER_PATHS" 
+                     android:resource="@xml/file_paths"></meta-data>
+</provider>
+```
+
+**Note:** If you receive the following error, it is because you are using AndroidX. To resolve this error, follow the instructions in Step `1b.)`.
+> Unable to get provider android.support.v4.content.FileProvider: java.lang.ClassNotFoundException: Didn't find class "android.support.v4.content.FileProvider" on path: DexPathList
+
+
+1b.) (AndroidX) Add the following to your AndroidManifest.xml inside the `<application>` tags:
+```xml
+<provider android:name="androidx.core.content.FileProvider" 
           android:authorities="${applicationId}.fileprovider" 
           android:exported="false" 
           android:grantUriPermissions="true">
@@ -279,6 +300,7 @@ You must also add a few additional configuration files to adhere to the new stri
 2.) Add a new folder called `xml` into your Resources folder and add a new XML file called `file_paths.xml`. Make sure that this XML file has a Build Action of: `AndroidResource`.
 
 Add the following code:
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
@@ -301,7 +323,7 @@ By default, the library adds `android.hardware.camera` and `android.hardware.cam
 
 #### iOS
 
-Your app is required to have keys in your Info.plist for `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` in order to access the device's camera and photo/video library. If you are using the Video capabilities of the library then you must also add `NSMicrophoneUsageDescription`.  If you want to "SaveToGallery" then you must add the `NSPhotoLibraryAddUsageDescription` key into your info.plist. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features. You can read me here: [New iOS 10 Privacy Permission Settings](https://devblogs.microsoft.com/xamarin/new-ios-10-privacy-permission-settings)
+Your app is required to have keys in your Info.plist for `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` in order to access the device's camera and photo/video library. If you are using the Video capabilities of the library then you must also add `NSMicrophoneUsageDescription`.  If you want to "SaveToGallery" then you must add the `NSPhotoLibraryAddUsageDescription` key into your info.plist. The string that you provide for each of these keys will be displayed to the user when they are prompted to provide permission to access these device features. You can read me here: [New iOS 10 Privacy Permission Settings](https://devblogs.microsoft.com/xamarin/new-ios-10-privacy-permission-settings?WT.mc_id=friends-0000-jamont)
 
 Such as:
 ```xml
