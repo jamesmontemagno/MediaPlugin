@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Plugin.Media;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -49,6 +50,8 @@ namespace Media.Plugin.Sample.UWP
             {
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
+
+                CrossMedia.SetFlags("UwpUseNewMediaImplementation");
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
                 FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
