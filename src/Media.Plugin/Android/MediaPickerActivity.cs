@@ -23,10 +23,10 @@ using System.Linq;
 
 namespace Plugin.Media
 {
-	/// <summary>
-	/// Picker
-	/// </summary>
-	[Activity(ConfigurationChanges= ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
+    /// <summary>
+    /// Picker
+    /// </summary>
+    [Activity(ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
     public class MediaPickerActivity
         : Activity, Android.Media.MediaScannerConnection.IOnScanCompletedListener
     {
@@ -36,8 +36,8 @@ namespace Plugin.Media
         internal const string ExtraId = "id";
         internal const string ExtraAction = "action";
         internal const string ExtraTasked = "tasked";
-		internal const string ExtraMultiSelect = "multi_select";
-		internal const string ExtraSaveToAlbum = "album_save";
+        internal const string ExtraMultiSelect = "multi_select";
+        internal const string ExtraSaveToAlbum = "album_save";
         internal const string ExtraFront = "android.intent.extras.CAMERA_FACING";
 
         internal static event EventHandler<MediaPickedEventArgs> MediaPicked;
@@ -55,9 +55,9 @@ namespace Plugin.Media
         bool isPhoto;
         bool saveToAlbum;
         string action;
-		bool multiSelect;
+        bool multiSelect;
 
-		int seconds;
+        int seconds;
         long size;
         VideoQuality quality;
 
@@ -80,15 +80,15 @@ namespace Plugin.Media
             outState.PutBoolean(ExtraSaveToAlbum, saveToAlbum);
             outState.PutBoolean(ExtraTasked, tasked);
             outState.PutInt(ExtraFront, front);
-			outState.PutBoolean(ExtraMultiSelect, multiSelect);
+            outState.PutBoolean(ExtraMultiSelect, multiSelect);
 
-			if (path != null)
+            if (path != null)
                 outState.PutString(ExtraPath, path.Path);
 
             base.OnSaveInstanceState(outState);
         }
 
-		const string huaweiManufacturer = "Huawei";
+        const string huaweiManufacturer = "Huawei";
 
         /// <summary>
         /// OnCreate
@@ -97,9 +97,9 @@ namespace Plugin.Media
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-	        MediaImplementation.CancelRequested += CancellationRequested;
+            MediaImplementation.CancelRequested += CancellationRequested;
 
-			var b = (savedInstanceState ?? Intent.Extras);
+            var b = (savedInstanceState ?? Intent.Extras);
 
             var ran = b.GetBoolean("ran", defaultValue: false);
 
@@ -110,8 +110,8 @@ namespace Plugin.Media
             id = b.GetInt(ExtraId, 0);
             type = b.GetString(ExtraType);
             front = b.GetInt(ExtraFront);
-			multiSelect = b.GetBoolean(ExtraMultiSelect);
-			if (type == "image/*")
+            multiSelect = b.GetBoolean(ExtraMultiSelect);
+            if (type == "image/*")
                 isPhoto = true;
 
             action = b.GetString(ExtraAction);
@@ -120,30 +120,30 @@ namespace Plugin.Media
             {
                 pickIntent = new Intent(action);
                 if (action == Intent.ActionPick)
-				{
-					if (multiSelect)
-						pickIntent.PutExtra(Intent.ExtraAllowMultiple, true);
+                {
+                    if (multiSelect)
+                        pickIntent.PutExtra(Intent.ExtraAllowMultiple, true);
 
-					pickIntent.SetType(type);
-				}
-				else
+                    pickIntent.SetType(type);
+                }
+                else
                 {
                     if (!isPhoto)
                     {
-						var isPixel = false;
-						try
-						{
-							var name = Settings.System.GetString(Application.Context.ContentResolver, "device_name");
-							isPixel = name.Contains("Pixel") || name.Contains("pixel");
-						}
-						catch (Exception)
-						{
-						}
+                        var isPixel = false;
+                        try
+                        {
+                            var name = Settings.System.GetString(Application.Context.ContentResolver, "device_name");
+                            isPixel = name.Contains("Pixel") || name.Contains("pixel");
+                        }
+                        catch (Exception)
+                        {
+                        }
 
                         seconds = b.GetInt(MediaStore.ExtraDurationLimit, 0);
-						if (seconds != 0 && !isPixel)
-							pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
-						
+                        if (seconds != 0 && !isPixel)
+                            pickIntent.PutExtra(MediaStore.ExtraDurationLimit, seconds);
+
                         size = b.GetLong(MediaStore.ExtraSizeLimit, 0);
                         if (size != 0)
                         {
@@ -171,46 +171,46 @@ namespace Plugin.Media
                         path = GetOutputMediaFile(this, b.GetString(ExtraPath), title, isPhoto, false);
 
                         Touch();
-						
 
-						if (path.Scheme == "file")
-						{
-							try
-							{
-								var photoURI = FileProvider.GetUriForFile(this,
-																		  Application.Context.PackageName + ".fileprovider",
-																		  new Java.IO.File(path.Path));
 
-								GrantUriPermissionsForIntent(pickIntent, photoURI);
-								pickIntent.AddFlags(ActivityFlags.GrantReadUriPermission);
-								pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
-								pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
-							}
-							catch (Java.Lang.IllegalArgumentException iae)
-							{
-								//Using a Huawei device on pre-N. Increased likelihood of failure...
-								if (huaweiManufacturer.Equals(Build.Manufacturer, StringComparison.CurrentCultureIgnoreCase) && (int)Build.VERSION.SdkInt < 24)
-								{
-									pickIntent.PutExtra(MediaStore.ExtraOutput, path);
-								}
-								else
-								{
-									System.Diagnostics.Debug.WriteLine($"Unable to get file location, check and set manifest with file provider. Exception: {iae}");
+                        if (path.Scheme == "file")
+                        {
+                            try
+                            {
+                                var photoURI = FileProvider.GetUriForFile(this,
+                                                                          Application.Context.PackageName + ".fileprovider",
+                                                                          new Java.IO.File(path.Path));
 
-									throw new ArgumentException("Unable to get file location. This most likely means that the file provider information is not set in your Android Manifest file. Please check documentation on how to set this up in your project.", iae);
-								}
-							}
-							catch (Exception ex)
-							{
-								System.Diagnostics.Debug.WriteLine($"Unable to get file location, check and set manifest with file provider. Exception: {ex}");
+                                GrantUriPermissionsForIntent(pickIntent, photoURI);
+                                pickIntent.AddFlags(ActivityFlags.GrantReadUriPermission);
+                                pickIntent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+                                pickIntent.PutExtra(MediaStore.ExtraOutput, photoURI);
+                            }
+                            catch (Java.Lang.IllegalArgumentException iae)
+                            {
+                                //Using a Huawei device on pre-N. Increased likelihood of failure...
+                                if (huaweiManufacturer.Equals(Build.Manufacturer, StringComparison.CurrentCultureIgnoreCase) && (int)Build.VERSION.SdkInt < 24)
+                                {
+                                    pickIntent.PutExtra(MediaStore.ExtraOutput, path);
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Unable to get file location, check and set manifest with file provider. Exception: {iae}");
 
-								throw new ArgumentException("Unable to get file location. This most likely means that the file provider information is not set in your Android Manifest file. Please check documentation on how to set this up in your project.", ex);
-							}
-						}
-						else
-						{
-							pickIntent.PutExtra(MediaStore.ExtraOutput, path);
-						}
+                                    throw new ArgumentException("Unable to get file location. This most likely means that the file provider information is not set in your Android Manifest file. Please check documentation on how to set this up in your project.", iae);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Unable to get file location, check and set manifest with file provider. Exception: {ex}");
+
+                                throw new ArgumentException("Unable to get file location. This most likely means that the file provider information is not set in your Android Manifest file. Please check documentation on how to set this up in your project.", ex);
+                            }
+                        }
+                        else
+                        {
+                            pickIntent.PutExtra(MediaStore.ExtraOutput, path);
+                        }
                     }
                     else
                         path = Uri.Parse(b.GetString(ExtraPath));
@@ -234,14 +234,14 @@ namespace Plugin.Media
             }
         }
 
-	    void CancellationRequested(object sender, EventArgs e)
-	    {
-			FinishActivity(id);
-			DeleteOutputFile();
-			Finish();
-		}
-		
-		void Touch()
+        void CancellationRequested(object sender, EventArgs e)
+        {
+            FinishActivity(id);
+            DeleteOutputFile();
+            Finish();
+        }
+
+        void Touch()
         {
             if (path.Scheme != "file")
                 return;
@@ -254,7 +254,7 @@ namespace Plugin.Media
                 stream.Dispose();
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Unable to create path: " + newPath + " " + ex.Message + "This means you have illegal characters");
                 throw ex;
@@ -275,21 +275,21 @@ namespace Plugin.Media
                     File.Delete(localPath);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Unable to delete file: " + ex.Message);
             }
         }
 
-		void GrantUriPermissionsForIntent(Intent intent, Uri uri)
-		{
-			var resInfoList = PackageManager.QueryIntentActivities(intent, PackageInfoFlags.MatchDefaultOnly);
-			foreach (var resolveInfo in resInfoList)
-			{
-				var packageName = resolveInfo.ActivityInfo.PackageName;
-				GrantUriPermission(packageName, uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
-			}
-		}
+        void GrantUriPermissionsForIntent(Intent intent, Uri uri)
+        {
+            var resInfoList = PackageManager.QueryIntentActivities(intent, PackageInfoFlags.MatchDefaultOnly);
+            foreach (var resolveInfo in resInfoList)
+            {
+                var packageName = resolveInfo.ActivityInfo.PackageName;
+                GrantUriPermission(packageName, uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+            }
+        }
 
         internal static Task<MediaPickedEventArgs> GetMediaFileAsync(Context context, int requestCode, string action, bool isPhoto, ref Uri path, Uri data, bool saveToAlbum)
         {
@@ -316,7 +316,7 @@ namespace Plugin.Media
                 else
                 {
                     pathFuture = TaskFromResult(new Tuple<string, string, bool>(path.Path, Path.GetFileName(path.Path), false));
-                   
+
                 }
             }
             else if (data != null)
@@ -330,7 +330,7 @@ namespace Plugin.Media
 
             return pathFuture.ContinueWith(t =>
             {
-                
+
                 var resultPath = t?.Result?.Item1;
                 var originalFilename = t?.Result?.Item2;
                 var aPath = originalPath;
@@ -357,33 +357,33 @@ namespace Plugin.Media
         protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             completed = true;
-	        MediaImplementation.CancelRequested -= CancellationRequested;
+            MediaImplementation.CancelRequested -= CancellationRequested;
             base.OnActivityResult(requestCode, resultCode, data);
-			
+
 
             if (tasked)
             {
-				if (data?.ClipData != null)
-				{
-					var clipData = data.ClipData;
-					var mediaFiles = new List<MediaFile>();
-					for (var i = 0; i < clipData.ItemCount; i++)
-					{
-						var item = clipData.GetItemAt(i);
-						var media = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, item.Uri, false);
+                if (data?.ClipData != null)
+                {
+                    var clipData = data.ClipData;
+                    var mediaFiles = new List<MediaFile>();
+                    for (var i = 0; i < clipData.ItemCount; i++)
+                    {
+                        var item = clipData.GetItemAt(i);
+                        var media = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, item.Uri, false);
 
-						// TODO: This can be done better.
-						mediaFiles.AddRange(media.Media);
-					}
+                        // TODO: This can be done better.
+                        mediaFiles.AddRange(media.Media);
+                    }
 
-					Finish();
-					await Task.Delay(50);
-					OnMediaPicked(new MediaPickedEventArgs(requestCode, resultCode == Result.Canceled, mediaFiles));
+                    Finish();
+                    await Task.Delay(50);
+                    OnMediaPicked(new MediaPickedEventArgs(requestCode, resultCode == Result.Canceled, mediaFiles));
 
-					return;
-				}
+                    return;
+                }
 
-				Task<MediaPickedEventArgs> future;
+                Task<MediaPickedEventArgs> future;
 
                 if (resultCode == Result.Canceled)
                 {
@@ -400,7 +400,7 @@ namespace Plugin.Media
                 }
                 else
                 {
-                    
+
                     var e = await GetMediaFileAsync(this, requestCode, action, isPhoto, ref path, data?.Data, false);
                     Finish();
                     await Task.Delay(50);
@@ -445,7 +445,7 @@ namespace Plugin.Media
                     if (url.Scheme == "content")
                         context.ContentResolver.Delete(url, null, null);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine("Unable to delete content resolver file: " + ex.Message);
                 }
@@ -611,27 +611,27 @@ namespace Plugin.Media
                             string originalFilename = null;
 
                             // If they don't follow the "rules", try to copy the file locally
-							if (contentPath == null || !contentPath.StartsWith("file", StringComparison.InvariantCultureIgnoreCase))
+                            if (contentPath == null || !contentPath.StartsWith("file", StringComparison.InvariantCultureIgnoreCase))
                             {
-								string fileName = null;
-								try
-								{
-									fileName = Path.GetFileName(contentPath);
+                                string fileName = null;
+                                try
+                                {
+                                    fileName = Path.GetFileName(contentPath);
                                     originalFilename = fileName;
-								}
-								catch(Exception ex)
-								{ 
-									System.Diagnostics.Debug.WriteLine("Unable to get file path name, using new unique " + ex);
-								}
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("Unable to get file path name, using new unique " + ex);
+                                }
 
 
-								var outputPath = GetOutputMediaFile(context, "temp", fileName, isPhoto, false);
+                                var outputPath = GetOutputMediaFile(context, "temp", fileName, isPhoto, false);
 
-								try
+                                try
                                 {
                                     using (var input = context.ContentResolver.OpenInputStream(uri))
-                                        using (var output = File.Create(outputPath.Path))
-                                            input.CopyTo(output);
+                                    using (var output = File.Create(outputPath.Path))
+                                        input.CopyTo(output);
 
                                     contentPath = outputPath.Path;
                                 }
@@ -640,7 +640,7 @@ namespace Plugin.Media
                                     // If there's no data associated with the uri, we don't know
                                     // how to open this. contentPath will be null which will trigger
                                     // MediaFileNotFoundException.
-									System.Diagnostics.Debug.WriteLine("Unable to save picked file from disk " + fnfEx);
+                                    System.Diagnostics.Debug.WriteLine("Unable to save picked file from disk " + fnfEx);
                                 }
                             }
                             else
@@ -667,8 +667,8 @@ namespace Plugin.Media
             return tcs.Task;
         }
 
-        static string GetLocalPath(Uri uri) =>  new System.Uri(uri.ToString()).LocalPath;
-        
+        static string GetLocalPath(Uri uri) => new System.Uri(uri.ToString()).LocalPath;
+
 
         static Task<T> TaskFromResult<T>(T result)
         {
@@ -678,27 +678,27 @@ namespace Plugin.Media
         }
 
         static void OnMediaPicked(MediaPickedEventArgs e) =>
-			MediaPicked?.Invoke(null, e);
-        
+            MediaPicked?.Invoke(null, e);
 
-		/// <summary>
-		/// Scan completed
-		/// </summary>
-		/// <param name="path"></param>
-		/// <param name="uri"></param>
+
+        /// <summary>
+        /// Scan completed
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="uri"></param>
         public void OnScanCompleted(string path, Uri uri) =>
-			Console.WriteLine("scan complete: " + path);
-        
-		/// <summary>
-		/// On Destroy
-		/// </summary>
+            Console.WriteLine("scan complete: " + path);
+
+        /// <summary>
+        /// On Destroy
+        /// </summary>
         protected override void OnDestroy()
         {
-            if(!completed)
+            if (!completed)
             {
                 DeleteOutputFile();
-				MediaImplementation.CompletionSource = null;
-				MediaImplementation.CompletionSourceMulti = null;
+                MediaImplementation.CompletionSource = null;
+                MediaImplementation.CompletionSourceMulti = null;
                 MediaPicked = null;
             }
             base.OnDestroy();
@@ -720,21 +720,21 @@ namespace Plugin.Media
             IsCanceled = isCanceled;
             if (!IsCanceled && media == null)
                 throw new ArgumentNullException("media");
-			
-			Media = new List<MediaFile> { media };
-		}
 
-		public MediaPickedEventArgs(int id, bool isCanceled, List<MediaFile> medias)
-		{
-			RequestId = id;
-			IsCanceled = isCanceled;
-			if (!IsCanceled && medias == null)
-				throw new ArgumentNullException("medias");
+            Media = new List<MediaFile> { media };
+        }
 
-			Media = medias;
-		}
+        public MediaPickedEventArgs(int id, bool isCanceled, List<MediaFile> medias)
+        {
+            RequestId = id;
+            IsCanceled = isCanceled;
+            if (!IsCanceled && medias == null)
+                throw new ArgumentNullException("medias");
 
-		public int RequestId
+            Media = medias;
+        }
+
+        public int RequestId
         {
             get;
             private set;
@@ -772,6 +772,6 @@ namespace Plugin.Media
             return tcs.Task;
         }
 
-       
+
     }
 }

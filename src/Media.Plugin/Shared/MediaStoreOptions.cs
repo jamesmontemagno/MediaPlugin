@@ -48,26 +48,26 @@ namespace Plugin.Media.Abstractions
         Front
     }
 
-	/// <summary>
-	/// Specifies the media picker's modal presentation style.
-	/// Only applies to iOS.
-	/// </summary>
-	public enum MediaPickerModalPresentationStyle
-	{
-		/// <summary>
-		/// This is the equivalent of presenting the media picker with UIKit.UIModalPresentationStyle.FullScreen style.
-		/// Will remove the views of the underlying view controller when presenting the media picker.
-		/// Only applies to iOS.
-		/// </summary>
-		FullScreen,
+    /// <summary>
+    /// Specifies the media picker's modal presentation style.
+    /// Only applies to iOS.
+    /// </summary>
+    public enum MediaPickerModalPresentationStyle
+    {
+        /// <summary>
+        /// This is the equivalent of presenting the media picker with UIKit.UIModalPresentationStyle.FullScreen style.
+        /// Will remove the views of the underlying view controller when presenting the media picker.
+        /// Only applies to iOS.
+        /// </summary>
+        FullScreen,
 
-		/// <summary>
-		/// This is the equivalent of presenting the media picker with UIKit.UIModalPresentationStyle.OverFullScreen style.
-		/// Will keep the views of the underlying view controller when presenting the media picker.
-		/// Only applies to iOS.
-		/// </summary>
-		OverFullScreen
-	}
+        /// <summary>
+        /// This is the equivalent of presenting the media picker with UIKit.UIModalPresentationStyle.OverFullScreen style.
+        /// Will keep the views of the underlying view controller when presenting the media picker.
+        /// Only applies to iOS.
+        /// </summary>
+        OverFullScreen
+    }
 
     /// <summary>
     /// 
@@ -133,42 +133,42 @@ namespace Plugin.Media.Abstractions
         /// Should the library rotate image according to received exif orientation.
         /// Set to true by default.
         /// </summary>
-        public bool RotateImage 
+        public bool RotateImage
         {
-            get { return rotateImage; } 
-            set { rotateImage = value;} 
+            get { return rotateImage; }
+            set { rotateImage = value; }
         }
 
-		bool saveMetaData = true;
-		/// <summary>
-		/// Saves metadate/exif data from the original file.
-		/// </summary>
-		public bool SaveMetaData
-		{
-			get { return saveMetaData; }
-			set { saveMetaData = value; }
-		}
+        bool saveMetaData = true;
+        /// <summary>
+        /// Saves metadate/exif data from the original file.
+        /// </summary>
+        public bool SaveMetaData
+        {
+            get { return saveMetaData; }
+            set { saveMetaData = value; }
+        }
 
-	    /// <summary>
-	    /// Specifies the media picker's modal presentation style.
-	    /// Only applies to iOS.
-	    /// Defaults to FullScreen, which is the equivalent of using UIKit.UIModalPresentationStyle.FullScreen.
-	    /// </summary>
-		public MediaPickerModalPresentationStyle ModalPresentationStyle { get; set; } = MediaPickerModalPresentationStyle.FullScreen;
+        /// <summary>
+        /// Specifies the media picker's modal presentation style.
+        /// Only applies to iOS.
+        /// Defaults to FullScreen, which is the equivalent of using UIKit.UIModalPresentationStyle.FullScreen.
+        /// </summary>
+        public MediaPickerModalPresentationStyle ModalPresentationStyle { get; set; } = MediaPickerModalPresentationStyle.FullScreen;
     }
 
-	public class StorePickerMediaOptions : StoreMediaOptions
-	{
-		/// <summary>
-		/// Enable multi picker
-		/// </summary>
-		public bool MultiPicker { get; set; }
-	}
+    public class StorePickerMediaOptions : StoreMediaOptions
+    {
+        /// <summary>
+        /// Enable multi picker
+        /// </summary>
+        public bool MultiPicker { get; set; }
+    }
 
-	/// <summary>
-	/// 
-	/// </summary>
-	public class StoreCameraMediaOptions
+    /// <summary>
+    /// 
+    /// </summary>
+    public class StoreCameraMediaOptions
         : StoreMediaOptions
     {
         /// <summary>
@@ -273,28 +273,28 @@ namespace Plugin.Media.Abstractions
         /// Set to true by default.
         /// </summary>
         public bool RotateImage
-		{
-			get { return rotateImage; }
-			set { rotateImage = value; }
-		}
+        {
+            get { return rotateImage; }
+            set { rotateImage = value; }
+        }
 
-		bool saveMetaData = true;
-		/// <summary>
-		/// Saves metadate/exif data from the original file.
-		/// </summary>
-		public bool SaveMetaData
-		{
-			get { return saveMetaData; }
-			set { saveMetaData = value; }
-		}
+        bool saveMetaData = true;
+        /// <summary>
+        /// Saves metadate/exif data from the original file.
+        /// </summary>
+        public bool SaveMetaData
+        {
+            get { return saveMetaData; }
+            set { saveMetaData = value; }
+        }
 
-	    /// <summary>
-	    /// Specifies the media picker's modal presentation style.
-	    /// Only applies to iOS.
-	    /// Defaults to FullScreen, which is the equivalent of using UIKit.UIModalPresentationStyle.FullScreen.
-	    /// </summary>
-	    public MediaPickerModalPresentationStyle ModalPresentationStyle { get; set; } = MediaPickerModalPresentationStyle.FullScreen;
-	}
+        /// <summary>
+        /// Specifies the media picker's modal presentation style.
+        /// Only applies to iOS.
+        /// Defaults to FullScreen, which is the equivalent of using UIKit.UIModalPresentationStyle.FullScreen.
+        /// </summary>
+        public MediaPickerModalPresentationStyle ModalPresentationStyle { get; set; } = MediaPickerModalPresentationStyle.FullScreen;
+    }
 
     /// <summary>
     /// Photo size enum.
@@ -333,37 +333,37 @@ namespace Plugin.Media.Abstractions
         MaxWidthHeight
     }
 
-	public enum MultiPickerBarStyle
-	{
-		Default = 0,
-		Black = 1,
-		BlackOpaque = 1,
-		BlackTranslucent = 2
-	}
+    public enum MultiPickerBarStyle
+    {
+        Default = 0,
+        Black = 1,
+        BlackOpaque = 1,
+        BlackTranslucent = 2
+    }
 
-	/// <summary>
-	/// UI options for iOS multi image picker
-	/// </summary>
-	public class MultiPickerOptions
-	{
-		// TODO: This only affects iOS since Android uses native
+    /// <summary>
+    /// UI options for iOS multi image picker
+    /// </summary>
+    public class MultiPickerOptions
+    {
+        // TODO: This only affects iOS since Android uses native
 
-		public int MaximumImagesCount { get; set; } = 10;
+        public int MaximumImagesCount { get; set; } = 10;
 
-		public MultiPickerBarStyle BarStyle { get; set; } = MultiPickerBarStyle.Default;
+        public MultiPickerBarStyle BarStyle { get; set; } = MultiPickerBarStyle.Default;
 
-		public string PathToOverlay { get; set; }
-		public string AlbumSelectTitle { get; set; }
-		public string PhotoSelectTitle { get; set; }
-		public string BackButtonTitle { get; set; }
-		public string DoneButtonTitle { get; set; }
-		public string LoadingTitle { get; set; }
-	}
+        public string PathToOverlay { get; set; }
+        public string AlbumSelectTitle { get; set; }
+        public string PhotoSelectTitle { get; set; }
+        public string BackButtonTitle { get; set; }
+        public string DoneButtonTitle { get; set; }
+        public string LoadingTitle { get; set; }
+    }
 
-	/// <summary>
-	/// Video quality
-	/// </summary>
-	public enum VideoQuality
+    /// <summary>
+    /// Video quality
+    /// </summary>
+    public enum VideoQuality
     {
         /// <summary>
         /// Low

@@ -12,63 +12,63 @@ namespace Plugin.Media
     /// </summary>
     public static class UIImageExtensions
     {
-		/// <summary>
-		/// Resize image maintain aspect ratio
-		/// </summary>
-		/// <param name="imageSource"></param>
-		/// <param name="scale"></param>
-		/// <returns></returns>
+        /// <summary>
+        /// Resize image maintain aspect ratio
+        /// </summary>
+        /// <param name="imageSource"></param>
+        /// <param name="scale"></param>
+        /// <returns></returns>
         public static UIImage ResizeImageWithAspectRatio(this UIImage imageSource, float scale)
         {
             if (scale > 1.0f)
                 return imageSource;
 
 
-			using var c = CIContext.Create();
-			var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
-			var orientation = imageSource.Orientation;
-			imageSource?.Dispose();
+            using var c = CIContext.Create();
+            var sourceImage = CIImage.FromCGImage(imageSource.CGImage);
+            var orientation = imageSource.Orientation;
+            imageSource?.Dispose();
 
-			CILanczosScaleTransform transform = null;
-			if(UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
-			{
-				transform = new CILanczosScaleTransform
-				{
-					Scale = scale,
-					InputImage = sourceImage,
-					AspectRatio = 1.0f
-				};
-			}
-			else
-			{
-			    transform = new CILanczosScaleTransform
-			    {
-				    Scale = scale,
+            CILanczosScaleTransform transform = null;
+            if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+            {
+                transform = new CILanczosScaleTransform
+                {
+                    Scale = scale,
+                    InputImage = sourceImage,
+                    AspectRatio = 1.0f
+                };
+            }
+            else
+            {
+                transform = new CILanczosScaleTransform
+                {
+                    Scale = scale,
 #pragma warning disable CS0618 // Type or member is obsolete
                     Image = sourceImage,
 #pragma warning restore CS0618 // Type or member is obsolete
                     AspectRatio = 1.0f
-			    };
-			}
+                };
+            }
 
-			var output = transform.OutputImage;
-			using var cgi = c.CreateCGImage(output, output.Extent);
-			transform?.Dispose();
-			output?.Dispose();
-			sourceImage?.Dispose();
+            var output = transform.OutputImage;
+            using var cgi = c.CreateCGImage(output, output.Extent);
+            transform?.Dispose();
+            output?.Dispose();
+            sourceImage?.Dispose();
 
-			return UIImage.FromImage(cgi, 1.0f, orientation);
-		}
+            return UIImage.FromImage(cgi, 1.0f, orientation);
+        }
 
-		/// <summary>
-		/// Resize image to maximum size
-		/// keeping the aspect ratio
-		/// </summary>
-		public static UIImage ResizeImageWithAspectRatio(this UIImage sourceImage, float maxWidth, float maxHeight)
+        /// <summary>
+        /// Resize image to maximum size
+        /// keeping the aspect ratio
+        /// </summary>
+        public static UIImage ResizeImageWithAspectRatio(this UIImage sourceImage, float maxWidth, float maxHeight)
         {
             var sourceSize = sourceImage.Size;
             var maxResizeFactor = Math.Max(maxWidth / sourceSize.Width, maxHeight / sourceSize.Height);
-            if (maxResizeFactor > 1) 
+            if (maxResizeFactor > 1)
                 return sourceImage;
             var width = maxResizeFactor * sourceSize.Width;
             var height = maxResizeFactor * sourceSize.Height;

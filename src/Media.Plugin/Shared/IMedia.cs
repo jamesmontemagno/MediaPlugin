@@ -38,40 +38,40 @@ namespace Plugin.Media.Abstractions
         /// </summary>
         bool IsPickVideoSupported { get; }
 
-		/// <summary>
-		/// Picks a photo from the default gallery
-		/// </summary>
-		/// <param name="token">Cancellation token</param>
-		/// <returns>Media file or null if canceled</returns>
-		Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken));
+        /// <summary>
+        /// Picks a photo from the default gallery
+        /// </summary>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>Media file or null if canceled</returns>
+        Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken));
 
-		/// <summary>
-		/// Picks a photo from the default gallery
-		/// </summary>
-		/// <returns>Media file or null if canceled</returns>
-		Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken));
-	    /// <summary>
-	    /// Take a photo async with specified options
-	    /// </summary>
-	    /// <param name="options">Camera Media Options</param>
-	    /// <param name="token">Cancellation token</param>
-	    /// <returns>Media file of photo or null if canceled</returns>
-	    Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken));
+        /// <summary>
+        /// Picks a photo from the default gallery
+        /// </summary>
+        /// <returns>Media file or null if canceled</returns>
+        Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken));
+        /// <summary>
+        /// Take a photo async with specified options
+        /// </summary>
+        /// <param name="options">Camera Media Options</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>Media file of photo or null if canceled</returns>
+        Task<MediaFile> TakePhotoAsync(StoreCameraMediaOptions options, CancellationToken token = default(CancellationToken));
 
-		/// <summary>
-		/// Picks a video from the default gallery
-		/// </summary>
-		/// <param name="token">Cancellation token</param>
-		/// <returns>Media file of video or null if canceled</returns>
-		Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken));
+        /// <summary>
+        /// Picks a video from the default gallery
+        /// </summary>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>Media file of video or null if canceled</returns>
+        Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken));
 
-		/// <summary>
-		/// Take a video with specified options
-		/// </summary>
-		/// <param name="options">Video Media Options</param>
-		/// <param name="token">Cancellation token</param>
-		/// <returns>Media file of new video or null if canceled</returns>
-		Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken));
+        /// <summary>
+        /// Take a video with specified options
+        /// </summary>
+        /// <param name="options">Video Media Options</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>Media file of new video or null if canceled</returns>
+        Task<MediaFile> TakeVideoAsync(StoreVideoOptions options, CancellationToken token = default(CancellationToken));
 
-	}
+    }
 }

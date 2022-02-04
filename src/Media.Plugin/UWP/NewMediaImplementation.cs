@@ -36,10 +36,10 @@ namespace Plugin.Media
         }
 
         bool initialized = false;
-		/// <summary>
-		/// Initialize camera
-		/// </summary>
-		/// <returns></returns>
+        /// <summary>
+        /// Initialize camera
+        /// </summary>
+        /// <returns></returns>
         public async Task<bool> Initialize()
         {
             if (initialized)
@@ -61,7 +61,7 @@ namespace Plugin.Media
             }
             catch (Exception ex)
             {
-				Debug.WriteLine("Unable to detect cameras: " + ex);
+                Debug.WriteLine("Unable to detect cameras: " + ex);
             }
 
             initialized = true;
@@ -118,9 +118,9 @@ namespace Plugin.Media
             }
             else
                 capture.PhotoSettings.AllowCropping = false;
-			
-			var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
-			if (result == null) return null;
+
+            var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Photo);
+            if (result == null) return null;
 
             if (options.SaveToAlbum) await SaveToAlbum(result, KnownFolders.SavedPictures, options.Directory, options.Name);
 
@@ -132,7 +132,7 @@ namespace Plugin.Media
 
             await ResizeAsync(result, options);
 
-			return MediaFileFromFile(result);
+            return MediaFileFromFile(result);
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Plugin.Media
             var picker = new FileOpenPicker();
             picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             picker.ViewMode = PickerViewMode.Thumbnail;
-           
+
             foreach (var filter in supportedImageFileTypes)
                 picker.FileTypeFilter.Add(filter);
 
@@ -160,39 +160,39 @@ namespace Plugin.Media
                 return MediaFileFromFile(copy);
         }
 
-		public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
-		{
-			var picker = new FileOpenPicker();
-			picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-			picker.ViewMode = PickerViewMode.Thumbnail;
+        public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
+        {
+            var picker = new FileOpenPicker();
+            picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            picker.ViewMode = PickerViewMode.Thumbnail;
 
-			foreach (var filter in supportedImageFileTypes)
-				picker.FileTypeFilter.Add(filter);
+            foreach (var filter in supportedImageFileTypes)
+                picker.FileTypeFilter.Add(filter);
 
-			var result = await picker.PickMultipleFilesAsync();
-			if (result == null)
-				return null;
+            var result = await picker.PickMultipleFilesAsync();
+            if (result == null)
+                return null;
 
-			var ret = new List<MediaFile>();
-			foreach (var file in result)
-			{
+            var ret = new List<MediaFile>();
+            foreach (var file in result)
+            {
                 var copy = await CopyToLocalAndResizeAsync(file, options);
                 if (copy is null)
                     ret.Add(MediaFileFromFile(file));
                 else
                     ret.Add(MediaFileFromFile(copy));
-			}
+            }
 
-			return ret;
-		}
+            return ret;
+        }
 
-		MediaFile MediaFileFromFile(StorageFile file)
-		{
-			var aPath = file.Path;
-			var path = file.Path;
+        MediaFile MediaFileFromFile(StorageFile file)
+        {
+            var aPath = file.Path;
+            var path = file.Path;
 
             return new MediaFile(path, () => file.OpenStreamForReadAsync().Result, albumPath: aPath);
-		}
+        }
 
         async Task SaveToAlbum(StorageFile file, StorageFolder folder, string directory = null, string name = null)
         {
@@ -228,7 +228,7 @@ namespace Plugin.Media
 
         CameraCaptureUIMaxPhotoResolution GetMaxResolution(PhotoSize photoSize, int customPhotoSize, int maxWidthHeight)
         {
-            if(photoSize == PhotoSize.Custom)
+            if (photoSize == PhotoSize.Custom)
             {
                 if (customPhotoSize <= 25)
                     photoSize = PhotoSize.Small;
@@ -239,7 +239,7 @@ namespace Plugin.Media
                 else
                     photoSize = PhotoSize.Large;
             }
-            switch(photoSize)
+            switch (photoSize)
             {
                 case PhotoSize.MaxWidthHeight:
                     return GetMaxResolutionFromMaxWidthHeight(maxWidthHeight);
@@ -251,7 +251,7 @@ namespace Plugin.Media
                     return CameraCaptureUIMaxPhotoResolution.MediumXga;
                 case PhotoSize.Small:
                     return CameraCaptureUIMaxPhotoResolution.SmallVga;
-                
+
             }
 
             return CameraCaptureUIMaxPhotoResolution.HighestAvailable;
@@ -300,11 +300,11 @@ namespace Plugin.Media
             capture.VideoSettings.MaxResolution = GetResolutionFromQuality(options.Quality);
             capture.VideoSettings.AllowTrimming = options?.AllowCropping ?? true;
 
-            if(capture.VideoSettings.AllowTrimming)
+            if (capture.VideoSettings.AllowTrimming)
                 capture.VideoSettings.MaxDurationInSeconds = (float)options.DesiredLength.TotalSeconds;
 
             capture.VideoSettings.Format = CameraCaptureUIVideoFormat.Mp4;
-            
+
             var result = await capture.CaptureFileAsync(CameraCaptureUIMode.Video);
             if (result == null)
                 return null;
@@ -322,17 +322,17 @@ namespace Plugin.Media
         /// <returns>Media file of video or null if canceled</returns>
         public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
         {
-			var picker = new FileOpenPicker()
-			{
-				SuggestedStartLocation = PickerLocationId.VideosLibrary,
-				ViewMode = PickerViewMode.Thumbnail
-			};
+            var picker = new FileOpenPicker()
+            {
+                SuggestedStartLocation = PickerLocationId.VideosLibrary,
+                ViewMode = PickerViewMode.Thumbnail
+            };
 
-			foreach (var filter in supportedVideoFileTypes)
+            foreach (var filter in supportedVideoFileTypes)
                 picker.FileTypeFilter.Add(filter);
 
             var result = await picker.PickSingleFileAsync();
-			if (result == null)
+            if (result == null)
                 return null;
 
             var aPath = result.Path;
@@ -391,55 +391,55 @@ namespace Plugin.Media
                 return CameraCaptureUIMaxPhotoResolution.Large3M;
             else if (maxWidthHeight > 320)
                 return CameraCaptureUIMaxPhotoResolution.MediumXga;
-                
+
             return CameraCaptureUIMaxPhotoResolution.SmallVga;
         }
-        
-		/// <summary>
-		///  Rotate an image if required and saves it back to disk.
-		/// </summary>
-		/// <param name="filePath">The file image path</param>
-		/// <param name="mediaOptions">The options.</param>
-		/// <param name="exif">original metadata</param>
-		/// <returns>True if rotation or compression occured, else false</returns>
-		Task<bool> ResizeAsync(StorageFile file, PickMediaOptions mediaOptions)
-		{
-			return ResizeAsync(
-				file,
+
+        /// <summary>
+        ///  Rotate an image if required and saves it back to disk.
+        /// </summary>
+        /// <param name="filePath">The file image path</param>
+        /// <param name="mediaOptions">The options.</param>
+        /// <param name="exif">original metadata</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        Task<bool> ResizeAsync(StorageFile file, PickMediaOptions mediaOptions)
+        {
+            return ResizeAsync(
+                file,
                 mediaOptions != null
                     ? new StoreCameraMediaOptions
-				        {
-					        PhotoSize = mediaOptions.PhotoSize,
-					        CompressionQuality = mediaOptions.CompressionQuality,
-					        CustomPhotoSize = mediaOptions.CustomPhotoSize,
-					        MaxWidthHeight = mediaOptions.MaxWidthHeight,
-					        RotateImage = mediaOptions.RotateImage,
-					        SaveMetaData = mediaOptions.SaveMetaData
-				        }
+                    {
+                        PhotoSize = mediaOptions.PhotoSize,
+                        CompressionQuality = mediaOptions.CompressionQuality,
+                        CustomPhotoSize = mediaOptions.CustomPhotoSize,
+                        MaxWidthHeight = mediaOptions.MaxWidthHeight,
+                        RotateImage = mediaOptions.RotateImage,
+                        SaveMetaData = mediaOptions.SaveMetaData
+                    }
                     : new StoreCameraMediaOptions());
-		}
+        }
 
-		/// <summary>
-		/// Resize Image Async
-		/// </summary>
-		/// <param name="filePath">The file image path</param>
-		/// <param name="photoSize">Photo size to go to.</param>
-		/// <param name="quality">Image quality (1-100)</param>
-		/// <param name="customPhotoSize">Custom size in percent</param>
-		/// <param name="exif">original metadata</param>
-		/// <returns>True if rotation or compression occured, else false</returns>
-		Task<bool> ResizeAsync(StorageFile file, StoreCameraMediaOptions mediaOptions)
+        /// <summary>
+        /// Resize Image Async
+        /// </summary>
+        /// <param name="filePath">The file image path</param>
+        /// <param name="photoSize">Photo size to go to.</param>
+        /// <param name="quality">Image quality (1-100)</param>
+        /// <param name="customPhotoSize">Custom size in percent</param>
+        /// <param name="exif">original metadata</param>
+        /// <returns>True if rotation or compression occured, else false</returns>
+        Task<bool> ResizeAsync(StorageFile file, StoreCameraMediaOptions mediaOptions)
         {
             if (file is null) throw new ArgumentNullException(nameof(file));
 
             try
             {
-				var photoSize = mediaOptions.PhotoSize;
+                var photoSize = mediaOptions.PhotoSize;
                 if (photoSize == PhotoSize.Full)
                     return Task.FromResult(false);
 
-				var customPhotoSize = mediaOptions.CustomPhotoSize;
-				var quality = mediaOptions.CompressionQuality;
+                var customPhotoSize = mediaOptions.CustomPhotoSize;
+                var quality = mediaOptions.CompressionQuality;
                 return Task.Run(async () =>
                 {
                     try
@@ -502,7 +502,7 @@ namespace Plugin.Media
                                 const int WINCODEC_ERR_UNSUPPORTEDOPERATION = unchecked((int)0x88982F81);
                                 switch (err.HResult)
                                 {
-                                    case WINCODEC_ERR_UNSUPPORTEDOPERATION: 
+                                    case WINCODEC_ERR_UNSUPPORTEDOPERATION:
                                         // If the encoder does not support writing a thumbnail, then try again
                                         // but disable thumbnail generation.
                                         encoder.IsThumbnailGenerated = false;
@@ -543,10 +543,10 @@ namespace Plugin.Media
 
         void OnDeviceUpdated(DeviceWatcher sender, DeviceInformationUpdate update)
         {
-			if (!update.Properties.TryGetValue("System.Devices.InterfaceEnabled", out var value))
-				return;
+            if (!update.Properties.TryGetValue("System.Devices.InterfaceEnabled", out var value))
+                return;
 
-			lock (devices)
+            lock (devices)
             {
                 if ((bool)value)
                     devices.Add(update.Id);

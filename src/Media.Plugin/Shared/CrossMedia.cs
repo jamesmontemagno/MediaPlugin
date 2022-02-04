@@ -55,24 +55,24 @@ namespace Plugin.Media
 #endif
 
         public static void SetFlags(params string[] flags)
-		{
-			if (FlagsSet)
-			{
-				// Don't try to set the flags again if they've already been set
-				// (e.g., during a configuration change where OnCreate runs again)
-				return;
-			}
+        {
+            if (FlagsSet)
+            {
+                // Don't try to set the flags again if they've already been set
+                // (e.g., during a configuration change where OnCreate runs again)
+                return;
+            }
 
 #if NETSTANDARD1_0
             CrossMedia.flags = flags.ToList();
 #else
             CrossMedia.flags = flags.ToList().AsReadOnly();
 #endif
-			FlagsSet = true;
-		}
+            FlagsSet = true;
+        }
 
         internal static Exception NotImplementedInReferenceAssembly() =>
             new NotImplementedException("This functionality is not implemented in the portable version of this assembly.  You should reference the NuGet package from your main application project in order to reference the platform-specific implementation.");
-        
+
     }
 }
