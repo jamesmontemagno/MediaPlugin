@@ -293,7 +293,7 @@ namespace Plugin.Media
 
         internal static Task<MediaPickedEventArgs> GetMediaFileAsync(Context context, int requestCode, string action, bool isPhoto, ref Uri path, Uri data, bool saveToAlbum)
         {
-            Task<Tuple<string, bool>> pathFuture;
+            Task<Tuple<string, string, bool>> pathFuture;
 
             string originalPath = null;
 
@@ -309,12 +309,13 @@ namespace Plugin.Media
                 {
                     originalPath = data.ToString();
                     var currentPath = path.Path;
+                    var originalFilename = Path.GetFileName(currentPath);
                     pathFuture = TryMoveFileAsync(context, data, path, isPhoto, false).ContinueWith(t =>
-                        new Tuple<string, bool>(t.Result ? currentPath : null, false));
+                        new Tuple<string, string, bool>(t.Result ? currentPath : null, t.Result ? originalFilename : null, false));
                 }
                 else
                 {
-                    pathFuture = TaskFromResult(new Tuple<string, bool>(path.Path, false));
+                    pathFuture = TaskFromResult(new Tuple<string, string, bool>(path.Path, Path.GetFileName(path.Path), false));
                    
                 }
             }
@@ -325,19 +326,20 @@ namespace Plugin.Media
                 pathFuture = GetFileForUriAsync(context, path, isPhoto, false);
             }
             else
-                pathFuture = TaskFromResult<Tuple<string, bool>>(null);
+                pathFuture = TaskFromResult<Tuple<string, string, bool>>(null);
 
             return pathFuture.ContinueWith(t =>
             {
                 
                 var resultPath = t?.Result?.Item1;
+                var originalFilename = t?.Result?.Item2;
                 var aPath = originalPath;
                 if (resultPath != null && File.Exists(resultPath))
                 {
                     var mf = new MediaFile(resultPath, () =>
                       {
                           return File.OpenRead(resultPath);
-                      }, albumPath: aPath);
+                      }, albumPath: aPath, originalFilename: originalFilename);
                     return new MediaPickedEventArgs(requestCode, false, mf);
                 }
                 else
@@ -574,12 +576,16 @@ namespace Plugin.Media
             return uri;
         }
 
-        internal static Task<Tuple<string, bool>> GetFileForUriAsync(Context context, Uri uri, bool isPhoto, bool saveToAlbum)
+        internal static Task<Tuple<string, string, bool>> GetFileForUriAsync(Context context, Uri uri, bool isPhoto, bool saveToAlbum)
         {
-            var tcs = new TaskCompletionSource<Tuple<string, bool>>();
+            var tcs = new TaskCompletionSource<Tuple<string, string, bool>>();
 
             if (uri.Scheme == "file")
-                tcs.SetResult(new Tuple<string, bool>(new System.Uri(uri.ToString()).LocalPath, false));
+            {
+                var path = new System.Uri(uri.ToString()).LocalPath;
+                var originalFilename = Path.GetFileName(path);
+                tcs.SetResult(new Tuple<string, string, bool>(path, originalFilename, false));
+            }
             else if (uri.Scheme == "content")
             {
                 Task.Factory.StartNew(() =>
@@ -593,7 +599,7 @@ namespace Plugin.Media
 
                         cursor = context.ContentResolver.Query(uri, proj, null, null, null);
                         if (cursor == null || !cursor.MoveToNext())
-                            tcs.SetResult(new Tuple<string, bool>(null, false));
+                            tcs.SetResult(new Tuple<string, string, bool>(null, null, false));
                         else
                         {
                             var column = cursor.GetColumnIndex(MediaStore.MediaColumns.Data);
@@ -602,7 +608,7 @@ namespace Plugin.Media
                             if (column != -1)
                                 contentPath = cursor.GetString(column);
 
-
+                            string originalFilename = null;
 
                             // If they don't follow the "rules", try to copy the file locally
 							if (contentPath == null || !contentPath.StartsWith("file", StringComparison.InvariantCultureIgnoreCase))
@@ -611,6 +617,7 @@ namespace Plugin.Media
 								try
 								{
 									fileName = Path.GetFileName(contentPath);
+                                    originalFilename = fileName;
 								}
 								catch(Exception ex)
 								{ 
@@ -636,8 +643,12 @@ namespace Plugin.Media
 									System.Diagnostics.Debug.WriteLine("Unable to save picked file from disk " + fnfEx);
                                 }
                             }
+                            else
+                            {
+                                originalFilename = Path.GetFileName(contentPath);
+                            }
 
-                            tcs.SetResult(new Tuple<string, bool>(contentPath, false));
+                            tcs.SetResult(new Tuple<string, string, bool>(contentPath, originalFilename, false));
                         }
                     }
                     finally
@@ -651,7 +662,7 @@ namespace Plugin.Media
                 }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
             }
             else
-                tcs.SetResult(new Tuple<string, bool>(null, false));
+                tcs.SetResult(new Tuple<string, string, bool>(null, null, false));
 
             return tcs.Task;
         }
