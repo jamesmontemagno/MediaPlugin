@@ -293,7 +293,7 @@ namespace Plugin.Media
 
         internal static Task<MediaPickedEventArgs> GetMediaFileAsync(Context context, int requestCode, string action, bool isPhoto, ref Uri path, Uri data, bool saveToAlbum)
         {
-            Task<Tuple<string, bool>> pathFuture;
+            Task<Tuple<string, string, bool>> pathFuture;
 
             string originalPath = null;
 
@@ -309,12 +309,13 @@ namespace Plugin.Media
                 {
                     originalPath = data.ToString();
                     var currentPath = path.Path;
+                    var originalFilename = Path.GetFileName(currentPath);
                     pathFuture = TryMoveFileAsync(context, data, path, isPhoto, false).ContinueWith(t =>
-                        new Tuple<string, bool>(t.Result ? currentPath : null, false));
+                        new Tuple<string, string, bool>(t.Result ? currentPath : null, t.Result ? originalFilename : null, false));
                 }
                 else
                 {
-                    pathFuture = TaskFromResult(new Tuple<string, bool>(path.Path, false));
+                    pathFuture = TaskFromResult(new Tuple<string, string, bool>(path.Path, Path.GetFileName(path.Path), false));
                    
                 }
             }
@@ -325,19 +326,20 @@ namespace Plugin.Media
                 pathFuture = GetFileForUriAsync(context, path, isPhoto, false);
             }
             else
-                pathFuture = TaskFromResult<Tuple<string, bool>>(null);
+                pathFuture = TaskFromResult<Tuple<string, string, bool>>(null);
 
             return pathFuture.ContinueWith(t =>
             {
                 
                 var resultPath = t?.Result?.Item1;
+                var originalFilename = t?.Result?.Item2;
                 var aPath = originalPath;
                 if (resultPath != null && File.Exists(resultPath))
                 {
                     var mf = new MediaFile(resultPath, () =>
                       {
                           return File.OpenRead(resultPath);
-                      }, albumPath: aPath);
+                      }, albumPath: aPath, originalFilename: originalFilename);
                     return new MediaPickedEventArgs(requestCode, false, mf);
                 }
                 else
@@ -499,18 +501,19 @@ namespace Plugin.Media
             return Path.Combine(folder, nname);
         }
 
-		/// <summary>
-		/// Try go get output file
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="subdir"></param>
-		/// <param name="name"></param>
-		/// <param name="isPhoto"></param>
-		/// <param name="saveToAlbum"></param>
-		/// <returns></returns>
+        /// <summary>
+        /// Try go get output file
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="subdir"></param>
+        /// <param name="name"></param>
+        /// <param name="isPhoto"></param>
+        /// <param name="saveToAlbum"></param>
+        /// <returns></returns>
         public static Uri GetOutputMediaFile(Context context, string subdir, string name, bool isPhoto, bool saveToAlbum)
         {
             subdir = subdir ?? string.Empty;
+            Uri uri;
 
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -521,14 +524,37 @@ namespace Plugin.Media
                     name = "VID_" + timestamp + ".mp4";
             }
 
-            var mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
-            var directory = saveToAlbum ? Environment.GetExternalStoragePublicDirectory(mediaType) : context.GetExternalFilesDir(mediaType);
-            using (var mediaStorageDir = new Java.IO.File(directory, subdir))
+            if ((int)Build.VERSION.SdkInt < 29)
             {
-                if (!mediaStorageDir.Exists())
+                var mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
+                var directory = saveToAlbum ? Environment.GetExternalStoragePublicDirectory(mediaType) : context.GetExternalFilesDir(mediaType);
+
+                using (var mediaStorageDir = new Java.IO.File(directory, subdir))
                 {
-                    if (!mediaStorageDir.Mkdirs())
-                        throw new IOException("Couldn't create directory, have you added the WRITE_EXTERNAL_STORAGE permission?");
+                    if (!mediaStorageDir.Exists())
+                    {
+                        if (!mediaStorageDir.Mkdirs())
+                            throw new IOException("Couldn't create directory, have you added the WRITE_EXTERNAL_STORAGE permission?");
+
+                        if (!saveToAlbum)
+                        {
+                            // Ensure this media doesn't show up in gallery apps
+                            using (var nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
+                                nomedia.CreateNewFile();
+                        }
+                    }
+
+                    uri = Uri.FromFile(new Java.IO.File(GetUniquePath(mediaStorageDir.Path, name, isPhoto)));
+                }
+            }
+            else
+            {
+                var mediaType = (isPhoto) ? Environment.DirectoryPictures : Environment.DirectoryMovies;
+                var directory = context.GetExternalFilesDir(mediaType);
+
+                using (var mediaStorageDir = new Java.IO.File(directory, subdir))
+                {
+                    mediaStorageDir.Mkdirs();
 
                     if (!saveToAlbum)
                     {
@@ -536,18 +562,30 @@ namespace Plugin.Media
                         using (var nomedia = new Java.IO.File(mediaStorageDir, ".nomedia"))
                             nomedia.CreateNewFile();
                     }
+
+                    uri = Uri.FromFile(new Java.IO.File(GetUniquePath(mediaStorageDir.Path, name, isPhoto)));
                 }
 
-                return Uri.FromFile(new Java.IO.File(GetUniquePath(mediaStorageDir.Path, name, isPhoto)));
+                if (saveToAlbum)
+                {
+                    uri = (isPhoto) ? MediaStore.Images.Media.ExternalContentUri : MediaStore.Video.Media.ExternalContentUri;
+                    uri = Uri.WithAppendedPath(uri, name);
+                }
             }
+
+            return uri;
         }
 
-        internal static Task<Tuple<string, bool>> GetFileForUriAsync(Context context, Uri uri, bool isPhoto, bool saveToAlbum)
+        internal static Task<Tuple<string, string, bool>> GetFileForUriAsync(Context context, Uri uri, bool isPhoto, bool saveToAlbum)
         {
-            var tcs = new TaskCompletionSource<Tuple<string, bool>>();
+            var tcs = new TaskCompletionSource<Tuple<string, string, bool>>();
 
             if (uri.Scheme == "file")
-                tcs.SetResult(new Tuple<string, bool>(new System.Uri(uri.ToString()).LocalPath, false));
+            {
+                var path = new System.Uri(uri.ToString()).LocalPath;
+                var originalFilename = Path.GetFileName(path);
+                tcs.SetResult(new Tuple<string, string, bool>(path, originalFilename, false));
+            }
             else if (uri.Scheme == "content")
             {
                 Task.Factory.StartNew(() =>
@@ -561,7 +599,7 @@ namespace Plugin.Media
 
                         cursor = context.ContentResolver.Query(uri, proj, null, null, null);
                         if (cursor == null || !cursor.MoveToNext())
-                            tcs.SetResult(new Tuple<string, bool>(null, false));
+                            tcs.SetResult(new Tuple<string, string, bool>(null, null, false));
                         else
                         {
                             var column = cursor.GetColumnIndex(MediaStore.MediaColumns.Data);
@@ -570,7 +608,7 @@ namespace Plugin.Media
                             if (column != -1)
                                 contentPath = cursor.GetString(column);
 
-
+                            string originalFilename = null;
 
                             // If they don't follow the "rules", try to copy the file locally
 							if (contentPath == null || !contentPath.StartsWith("file", StringComparison.InvariantCultureIgnoreCase))
@@ -579,6 +617,7 @@ namespace Plugin.Media
 								try
 								{
 									fileName = Path.GetFileName(contentPath);
+                                    originalFilename = fileName;
 								}
 								catch(Exception ex)
 								{ 
@@ -604,8 +643,12 @@ namespace Plugin.Media
 									System.Diagnostics.Debug.WriteLine("Unable to save picked file from disk " + fnfEx);
                                 }
                             }
+                            else
+                            {
+                                originalFilename = Path.GetFileName(contentPath);
+                            }
 
-                            tcs.SetResult(new Tuple<string, bool>(contentPath, false));
+                            tcs.SetResult(new Tuple<string, string, bool>(contentPath, originalFilename, false));
                         }
                     }
                     finally
@@ -619,7 +662,7 @@ namespace Plugin.Media
                 }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
             }
             else
-                tcs.SetResult(new Tuple<string, bool>(null, false));
+                tcs.SetResult(new Tuple<string, string, bool>(null, null, false));
 
             return tcs.Task;
         }
