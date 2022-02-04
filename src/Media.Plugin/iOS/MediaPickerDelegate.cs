@@ -191,12 +191,25 @@ namespace Plugin.Media
 
 		void RemoveOrientationChangeObserverAndNotifications()
 		{
-			if (viewController != null)
-			{
-				UIDevice.CurrentDevice.EndGeneratingDeviceOrientationNotifications();
-				NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
-				observer.Dispose();
-			}
+            if (viewController == null)
+                return;
+
+			
+			UIDevice.CurrentDevice.EndGeneratingDeviceOrientationNotifications();
+
+            if(observer != null)
+            {
+                try
+                {
+                    NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+
+            }
+			observer?.Dispose();			
 		}
 
 		void DidRotate(NSNotification notice)
