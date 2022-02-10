@@ -212,6 +212,7 @@ namespace Plugin.Media
 
             }
             observer?.Dispose();
+            observer = null;
         }
 
         void DidRotate(NSNotification notice)
