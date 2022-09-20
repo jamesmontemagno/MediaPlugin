@@ -90,10 +90,6 @@ namespace Plugin.Media
         /// <returns>Media file or null if canceled</returns>
         public async Task<MediaFile> PickPhotoAsync(PickMediaOptions options = null, CancellationToken token = default(CancellationToken))
         {
-            if (!(await RequestStoragePermission()))
-            {
-                throw new MediaPermissionException(nameof(StoragePermission));
-            }
             var media = await TakeMediaAsync("image/*", Intent.ActionPick, null, token);
 
             if (options == null)
@@ -117,11 +113,6 @@ namespace Plugin.Media
 
         public async Task<List<MediaFile>> PickPhotosAsync(PickMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
         {
-            if (!await RequestStoragePermission())
-            {
-                return null;
-            }
-
             var medias = await TakeMediasAsync("image/*", Intent.ActionPick, new StorePickerMediaOptions { MultiPicker = true }, token);
 
             if (medias == null)
@@ -274,11 +265,6 @@ namespace Plugin.Media
         public async Task<MediaFile> PickVideoAsync(CancellationToken token = default(CancellationToken))
         {
 
-            if (!(await RequestStoragePermission()))
-            {
-                throw new MediaPermissionException(nameof(StoragePermission));
-            }
-
             return await TakeMediaAsync("video/*", Intent.ActionPick, null, token);
         }
 
@@ -318,8 +304,6 @@ namespace Plugin.Media
 
             var checkCamera = HasPermissionInManifest(Android.Manifest.Permission.Camera);
 
-            var hasStoragePermission = await Permissions.CheckStatusAsync<StoragePermission>();
-
             var hasCameraPermission = PermissionStatus.Granted;
             if (checkCamera)
                 hasCameraPermission = await Permissions.CheckStatusAsync<Permissions.Camera>();
@@ -328,14 +312,11 @@ namespace Plugin.Media
             var permissions = new List<string>();
 
             var camera = nameof(Permissions.Camera);
-            var storage = nameof(StoragePermission);
 
 
             if (hasCameraPermission != PermissionStatus.Granted)
                 permissions.Add(camera);
 
-            if (hasStoragePermission != PermissionStatus.Granted)
-                permissions.Add(storage);
 
             if (permissions.Count == 0) //good to go!
                 return true;
@@ -348,17 +329,7 @@ namespace Plugin.Media
                     case nameof(Permissions.Camera):
                         results.Add(permission, await Permissions.RequestAsync<Permissions.Camera>());
                         break;
-                    case nameof(StoragePermission):
-                        results.Add(permission, await Permissions.RequestAsync<StoragePermission>());
-                        break;
                 }
-            }
-
-            if (results.ContainsKey(storage) &&
-                    results[storage] != PermissionStatus.Granted)
-            {
-                Console.WriteLine("Storage permission Denied.");
-                return false;
             }
 
             if (results.ContainsKey(camera) &&
@@ -371,26 +342,6 @@ namespace Plugin.Media
             return true;
         }
 
-        async Task<bool> RequestStoragePermission()
-        {
-            //We always have permission on anything lower than marshmallow.
-            if ((int)Build.VERSION.SdkInt < 23)
-                return true;
-
-            var status = await Permissions.CheckStatusAsync<StoragePermission>();
-            if (status != PermissionStatus.Granted)
-            {
-                Console.WriteLine("Does not have storage permission granted, requesting.");
-                var result = await Permissions.RequestAsync<StoragePermission>();
-                if (result != PermissionStatus.Granted)
-                {
-                    Console.WriteLine("Storage permission Denied.");
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         IList<string> requestedPermissions;
         bool HasPermissionInManifest(string permission)
