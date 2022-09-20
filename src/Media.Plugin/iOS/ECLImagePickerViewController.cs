@@ -1,5 +1,7 @@
 ﻿// Based off the ELCImagePicker implementation from https://github.com/bjdodson/XamarinSharpPlus
 
+#if MACCATALYST
+#else
 using AssetsLibrary;
 using CoreGraphics;
 using Foundation;
@@ -12,6 +14,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UIKit;
+#if NET6_0_OR_GREATER
+using System.Runtime.InteropServices;
+#endif
 
 namespace Plugin.Media
 {
@@ -427,10 +432,11 @@ namespace Plugin.Media
                 NavigationController.PushViewController(picker, true);
             }
 
-            public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath)
-            {
-                return 57;
-            }
+#if NET6_0_OR_GREATER
+            public override NFloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath) => 57;
+#else
+            public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath) => 57;
+#endif
         }
 
 
@@ -518,7 +524,7 @@ namespace Plugin.Media
                 }
             }
 
-            #region UICollectionViewDelegate
+#region UICollectionViewDelegate
 
             public override bool ShouldSelectItem(UICollectionView collectionView, NSIndexPath indexPath)
             {
@@ -539,9 +545,9 @@ namespace Plugin.Media
 
             public override void ItemDeselected(UICollectionView collectionView, NSIndexPath indexPath) => AssetSelected(indexPath, false);
 
-            #endregion
+#endregion
 
-            #region UICollectionViewDataSource
+#region UICollectionViewDataSource
 
             public override nint NumberOfSections(UICollectionView collectionView) => 1;
             public override nint GetItemsCount(UICollectionView collectionView, nint section) => assets.Count;
@@ -553,9 +559,9 @@ namespace Plugin.Media
                 return cell;
             }
 
-            #endregion
+#endregion
 
-            #region Not interested in
+#region Not interested in
 
             ALAsset AssetForIndexPath(NSIndexPath path) => assets[path.Row];
 
@@ -780,7 +786,9 @@ namespace Plugin.Media
                 }
             }
 
-            #endregion
+#endregion
         }
     }
 }
+
+#endif

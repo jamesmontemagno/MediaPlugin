@@ -1,6 +1,10 @@
 ﻿using System;
 using CoreGraphics;
 using UIKit;
+#if NET6_0_OR_GREATER
+using System.Runtime.InteropServices;
+#endif
+
 
 namespace Plugin.Media
 {
@@ -60,7 +64,11 @@ namespace Plugin.Media
             // Shadow Declarations
             var shadow2 = UIColor.Brown;
             var shadow2Offset = new CGSize(0.1, -0.1);
+#if NET6_0_OR_GREATER
+            NFloat shadow2BlurRadius = 2.5f;
+#else
             nfloat shadow2BlurRadius = 2.5f;
+#endif
 
             var frame = Bounds;
 
@@ -102,7 +110,11 @@ namespace Plugin.Media
             // Shadow Declarations
             var shadow2 = UIColor.Black;
             var shadow2Offset = new CGSize(0.1, -0.1);
+#if NET6_0_OR_GREATER
+            NFloat shadow2BlurRadius = 2.5f;
+#else
             nfloat shadow2BlurRadius = 2.5f;
+#endif
 
             var frame = Bounds;
 
@@ -139,10 +151,18 @@ namespace Plugin.Media
             // Shadow Declarations
             var shadow = UIColor.Black;
             var shadowOffset = new CGSize(0.1, -0.1);
+#if NET6_0_OR_GREATER
+            NFloat shadowBlurRadius = 0.5f;
+#else
             nfloat shadowBlurRadius = 0.5f;
+#endif
             var shadow2 = UIColor.Black;
             var shadow2Offset = new CGSize(0.1, -0.1);
+#if NET6_0_OR_GREATER
+            NFloat shadow2BlurRadius = 2.5f;
+#else
             nfloat shadow2BlurRadius = 2.5f;
+#endif
 
             var frame = Bounds;
 

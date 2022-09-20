@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+#if !MACCATALYST
+using System;
 using CoreImage;
 using Foundation;
 using Photos;
@@ -11,6 +13,7 @@ namespace Plugin.Media
     /// </summary>
     public static class PhotoLibraryAccess
     {
+
         /// <summary>
         /// 
         /// </summary>
@@ -99,3 +102,4 @@ namespace Plugin.Media
         }
     }
 }
+#endif

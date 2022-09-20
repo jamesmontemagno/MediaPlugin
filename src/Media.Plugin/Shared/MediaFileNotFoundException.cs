@@ -5,7 +5,7 @@ namespace Plugin.Media.Abstractions
     /// <summary>
     /// 
     /// </summary>
-#if !NETSTANDARD1_0
+#if !NETSTANDARD
     [Serializable]
 #endif
     public class MediaFileNotFoundException : Exception

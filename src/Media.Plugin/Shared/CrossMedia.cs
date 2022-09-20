@@ -35,9 +35,9 @@ namespace Plugin.Media
 
         static IMedia CreateMedia()
         {
-#if NETSTANDARD1_0 || NETSTANDARD2_0
+#if NETSTANDARD
             return null;
-#elif UWP
+#elif UWP || WINDOWS
             return Flags.Contains(FeatureFlags.UwpUseNewMediaImplementation)
                 ? (IMedia)new NewMediaImplementation()
                 : new MediaImplementation();

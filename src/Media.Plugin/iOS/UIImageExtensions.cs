@@ -41,6 +41,10 @@ namespace Plugin.Media
             }
             else
             {
+#if NET6_0_OR_GREATER
+
+                return imageSource;
+#else
                 transform = new CILanczosScaleTransform
                 {
                     Scale = scale,
@@ -49,6 +53,7 @@ namespace Plugin.Media
 #pragma warning restore CS0618 // Type or member is obsolete
                     AspectRatio = 1.0f
                 };
+#endif
             }
 
             var output = transform.OutputImage;

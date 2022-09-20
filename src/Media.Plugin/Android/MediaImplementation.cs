@@ -13,9 +13,13 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Linq;
 using Android.App;
+#if NET6_0_OR_GREATER
+using Permissions = Microsoft.Maui.ApplicationModel.Permissions;
+using PermissionStatus = Microsoft.Maui.ApplicationModel.PermissionStatus;
+#else
 using Permissions = Xamarin.Essentials.Permissions;
 using PermissionStatus = Xamarin.Essentials.PermissionStatus;
-
+#endif
 namespace Plugin.Media
 {
     /// <summary>
@@ -217,7 +221,7 @@ namespace Plugin.Media
                     var albumUri = cr.Insert(MediaStore.Images.Media.ExternalContentUri, values);
 
                     using (System.IO.Stream input = File.OpenRead(media.Path))
-                    using (System.IO.Stream output = cr.OpenOutputStream(albumUri))
+                    using (var output = cr.OpenOutputStream(albumUri))
                         input.CopyTo(output);
                 }
                 catch (Exception ex)
@@ -290,7 +294,7 @@ namespace Plugin.Media
 
             if (!(await RequestCameraPermissions()))
             {
-                throw new MediaPermissionException(nameof(Xamarin.Essentials.Permissions.Camera));
+                throw new MediaPermissionException(nameof(Permissions.Camera));
             }
 
             VerifyOptions(options);
@@ -397,7 +401,12 @@ namespace Plugin.Media
                     return requestedPermissions.Any(r => r.Equals(permission, StringComparison.InvariantCultureIgnoreCase));
 
                 //try to use current activity else application context
+#if NET6_0_OR_GREATER
+                var permissionContext = Microsoft.Maui.ApplicationModel.Platform.CurrentActivity ?? Application.Context;
+#else
                 var permissionContext = Xamarin.Essentials.Platform.CurrentActivity ?? Application.Context;
+#endif
+
 
                 if (context == null)
                 {

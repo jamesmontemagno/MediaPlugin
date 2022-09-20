@@ -1,7 +1,8 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
-  <PropertyGroup>
-    <TargetFrameworks>netstandard1.0;netstandard2.0;MonoAndroid10.0;Xamarin.iOS10;uap10.0.19041;Tizen40</TargetFrameworks>
-    <AssemblyName>Plugin.Media</AssemblyName>
+﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
+	<PropertyGroup>			
+		<TargetFrameworks>netstandard2.0;MonoAndroid10.0;Xamarin.iOS10;net6.0-android;net6.0-ios;net6.0-maccatalyst;Tizen40</TargetFrameworks>
+		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.19041;net6.0-windows10.0.19041;</TargetFrameworks>
+		<AssemblyName>Plugin.Media</AssemblyName>
     <RootNamespace>Plugin.Media</RootNamespace>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
@@ -9,35 +10,30 @@
     <Version>1.0.0.0</Version>
     <Authors>James Montemagno</Authors>
     <PackageId>Xam.Plugin.Media</PackageId>
-    <LangVersion>8.0</LangVersion>
     <PackOnBuild>true</PackOnBuild>
     <PackageIconUrl>http://www.refractored.com/images/plugin_icon_media.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/jamesmontemagno/MediaPlugin/blob/master/LICENSE</PackageLicenseUrl>
     <Owners>JamesMontemagno</Owners>
     <PackageProjectUrl>https://github.com/jamesmontemagno/MediaPlugin</PackageProjectUrl>
     <Summary>Take or pick photos and videos from a cross platform API.</Summary>
-    <PackageTags>xamarin, pcl, xam.pcl, media, photo, video, plugin, plugin for xamarin, windows phone, winphone, wp8, winrt, android, xamarin.forms, ios</PackageTags>
-    <Title>Media Plugin for Xamarin and Windows</Title>
+    <PackageTags>xamarin, pcl, xam.pcl, dotnet maui, .net maui, .net 6, media, photo, video, plugin, plugin for xamarin, windows phone, winphone, wp8, winrt, android, xamarin.forms, ios</PackageTags>
+    <Title>Media Plugin for .NET 6, .NET MAUI, Xamarin, and Windows</Title>
     <Description>
       Take or pick photos and videos from a cross platform API.
     </Description>
     <Copyright>Copyright 2022</Copyright>
     <RepositoryUrl>https://github.com/jamesmontemagno/MediaPlugin</RepositoryUrl>
     <PackageReleaseNotes>See: https://github.com/jamesmontemagno/MediaPlugin </PackageReleaseNotes>
-
     <NeutralLanguage>en</NeutralLanguage>
-    <LangVersion>default</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <DebugType>portable</DebugType>
-    <DefineConstants>$(DefineConstants);</DefineConstants>
-
-
-    <!--When built in 2019 will remove extra references on pack-->
-    <DisableExtraReferences>false</DisableExtraReferences>
-
+    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+    <DefineConstants>$(DefineConstants);UWP</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" $(TargetFramework.Contains('-windows')) ">
     <DefineConstants>$(DefineConstants);UWP</DefineConstants>
   </PropertyGroup>
 
@@ -45,6 +41,8 @@
     <DebugSymbols>true</DebugSymbols>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
+  
+  
   <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
@@ -54,13 +52,30 @@
     <!-- sourcelink: Include PDB in the built .nupkg -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
+  
+  
   <ItemGroup Condition=" '$(Configuration)'=='Release' ">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
+
+  	<!-- platform version number information -->
+	<PropertyGroup>
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-ios'))">10.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-tvos'))">10.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-maccatalyst'))">13.1</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-macos'))">10.14</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-windows10'))">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$(TargetFramework.Contains('-windows10'))">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('uap10.0')) ">
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
 
   <ItemGroup>
     <None Include="..\..\nuget\readme.txt" PackagePath="readme.txt" Pack="true" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
     <Compile Include="**\Shared\*.cs" />
   </ItemGroup>
 
@@ -71,15 +86,51 @@
     <Compile Include="**\UWP\*.cs" />
   </ItemGroup>
 
+  <PropertyGroup Condition=" $(TargetFramework.Contains('-windows')) ">
+  </PropertyGroup>
+
+
+  <ItemGroup Condition=" $(TargetFramework.Contains('-windows')) ">
+    <Compile Include="**\UWP\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.Contains('-android')) ">
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.8.0.1" />
+    <Compile Include="**\Android\*.cs" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" $(TargetFramework.Contains('-android')) ">
+    <UseMauiEssentials>true</UseMauiEssentials>
+  </PropertyGroup>
+
   <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.6.0.1" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.7.0.2" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
     <Compile Include="**\Android\*.cs" />
   </ItemGroup>
 
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('Xamarin.iOS')) ">
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
     <Compile Include="**\iOS\*.cs" />
   </ItemGroup>
+
+   <ItemGroup Condition=" $(TargetFramework.Contains('-ios')) ">
+    <Compile Include="**\iOS\*.cs" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" $(TargetFramework.Contains('-ios')) ">
+    <UseMauiEssentials>true</UseMauiEssentials>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" $(TargetFramework.Contains('-mac')) ">
+    <UseMauiEssentials>true</UseMauiEssentials>
+  </PropertyGroup>
+
+   <ItemGroup Condition=" $(TargetFramework.Contains('-mac')) ">
+    <Compile Include="**\iOS\*.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition=" $(TargetFramework.StartsWith('Tizen')) ">
     <Compile Include="**\Tizen\*.cs" />
     <PackageReference Include="Tizen.NET" Version="4.0.0">

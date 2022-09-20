@@ -9,8 +9,14 @@ using UIKit;
 using Foundation;
 
 using System.Collections.Generic;
+
+#if NET6_0_OR_GREATER
+using Permissions = Microsoft.Maui.ApplicationModel.Permissions;
+using PermissionStatus = Microsoft.Maui.ApplicationModel.PermissionStatus;
+#else
 using Permissions = Xamarin.Essentials.Permissions;
 using PermissionStatus = Xamarin.Essentials.PermissionStatus;
+#endif
 
 namespace Plugin.Media
 {
@@ -337,8 +343,12 @@ namespace Plugin.Media
 
         Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))
         {
-            var viewController = GetHostViewController();
 
+#if MACCATALYST
+            return Task.FromResult(new List<MediaFile>());
+#else
+            var viewController = GetHostViewController();
+            
             if (options == null)
                 options = new StoreCameraMediaOptions();
 
@@ -386,6 +396,8 @@ namespace Plugin.Media
 
                 return t;
             }).Unwrap();
+
+#endif
         }
 
         static void ResizeAndCompressImage(StoreCameraMediaOptions options, MediaFile mediaFile, string pathExtension)
@@ -437,7 +449,9 @@ namespace Plugin.Media
             {
                 try
                 {
+#if !MACCATALYST
                     meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(new NSUrl(mediaFile.AlbumPath));
+#endif
                 }
                 catch (Exception ex)
                 {
