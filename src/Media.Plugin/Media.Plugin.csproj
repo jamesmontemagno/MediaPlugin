@@ -1,6 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/3.0.44">
 	<PropertyGroup>			
-		<TargetFrameworks>netstandard2.0;MonoAndroid12.0;Xamarin.iOS10;net6.0-android;net6.0-ios;net6.0-maccatalyst;Tizen40</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;MonoAndroid10.0;Xamarin.iOS10;net6.0-android;net6.0-ios;net6.0-maccatalyst;Tizen40</TargetFrameworks>
 		<TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0.19041;net6.0-windows10.0.19041;</TargetFrameworks>
 		<AssemblyName>Plugin.Media</AssemblyName>
     <RootNamespace>Plugin.Media</RootNamespace>
@@ -104,7 +104,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
-    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.8.0.1" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.7.0.2" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
     <Compile Include="**\Android\*.cs" />
   </ItemGroup>
