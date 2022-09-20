@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Plugin.Media.Abstractions;
 
 using CoreGraphics;
+#if !MACCATALYST
 using AssetsLibrary;
+#endif
 using Foundation;
 using UIKit;
 using NSAction = System.Action;
@@ -389,7 +391,11 @@ namespace Plugin.Media
                     {
                         var url = info[UIImagePickerController.ReferenceUrl] as NSUrl;
                         if (url != null)
+                        {
+#if !MACCATALYST
                             meta = PhotoLibraryAccess.GetPhotoLibraryMetadata(url);
+#endif
+                        }
                     }
                 }
 
@@ -441,9 +447,11 @@ namespace Plugin.Media
                 {
                     try
                     {
+#if !MACCATALYST
                         var library = new ALAssetsLibrary();
                         var albumSave = await library.WriteImageToSavedPhotosAlbumAsync(cgImage, meta);
                         aPath = albumSave.AbsoluteString;
+#endif
                     }
                     catch (Exception ex)
                     {
@@ -670,9 +678,11 @@ namespace Plugin.Media
                 {
                     try
                     {
+#if !MACCATALYST
                         var library = new ALAssetsLibrary();
                         var albumSave = await library.WriteVideoToSavedPhotosAlbumAsync(new NSUrl(path));
                         aPath = albumSave.AbsoluteString;
+#endif
                     }
                     catch (Exception ex)
                     {

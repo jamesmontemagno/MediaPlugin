@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using static Xamarin.Essentials.Permissions;
 
 namespace Plugin.Media.Abstractions
 {

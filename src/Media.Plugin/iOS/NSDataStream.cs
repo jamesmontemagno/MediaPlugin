@@ -36,7 +36,11 @@ namespace Plugin.Media
             else
             {
                 var len = (int)Math.Min(count, (double)(theData.Length - pos));
+#if NET6_0_OR_GREATER
+                Marshal.Copy(new IntPtr(Convert.ToInt64(theData.Bytes) + pos), buffer, offset, len);
+#else
                 Marshal.Copy(new IntPtr(theData.Bytes.ToInt64() + pos), buffer, offset, len);
+#endif
                 pos += (uint)len;
                 return len;
             }

@@ -19,7 +19,6 @@ Ported from [Xamarin.Mobile](http://www.github.com/xamarin/xamarin.mobile) to a 
 
 Build Status: 
 * ![](https://jamesmontemagno.visualstudio.com/_apis/public/build/definitions/6b79a378-ddd6-4e31-98ac-a12fcd68644c/24/badge)
-* CI NuGet Feed: http://myget.org/F/xamarin-plugins
 
 **Platform Support**
 
@@ -28,6 +27,10 @@ Build Status:
 |Xamarin.iOS|iOS 7+|
 |Xamarin.Android|API 14+|
 |Windows 10 UWP|10+|
+|.NET for iOS |iOS 10+|
+|.NET for Android |API 21+|
+|Windows App SDK (WinUI3)|10+|
+|.NET for Mac Catalyst|All|
 |Tizen|4+|
 
 
