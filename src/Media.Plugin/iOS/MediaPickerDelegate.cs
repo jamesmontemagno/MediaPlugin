@@ -154,6 +154,7 @@ namespace Plugin.Media
 
         UIDeviceOrientation? orientation;
         NSObject observer;
+        readonly object observerDisposeLock = new object();
         readonly UIViewController viewController;
         readonly UIImagePickerControllerSourceType source;
         TaskCompletionSource<List<MediaFile>> tcs = new TaskCompletionSource<List<MediaFile>>();
@@ -203,18 +204,24 @@ namespace Plugin.Media
 
             if (observer != null)
             {
-                try
+                lock (observerDisposeLock)
                 {
-                    NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex);
-                }
+                    if (observer != null)
+                    {
+                        try
+                        {
+                            NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex);
+                        }
 
+                        observer.Dispose();
+                        observer = null;
+                    }
+                }
             }
-            observer?.Dispose();
-            observer = null;
         }
 
         void DidRotate(NSNotification notice)
