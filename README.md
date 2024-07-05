@@ -1,3 +1,7 @@
+## Update July 2024
+
+.NET MAUI now has an [API built for taking and picking photos/videos](https://learn.microsoft.com/dotnet/maui/platform-integration/device-media/picker). Additionally the .NET MAUI Community Toolkit offers a [CameraView](https://learn.microsoft.com/dotnet/communitytoolkit/maui/views/camera-view). These two features combine replace this plugin and are recommended for migration moving forward. 
+
 ## Update Novemeber 2020
 
 [Xamarin.Essentials](https://github.com/xamarin/essentials?WT.mc_id=docs-github-jamont) 1.6 introduced official support for [picking/taking photos and videos](https://docs.microsoft.com/xamarin/essentials/media-picker?WT.mc_id=friends-0000-jamont) with the new Media Picker API. 
